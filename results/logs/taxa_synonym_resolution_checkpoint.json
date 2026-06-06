@@ -1,0 +1,7 @@
+{
+  "processed_rows": "40122",
+  "total_rows": "40122",
+  "output_csv": "/tmp/bmb646/28277183/taxa_synonym_resolution_d1gqu9n_/Ollama_cleaned_synresolved.csv",
+  "unresolved_csv": "/tmp/bmb646/28277183/taxa_synonym_resolution_d1gqu9n_/taxa_unresolved_review.csv",
+  "status": "complete"
+}

@@ -1,0 +1,5 @@
+test,statistic,p_value,method,interpretation
+Chi-Square: Fungal Phylum x Continent,230.66062523147744,4.997501249375312e-4,"Pearson's Chi-squared test with simulated p-value
+	 (based on 2000 replicates)",Significant bias: Fungal phyla are not studied equally across continents.
+Chi-Square: Fungal Phylum x Tissue Category,1319.8857064883232,4.997501249375312e-4,"Pearson's Chi-squared test with simulated p-value
+	 (based on 2000 replicates)",Significant bias: Fungal phyla are not studied equally across plant tissues.

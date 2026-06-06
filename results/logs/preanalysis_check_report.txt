@@ -1,0 +1,54 @@
+========================================================================
+PRE-ANALYSIS QA CHECK
+========================================================================
+Standardized file: data/Ollama_cleaned_synresolved_standardized_final.csv
+Rows: 65,294
+Unique papers: 18,751
+Unique interaction IDs: 40,122
+
+STRUCTURAL CHECKS
+------------------------------------------------------------------------
+Required columns present: yes
+Duplicate interaction rows: 25,172
+Duplicate interaction IDs: 16,805
+
+KEY STATUS COUNTS
+------------------------------------------------------------------------
+fungal_taxon_status: resolved/other=44,468 | unresolved/empty=20,826
+plant_host_status: resolved/other=53,020 | unresolved/empty=12,274
+
+MISSINGNESS
+------------------------------------------------------------------------
+paper_id: 0 missing (0.0%)
+interaction_id: 0 missing (0.0%)
+fungal_taxon_resolved: 20,826 missing (31.9%)
+fungal_taxon_status: 20,826 missing (31.9%)
+fungal_taxon_accepted_ids: 20,826 missing (31.9%)
+plant_host_resolved: 12,274 missing (18.8%)
+plant_host_status: 12,274 missing (18.8%)
+plant_host_accepted_ids: 12,274 missing (18.8%)
+country: 27,370 missing (41.9%)
+biome: 27,066 missing (41.5%)
+tissue: 13,296 missing (20.4%)
+primary_guild: 2,451 missing (3.8%)
+
+FILTERING RECONCILIATION
+------------------------------------------------------------------------
+Filtered file rows: 60,999
+Filtered audit rows: 4,295
+Filtered + audit rows: 65,294
+
+SUMMARY COUNTS
+------------------------------------------------------------------------
+country: top='NA' (27,370)
+biome: top='NA' (27,066)
+tissue: top='root' (17,401)
+primary_guild: top='endophyte' (27,019)
+relevance: top='Relevant' (65,164)
+doc_type_ai: top='abstract' (52,116)
+
+WARNINGS
+------------------------------------------------------------------------
+- Duplicate interaction_id values found across 25,172 extra row(s).
+
+STATUS: PASS_WITH_WARNINGS

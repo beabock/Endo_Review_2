@@ -1,0 +1,53 @@
+fungal_phylum,continent,study_count
+Ascomycota,Africa,357
+Ascomycota,Antarctica,37
+Ascomycota,Asia,1397
+Ascomycota,Europe,373
+Ascomycota,North America,496
+Ascomycota,Oceania,118
+Ascomycota,South America,302
+Basidiomycota,Africa,13
+Basidiomycota,Antarctica,8
+Basidiomycota,Asia,163
+Basidiomycota,Europe,44
+Basidiomycota,North America,57
+Basidiomycota,Oceania,16
+Basidiomycota,South America,51
+Blastocladiomycota,Europe,1
+Chlorophyta,North America,1
+Chytridiomycota,Antarctica,1
+Chytridiomycota,Asia,5
+Chytridiomycota,Europe,1
+Chytridiomycota,North America,5
+Chytridiomycota,Oceania,1
+Chytridiomycota,South America,2
+Glomeromycota,Africa,7
+Glomeromycota,Antarctica,1
+Glomeromycota,Asia,52
+Glomeromycota,Europe,29
+Glomeromycota,North America,50
+Glomeromycota,Oceania,14
+Glomeromycota,South America,31
+Marchantiophyta,Antarctica,1
+Mucoromycota,Africa,13
+Mucoromycota,Antarctica,2
+Mucoromycota,Asia,38
+Mucoromycota,Europe,12
+Mucoromycota,North America,8
+Mucoromycota,Oceania,4
+Mucoromycota,South America,5
+Rhodophyta,Asia,1
+Rhodophyta,Europe,1
+Tracheophyta,Africa,1
+Tracheophyta,Asia,14
+Tracheophyta,Europe,5
+Tracheophyta,North America,3
+Tracheophyta,Oceania,2
+Tracheophyta,South America,2
+Unassigned,Europe,1
+Zoopagomycota,South America,1
+Zygomycota,Antarctica,1
+Zygomycota,Asia,9
+Zygomycota,Europe,1
+Zygomycota,Oceania,1
+Zygomycota,South America,1

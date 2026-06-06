@@ -1,0 +1,14 @@
+--- Environment Preflight ---
+Python executable: /scratch/bmb646/Endo-Review/Endo_Review_Ollama/.venv/bin/python
+Python version: 3.11.9
+Python dependency check: pandas OK
+R version: 4.5.2 
+--- Starting Python Processing ---
+Step 1: Standardizing Metadata...
+[2026-04-30 14:12:02] Starting standardization...
+[2026-04-30 14:12:02] Input file: data/Ollama_cleaned_synresolved.csv
+[2026-04-30 14:12:02] Opened file, reading headers...
+[2026-04-30 14:12:02] Headers: 30 columns
+[2026-04-30 14:12:02] Processing data/Ollama_cleaned_synresolved.csv...
+  Row      0 (elapsed: 0.0s, rate: 0 rows/sec)
+[2026-04-30T14:12:58.058] error: *** JOB 28266029 ON cn66 CANCELLED AT 2026-04-30T14:12:58 DUE to SIGNAL Terminated ***

@@ -1,0 +1,8 @@
+GBIF symlink already exists: data/Reference_datasets/gbif_backbone -> ../data/Reference_datasets/gbif_backbone
+--- Environment Preflight (Stage 04) ---
+Python executable: /scratch/bmb646/Endo-Review/Endo_Review_Ollama/.venv/bin/python
+Python version: 3.11.9
+Python dependency check: pandas OK
+R version: 4.5.2 
+Error: Missing R package: gridExtra
+Execution halted

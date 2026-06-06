@@ -1,0 +1,22 @@
+metric_source,metric_label,continent,n_countries,n_understudied,n_high_priority,n_overlap,chi_square,p_value,significant
+WB_TOTAL,Total species,Africa,28,5,14,1,0.9739130434782609,0.32370621227391017,NO
+WB_TOTAL,Total species,Asia,21,3,11,0,1.789772727272727,0.180953856297709,NO
+WB_TOTAL,Total species,Europe,32,1,16,0,0.0,1.0,NO
+WB_TOTAL,Total species,Middle East,12,2,6,0,0.6,0.4385780260809997,NO
+WB_TOTAL,Total species,Oceania,7,3,4,0,3.5121527777777777,0.06092024766579063,NO
+WB_TOTAL,Total species,Other,111,65,56,26,5.880765946010513,0.015307161372140018,YES
+WB_TOTAL,Total species,South America,12,1,6,0,0.0,1.0,NO
+WB_SMALL50XENDEMIC100,Endemic species,Africa,28,5,14,2,0.0,1.0,NO
+WB_SMALL50XENDEMIC100,Endemic species,Asia,21,3,11,0,1.789772727272727,0.180953856297709,NO
+WB_SMALL50XENDEMIC100,Endemic species,Europe,32,1,16,0,0.0,1.0,NO
+WB_SMALL50XENDEMIC100,Endemic species,Middle East,12,2,6,0,0.6,0.4385780260809997,NO
+WB_SMALL50XENDEMIC100,Endemic species,Oceania,7,3,4,1,0.10937499999999994,0.7408568142938687,NO
+WB_SMALL50XENDEMIC100,Endemic species,Other,111,65,56,25,7.8983209996525225,0.004948070548046401,YES
+WB_SMALL50XENDEMIC100,Endemic species,South America,12,1,6,0,0.0,1.0,NO
+WB_TPROB80,Threatened species probability,Africa,28,5,14,2,0.0,1.0,NO
+WB_TPROB80,Threatened species probability,Asia,21,3,11,0,1.789772727272727,0.180953856297709,NO
+WB_TPROB80,Threatened species probability,Europe,32,1,16,0,0.0,1.0,NO
+WB_TPROB80,Threatened species probability,Middle East,12,2,6,0,0.6,0.4385780260809997,NO
+WB_TPROB80,Threatened species probability,Oceania,7,3,4,0,3.5121527777777777,0.06092024766579063,NO
+WB_TPROB80,Threatened species probability,Other,111,65,57,29,2.2352674118406393,0.13489328509311208,NO
+WB_TPROB80,Threatened species probability,South America,12,1,6,0,0.0,1.0,NO

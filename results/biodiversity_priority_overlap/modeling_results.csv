@@ -1,0 +1,10 @@
+metric,model,variable,coefficient,p_value
+Total species,raw,Intercept,-5.206996412431133,1.6500432980609216e-31
+Total species,raw,gdp_log10,0.556801780539202,1.9069687872796632e-34
+Total species,raw,metric_value,7.611437117701204e-06,0.0028003862365930192
+Endemic species,raw,Intercept,-5.310515617576895,8.960205809843107e-40
+Endemic species,raw,gdp_log10,0.5729310553591587,1.9525263581495392e-46
+Endemic species,raw,metric_value,0.00011791568608525657,8.515829383864098e-06
+Threatened species probability,raw,Intercept,-5.063945459237221,9.148178159359787e-35
+Threatened species probability,raw,gdp_log10,0.5459024684369158,4.506757252473854e-40
+Threatened species probability,raw,metric_value,0.00020731060001429765,2.684299917957096e-06

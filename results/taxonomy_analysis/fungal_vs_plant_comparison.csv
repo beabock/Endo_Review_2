@@ -1,0 +1,10 @@
+Metric,Fungi,Plants
+dataset_rows,65294.0,65294.0
+rows_with_fungi_records,44468.0,
+unique_papers_with_fungi,13082.0,
+unique_fungi_accepted_ids,3979.0,
+unique_fungi_species_matched_to_gbif,2850.0,
+total_known_fungi_species_gbif,171668.0,
+coverage_percent,1.660181280145397,0.8365852635112454
+phyla_represented,12.0,
+phyla_with_studies,8.0,

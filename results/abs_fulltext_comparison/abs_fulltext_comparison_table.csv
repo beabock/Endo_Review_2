@@ -1,0 +1,22 @@
+metric_group,metric,abstract_value,full_text_value,full_minus_abstract,full_to_abstract_ratio,notes
+Correlation,study_count_vs_latitude - Pearson r,0.06770662463091319,NA,NA,NA,p_abs=3.02e-01; p_full=2.54e-01; n_abs=234; n_full=234
+Correlation,study_count_vs_latitude - Pearson r,NA,0.074896315573842,NA,NA,p_abs=3.02e-01; p_full=2.54e-01; n_abs=234; n_full=234
+Correlation,study_count_vs_latitude - Spearman rho,0.2127957760876678,NA,NA,NA,p_abs=1.06e-03; p_full=1.41e-03; n_abs=234; n_full=234
+Correlation,study_count_vs_latitude - Spearman rho,NA,0.2075327910656212,NA,NA,p_abs=1.06e-03; p_full=1.41e-03; n_abs=234; n_full=234
+Correlation,study_count_vs_log10_gdp - Pearson r,0.4675130278152509,NA,NA,NA,p_abs=8.44e-13; p_full=6.39e-13; n_abs=210; n_full=210
+Correlation,study_count_vs_log10_gdp - Pearson r,NA,0.4696960799460744,NA,NA,p_abs=8.44e-13; p_full=6.39e-13; n_abs=210; n_full=210
+Correlation,study_count_vs_log10_gdp - Spearman rho,0.7799319747195227,NA,NA,NA,p_abs=3.29e-44; p_full=9.39e-56; n_abs=210; n_full=210
+Correlation,study_count_vs_log10_gdp - Spearman rho,NA,0.8345340078837651,NA,NA,p_abs=3.29e-44; p_full=9.39e-56; n_abs=210; n_full=210
+Coverage,Fungal coverage (%),1.4233120311197556,0.6599055293136983,-0.7634065018060573,0.46364080039043437,NA
+Coverage,Plant coverage (%),0.6899861530715005,0.35535204766700235,-0.3346341054044981,0.5150133029266439,NA
+Scale,Biomes,1342,628,-714,0.46795827123695977,NA
+Scale,Countries,303,180,-123,0.594059405940594,NA
+Scale,Fungal IDs,3387,1680,-1707,0.49601417183348095,NA
+Scale,Plant IDs,3548,1756,-1792,0.49492671927846676,NA
+Scale,Total rows,47505,17789,-29716,0.3744658457004526,NA
+Scale,Unique interactions,29874,10248,-19626,0.3430407712392047,NA
+Scale,Unique papers,15681,3070,-12611,0.1957783304636184,NA
+Understudied overlap,Understudied countries (count),38,47,9,1.236842105263158,overlap=27; jaccard=0.466
+Understudied overlap,Understudied plant families (count),644,719,75,1.1164596273291925,overlap=629; jaccard=0.857
+Understudied overlap,Understudied plant genera (count),15314,15845,531,1.0346741543685516,overlap=15121; jaccard=0.943
+Understudied overlap,Understudied plant species (count),376656,377932,1276,1.0033877065545218,overlap=376097; jaccard=0.994

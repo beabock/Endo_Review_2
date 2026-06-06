@@ -1,0 +1,35 @@
+GBIF symlink already exists: data/Reference_datasets/gbif_backbone -> ../data/Reference_datasets/gbif_backbone
+--- Environment Preflight (Stage 04) ---
+Python executable: /scratch/bmb646/Endo-Review/Endo_Review_Ollama/.venv/bin/python
+Python version: 3.11.9
+Python dependency check: pandas OK
+R version: 4.5.2 
+--- Starting Stage 04 Analyses ---
+Step 1: Geographic Bias Analysis
+Skipping Step 1 (START_STEP=2)
+Step 2: Taxonomic Bias Analysis
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: ‘scales’
+
+The following object is masked from ‘package:readr’:
+
+    col_factor
+
+Loading study-level host data...
+Loading GBIF backbone reference species...
+Loading PBDB extinct taxa to exclude extinct plant species from denominator...
+Extracting studied plant species IDs...
+Error in scale_fill_endo_discrete() : 
+  could not find function "scale_fill_endo_discrete"
+Execution halted

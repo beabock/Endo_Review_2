@@ -1,0 +1,4 @@
+--- Environment Preflight ---
+Python executable: /packages/spack/1.1.0/var/spack/environments/r-2601/.spack-env/view/bin/python
+Python version: 3.14.0
+Python dependency check failed (pandas): No module named 'pandas'

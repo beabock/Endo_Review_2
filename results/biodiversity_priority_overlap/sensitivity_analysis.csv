@@ -1,0 +1,13 @@
+metric_source,metric_label,quantile,priority_score_threshold,n_priority_countries,n_overlap_countries,pct_understudied_overlapping
+WB_TOTAL,Total species,0.25,4815.5,170,45,56.25
+WB_TOTAL,Total species,0.5,8879.0,114,18,22.5
+WB_TOTAL,Total species,0.75,19127.5,57,4,5.0
+WB_TOTAL,Total species,0.9,34054.60000000001,23,0,0.0
+WB_SMALL50XENDEMIC100,Endemic species,0.25,13.5,170,45,56.25
+WB_SMALL50XENDEMIC100,Endemic species,0.5,53.0,114,22,27.5
+WB_SMALL50XENDEMIC100,Endemic species,0.75,198.5,57,2,2.5
+WB_SMALL50XENDEMIC100,Endemic species,0.9,841.4000000000002,23,0,0.0
+WB_TPROB80,Threatened species probability,0.25,78.0,173,46,57.5
+WB_TPROB80,Threatened species probability,0.5,149.0,115,21,26.25
+WB_TPROB80,Threatened species probability,0.75,403.0,58,2,2.5
+WB_TPROB80,Threatened species probability,0.9,930.4000000000007,23,0,0.0

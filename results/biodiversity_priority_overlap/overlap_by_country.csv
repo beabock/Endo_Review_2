@@ -1,0 +1,243 @@
+iso_a3,name,data_status,country_name_x,country_key,country_name_y,priority_score,source,country_name,study_count,overlap_status
+ALA,Aland,0,Aland,aland,,,,,,Understudied only
+ASM,American Samoa,0,American Samoa,american samoa,American Samoa,15.0,WB_SMALL50XENDEMIC100,American Samoa,0.0,Understudied + priority area
+ASM,American Samoa,0,American Samoa,american samoa,American Samoa,46.0,WB_TPROB80,American Samoa,0.0,Understudied + priority area
+ASM,American Samoa,0,American Samoa,american samoa,American Samoa,1851.0,WB_TOTAL,American Samoa,0.0,Understudied + priority area
+AND,Andorra,0,Andorra,andorra,Andorra,0.0,WB_SMALL50XENDEMIC100,Andorra,0.0,Understudied + priority area
+AND,Andorra,0,Andorra,andorra,Andorra,259.0,WB_TPROB80,Andorra,0.0,Understudied + priority area
+AND,Andorra,0,Andorra,andorra,Andorra,25302.0,WB_TOTAL,Andorra,0.0,Understudied + priority area
+AGO,Angola,0,Angola,angola,Angola,89.0,WB_SMALL50XENDEMIC100,Angola,0.0,Understudied + priority area
+AGO,Angola,0,Angola,angola,Angola,73.0,WB_TPROB80,Angola,0.0,Understudied + priority area
+AGO,Angola,0,Angola,angola,Angola,7872.0,WB_TOTAL,Angola,0.0,Understudied + priority area
+AIA,Anguilla,0,Anguilla,anguilla,Anguilla,2.0,WB_SMALL50XENDEMIC100,Anguilla,0.0,Understudied + priority area
+AIA,Anguilla,0,Anguilla,anguilla,Anguilla,140.0,WB_TPROB80,Anguilla,0.0,Understudied + priority area
+AIA,Anguilla,0,Anguilla,anguilla,Anguilla,6097.0,WB_TOTAL,Anguilla,0.0,Understudied + priority area
+ATG,Antigua and Barb.,0,Antigua and Barb.,antigua and barb.,Antigua and Barbuda,4.0,WB_SMALL50XENDEMIC100,Antigua and Barb.,0.0,Understudied + priority area
+ATG,Antigua and Barb.,0,Antigua and Barb.,antigua and barb.,Antigua and Barbuda,157.0,WB_TPROB80,Antigua and Barb.,0.0,Understudied + priority area
+ATG,Antigua and Barb.,0,Antigua and Barb.,antigua and barb.,Antigua and Barbuda,6906.0,WB_TOTAL,Antigua and Barb.,0.0,Understudied + priority area
+ARM,Armenia,0,Armenia,armenia,Armenia,80.0,WB_SMALL50XENDEMIC100,Armenia,0.0,Understudied + priority area
+ARM,Armenia,0,Armenia,armenia,Armenia,104.0,WB_TPROB80,Armenia,0.0,Understudied + priority area
+ARM,Armenia,0,Armenia,armenia,Armenia,7423.0,WB_TOTAL,Armenia,0.0,Understudied + priority area
+ABW,Aruba,0,Aruba,aruba,Aruba,7.0,WB_SMALL50XENDEMIC100,Aruba,0.0,Understudied + priority area
+ABW,Aruba,0,Aruba,aruba,Aruba,202.0,WB_TPROB80,Aruba,0.0,Understudied + priority area
+ABW,Aruba,0,Aruba,aruba,Aruba,8656.0,WB_TOTAL,Aruba,0.0,Understudied + priority area
+BHS,Bahamas,0,Bahamas,bahamas,"Bahamas, The",128.0,WB_SMALL50XENDEMIC100,Bahamas,0.0,Understudied + priority area
+BHS,Bahamas,0,Bahamas,bahamas,"Bahamas, The",321.0,WB_TPROB80,Bahamas,0.0,Understudied + priority area
+BHS,Bahamas,0,Bahamas,bahamas,"Bahamas, The",14798.0,WB_TOTAL,Bahamas,0.0,Understudied + priority area
+BHR,Bahrain,0,Bahrain,bahrain,Bahrain,0.0,WB_SMALL50XENDEMIC100,Bahrain,0.0,Understudied + priority area
+BHR,Bahrain,0,Bahrain,bahrain,Bahrain,27.0,WB_TPROB80,Bahrain,0.0,Understudied + priority area
+BHR,Bahrain,0,Bahrain,bahrain,Bahrain,1950.0,WB_TOTAL,Bahrain,0.0,Understudied + priority area
+BLZ,Belize,0,Belize,belize,Belize,106.0,WB_SMALL50XENDEMIC100,Belize,0.0,Understudied + priority area
+BLZ,Belize,0,Belize,belize,Belize,269.0,WB_TPROB80,Belize,0.0,Understudied + priority area
+BLZ,Belize,0,Belize,belize,Belize,18640.0,WB_TOTAL,Belize,0.0,Understudied + priority area
+IOT,Br. Indian Ocean Ter.,0,Br. Indian Ocean Ter.,br. indian ocean ter.,British Indian Ocean Territory (UK),1.0,WB_SMALL50XENDEMIC100,Br. Indian Ocean Ter.,0.0,Understudied + priority area
+IOT,Br. Indian Ocean Ter.,0,Br. Indian Ocean Ter.,br. indian ocean ter.,British Indian Ocean Territory (UK),12.0,WB_TPROB80,Br. Indian Ocean Ter.,0.0,Understudied + priority area
+IOT,Br. Indian Ocean Ter.,0,Br. Indian Ocean Ter.,br. indian ocean ter.,British Indian Ocean Territory (UK),1386.0,WB_TOTAL,Br. Indian Ocean Ter.,0.0,Understudied + priority area
+VGB,British Virgin Is.,0,British Virgin Is.,british virgin is.,British Virgin Islands,12.0,WB_SMALL50XENDEMIC100,British Virgin Is.,0.0,Understudied + priority area
+VGB,British Virgin Is.,0,British Virgin Is.,british virgin is.,British Virgin Islands,190.0,WB_TPROB80,British Virgin Is.,0.0,Understudied + priority area
+VGB,British Virgin Is.,0,British Virgin Is.,british virgin is.,British Virgin Islands,7078.0,WB_TOTAL,British Virgin Is.,0.0,Understudied + priority area
+KHM,Cambodia,0,Cambodia,cambodia,Cambodia,46.0,WB_SMALL50XENDEMIC100,Cambodia,0.0,Understudied + priority area
+KHM,Cambodia,0,Cambodia,cambodia,Cambodia,125.0,WB_TPROB80,Cambodia,0.0,Understudied + priority area
+KHM,Cambodia,0,Cambodia,cambodia,Cambodia,11117.0,WB_TOTAL,Cambodia,0.0,Understudied + priority area
+CPV,Cape Verde,0,Cape Verde,cape verde,Cabo Verde,117.0,WB_SMALL50XENDEMIC100,,,Understudied + priority area
+CPV,Cape Verde,0,Cape Verde,cape verde,Cabo Verde,100.0,WB_TPROB80,,,Understudied + priority area
+CPV,Cape Verde,0,Cape Verde,cape verde,Cabo Verde,2499.0,WB_TOTAL,,,Understudied + priority area
+CYM,Cayman Is.,0,Cayman Is.,cayman is.,Cayman Islands,42.0,WB_SMALL50XENDEMIC100,Cayman Is.,0.0,Understudied + priority area
+CYM,Cayman Is.,0,Cayman Is.,cayman is.,Cayman Islands,207.0,WB_TPROB80,Cayman Is.,0.0,Understudied + priority area
+CYM,Cayman Is.,0,Cayman Is.,cayman is.,Cayman Islands,9639.0,WB_TOTAL,Cayman Is.,0.0,Understudied + priority area
+CAF,Central African Rep.,0,Central African Rep.,central african rep.,Central African Republic,15.0,WB_SMALL50XENDEMIC100,Central African Rep.,0.0,Understudied + priority area
+CAF,Central African Rep.,0,Central African Rep.,central african rep.,Central African Republic,31.0,WB_TPROB80,Central African Rep.,0.0,Understudied + priority area
+CAF,Central African Rep.,0,Central African Rep.,central african rep.,Central African Republic,5621.0,WB_TOTAL,Central African Rep.,0.0,Understudied + priority area
+COM,Comoros,0,Comoros,comoros,Comoros,47.0,WB_SMALL50XENDEMIC100,Comoros,0.0,Understudied + priority area
+COM,Comoros,0,Comoros,comoros,Comoros,56.0,WB_TPROB80,Comoros,0.0,Understudied + priority area
+COM,Comoros,0,Comoros,comoros,Comoros,5052.0,WB_TOTAL,Comoros,0.0,Understudied + priority area
+COK,Cook Is.,0,Cook Is.,cook is.,Cook Islands,23.0,WB_SMALL50XENDEMIC100,Cook Is.,0.0,Understudied + priority area
+COK,Cook Is.,0,Cook Is.,cook is.,Cook Islands,27.0,WB_TPROB80,Cook Is.,0.0,Understudied + priority area
+COK,Cook Is.,0,Cook Is.,cook is.,Cook Islands,1790.0,WB_TOTAL,Cook Is.,0.0,Understudied + priority area
+CUW,Curaçao,0,Curaçao,curaçao,Curacao,23.0,WB_SMALL50XENDEMIC100,Curaçao,0.0,Understudied + priority area
+CUW,Curaçao,0,Curaçao,curaçao,Curacao,205.0,WB_TPROB80,Curaçao,0.0,Understudied + priority area
+CUW,Curaçao,0,Curaçao,curaçao,Curacao,9077.0,WB_TOTAL,Curaçao,0.0,Understudied + priority area
+PRK,Dem. Rep. Korea,0,Dem. Rep. Korea,dem. rep. korea,"Korea, Dem. People's Rep.",0.0,WB_SMALL50XENDEMIC100,,,Understudied + priority area
+PRK,Dem. Rep. Korea,0,Dem. Rep. Korea,dem. rep. korea,"Korea, Dem. People's Rep.",177.0,WB_TPROB80,,,Understudied + priority area
+PRK,Dem. Rep. Korea,0,Dem. Rep. Korea,dem. rep. korea,"Korea, Dem. People's Rep.",9858.0,WB_TOTAL,,,Understudied + priority area
+DJI,Djibouti,0,Djibouti,djibouti,Djibouti,5.0,WB_SMALL50XENDEMIC100,Djibouti,0.0,Understudied + priority area
+DJI,Djibouti,0,Djibouti,djibouti,Djibouti,22.0,WB_TPROB80,Djibouti,0.0,Understudied + priority area
+DJI,Djibouti,0,Djibouti,djibouti,Djibouti,2715.0,WB_TOTAL,Djibouti,0.0,Understudied + priority area
+SLV,El Salvador,0,El Salvador,el salvador,El Salvador,23.0,WB_SMALL50XENDEMIC100,El Salvador,0.0,Understudied + priority area
+SLV,El Salvador,0,El Salvador,el salvador,El Salvador,212.0,WB_TPROB80,El Salvador,0.0,Understudied + priority area
+SLV,El Salvador,0,El Salvador,el salvador,El Salvador,15996.0,WB_TOTAL,El Salvador,0.0,Understudied + priority area
+GNQ,Eq. Guinea,0,Eq. Guinea,eq. guinea,Equatorial Guinea,17.0,WB_SMALL50XENDEMIC100,Eq. Guinea,0.0,Understudied + priority area
+GNQ,Eq. Guinea,0,Eq. Guinea,eq. guinea,Equatorial Guinea,63.0,WB_TPROB80,Eq. Guinea,0.0,Understudied + priority area
+GNQ,Eq. Guinea,0,Eq. Guinea,eq. guinea,Equatorial Guinea,8610.0,WB_TOTAL,Eq. Guinea,0.0,Understudied + priority area
+FRO,Faeroe Is.,0,Faeroe Is.,faeroe is.,Faroe Islands,18.0,WB_SMALL50XENDEMIC100,Faeroe Is.,0.0,Understudied + priority area
+FRO,Faeroe Is.,0,Faeroe Is.,faeroe is.,Faroe Islands,77.0,WB_TPROB80,Faeroe Is.,0.0,Understudied + priority area
+FRO,Faeroe Is.,0,Faeroe Is.,faeroe is.,Faroe Islands,3816.0,WB_TOTAL,Faeroe Is.,0.0,Understudied + priority area
+FLK,Falkland Is.,0,Falkland Is.,falkland is.,,,,Falkland Is.,0.0,Understudied only
+FJI,Fiji,0,Fiji,fiji,Fiji,278.0,WB_SMALL50XENDEMIC100,Fiji,0.0,Understudied + priority area
+FJI,Fiji,0,Fiji,fiji,Fiji,79.0,WB_TPROB80,Fiji,0.0,Understudied + priority area
+FJI,Fiji,0,Fiji,fiji,Fiji,4418.0,WB_TOTAL,Fiji,0.0,Understudied + priority area
+ATF,Fr. S. Antarctic Lands,0,Fr. S. Antarctic Lands,fr. s. antarctic lands,,,,Fr. S. Antarctic Lands,0.0,Understudied only
+GAB,Gabon,0,Gabon,gabon,Gabon,200.0,WB_SMALL50XENDEMIC100,Gabon,0.0,Understudied + priority area
+GAB,Gabon,0,Gabon,gabon,Gabon,145.0,WB_TPROB80,Gabon,0.0,Understudied + priority area
+GAB,Gabon,0,Gabon,gabon,Gabon,9364.0,WB_TOTAL,Gabon,0.0,Understudied + priority area
+GMB,Gambia,0,Gambia,gambia,"Gambia, The",13.0,WB_SMALL50XENDEMIC100,Gambia,0.0,Understudied + priority area
+GMB,Gambia,0,Gambia,gambia,"Gambia, The",25.0,WB_TPROB80,Gambia,0.0,Understudied + priority area
+GMB,Gambia,0,Gambia,gambia,"Gambia, The",3704.0,WB_TOTAL,Gambia,0.0,Understudied + priority area
+GRD,Grenada,0,Grenada,grenada,Grenada,6.0,WB_SMALL50XENDEMIC100,Grenada,0.0,Understudied + priority area
+GRD,Grenada,0,Grenada,grenada,Grenada,138.0,WB_TPROB80,Grenada,0.0,Understudied + priority area
+GRD,Grenada,0,Grenada,grenada,Grenada,7407.0,WB_TOTAL,Grenada,0.0,Understudied + priority area
+GUM,Guam,0,Guam,guam,Guam,70.0,WB_SMALL50XENDEMIC100,Guam,0.0,Understudied + priority area
+GUM,Guam,0,Guam,guam,Guam,97.0,WB_TPROB80,Guam,0.0,Understudied + priority area
+GUM,Guam,0,Guam,guam,Guam,3108.0,WB_TOTAL,Guam,0.0,Understudied + priority area
+GGY,Guernsey,0,Guernsey,guernsey,Guernsey,0.0,WB_SMALL50XENDEMIC100,Guernsey,0.0,Understudied + priority area
+GGY,Guernsey,0,Guernsey,guernsey,Guernsey,417.0,WB_TPROB80,Guernsey,0.0,Understudied + priority area
+GGY,Guernsey,0,Guernsey,guernsey,Guernsey,28217.0,WB_TOTAL,Guernsey,0.0,Understudied + priority area
+HTI,Haiti,0,Haiti,haiti,Haiti,62.0,WB_SMALL50XENDEMIC100,Haiti,0.0,Understudied + priority area
+HTI,Haiti,0,Haiti,haiti,Haiti,332.0,WB_TPROB80,Haiti,0.0,Understudied + priority area
+HTI,Haiti,0,Haiti,haiti,Haiti,10357.0,WB_TOTAL,Haiti,0.0,Understudied + priority area
+HMD,Heard I. and McDonald Is.,0,Heard I. and McDonald Is.,heard i. and mcdonald is.,Heard Island and McDonald Islands,12.0,WB_SMALL50XENDEMIC100,Heard I. and McDonald Is.,0.0,Understudied + priority area
+HMD,Heard I. and McDonald Is.,0,Heard I. and McDonald Is.,heard i. and mcdonald is.,Heard Island and McDonald Islands,8.0,WB_TPROB80,Heard I. and McDonald Is.,0.0,Understudied + priority area
+HMD,Heard I. and McDonald Is.,0,Heard I. and McDonald Is.,heard i. and mcdonald is.,Heard Island and McDonald Islands,444.0,WB_TOTAL,Heard I. and McDonald Is.,0.0,Understudied + priority area
+KIR,Kiribati,0,Kiribati,kiribati,Kiribati,9.0,WB_SMALL50XENDEMIC100,Kiribati,0.0,Understudied + priority area
+KIR,Kiribati,0,Kiribati,kiribati,Kiribati,37.0,WB_TPROB80,Kiribati,0.0,Understudied + priority area
+KIR,Kiribati,0,Kiribati,kiribati,Kiribati,2541.0,WB_TOTAL,Kiribati,0.0,Understudied + priority area
+KWT,Kuwait,0,Kuwait,kuwait,Kuwait,9.0,WB_SMALL50XENDEMIC100,Kuwait,0.0,Understudied + priority area
+KWT,Kuwait,0,Kuwait,kuwait,Kuwait,25.0,WB_TPROB80,Kuwait,0.0,Understudied + priority area
+KWT,Kuwait,0,Kuwait,kuwait,Kuwait,1973.0,WB_TOTAL,Kuwait,0.0,Understudied + priority area
+KGZ,Kyrgyzstan,0,Kyrgyzstan,kyrgyzstan,Kyrgyz Republic,60.0,WB_SMALL50XENDEMIC100,Kyrgyzstan,0.0,Understudied + priority area
+KGZ,Kyrgyzstan,0,Kyrgyzstan,kyrgyzstan,Kyrgyz Republic,164.0,WB_TPROB80,Kyrgyzstan,0.0,Understudied + priority area
+KGZ,Kyrgyzstan,0,Kyrgyzstan,kyrgyzstan,Kyrgyz Republic,4974.0,WB_TOTAL,Kyrgyzstan,0.0,Understudied + priority area
+LSO,Lesotho,0,Lesotho,lesotho,Lesotho,3.0,WB_SMALL50XENDEMIC100,Lesotho,0.0,Understudied + priority area
+LSO,Lesotho,0,Lesotho,lesotho,Lesotho,92.0,WB_TPROB80,Lesotho,0.0,Understudied + priority area
+LSO,Lesotho,0,Lesotho,lesotho,Lesotho,8879.0,WB_TOTAL,Lesotho,0.0,Understudied + priority area
+LBR,Liberia,0,Liberia,liberia,Liberia,33.0,WB_SMALL50XENDEMIC100,Liberia,0.0,Understudied + priority area
+LBR,Liberia,0,Liberia,liberia,Liberia,55.0,WB_TPROB80,Liberia,0.0,Understudied + priority area
+LBR,Liberia,0,Liberia,liberia,Liberia,5719.0,WB_TOTAL,Liberia,0.0,Understudied + priority area
+LIE,Liechtenstein,0,Liechtenstein,liechtenstein,Liechtenstein,0.0,WB_SMALL50XENDEMIC100,Liechtenstein,0.0,Understudied + priority area
+LIE,Liechtenstein,0,Liechtenstein,liechtenstein,Liechtenstein,440.0,WB_TPROB80,Liechtenstein,0.0,Understudied + priority area
+LIE,Liechtenstein,0,Liechtenstein,liechtenstein,Liechtenstein,32971.0,WB_TOTAL,Liechtenstein,0.0,Understudied + priority area
+MAC,Macao,0,Macao,macao,"Macao SAR, China",1.0,WB_SMALL50XENDEMIC100,Macao,0.0,Understudied + priority area
+MAC,Macao,0,Macao,macao,"Macao SAR, China",84.0,WB_TPROB80,Macao,0.0,Understudied + priority area
+MAC,Macao,0,Macao,macao,"Macao SAR, China",7851.0,WB_TOTAL,Macao,0.0,Understudied + priority area
+MKD,Macedonia,0,Macedonia,macedonia,North Macedonia,25.0,WB_SMALL50XENDEMIC100,,,Understudied + priority area
+MKD,Macedonia,0,Macedonia,macedonia,North Macedonia,123.0,WB_TPROB80,,,Understudied + priority area
+MKD,Macedonia,0,Macedonia,macedonia,North Macedonia,13912.0,WB_TOTAL,,,Understudied + priority area
+MDV,Maldives,0,Maldives,maldives,Maldives,20.0,WB_SMALL50XENDEMIC100,Maldives,0.0,Understudied + priority area
+MDV,Maldives,0,Maldives,maldives,Maldives,27.0,WB_TPROB80,Maldives,0.0,Understudied + priority area
+MDV,Maldives,0,Maldives,maldives,Maldives,2274.0,WB_TOTAL,Maldives,0.0,Understudied + priority area
+MHL,Marshall Is.,0,Marshall Is.,marshall is.,Marshall Islands,77.0,WB_SMALL50XENDEMIC100,Marshall Is.,0.0,Understudied + priority area
+MHL,Marshall Is.,0,Marshall Is.,marshall is.,Marshall Islands,12.0,WB_TPROB80,Marshall Is.,0.0,Understudied + priority area
+MHL,Marshall Is.,0,Marshall Is.,marshall is.,Marshall Islands,1996.0,WB_TOTAL,Marshall Is.,0.0,Understudied + priority area
+MRT,Mauritania,0,Mauritania,mauritania,Mauritania,20.0,WB_SMALL50XENDEMIC100,Mauritania,0.0,Understudied + priority area
+MRT,Mauritania,0,Mauritania,mauritania,Mauritania,56.0,WB_TPROB80,Mauritania,0.0,Understudied + priority area
+MRT,Mauritania,0,Mauritania,mauritania,Mauritania,4216.0,WB_TOTAL,Mauritania,0.0,Understudied + priority area
+FSM,Micronesia,0,Micronesia,micronesia,"Micronesia, Fed. Sts.",92.0,WB_SMALL50XENDEMIC100,Micronesia,0.0,Understudied + priority area
+FSM,Micronesia,0,Micronesia,micronesia,"Micronesia, Fed. Sts.",78.0,WB_TPROB80,Micronesia,0.0,Understudied + priority area
+FSM,Micronesia,0,Micronesia,micronesia,"Micronesia, Fed. Sts.",3959.0,WB_TOTAL,Micronesia,0.0,Understudied + priority area
+MCO,Monaco,0,Monaco,monaco,Monaco,0.0,WB_SMALL50XENDEMIC100,Monaco,0.0,Understudied + priority area
+MCO,Monaco,0,Monaco,monaco,Monaco,349.0,WB_TPROB80,Monaco,0.0,Understudied + priority area
+MCO,Monaco,0,Monaco,monaco,Monaco,27515.0,WB_TOTAL,Monaco,0.0,Understudied + priority area
+MSR,Montserrat,0,Montserrat,montserrat,Montserrat,8.0,WB_SMALL50XENDEMIC100,Montserrat,0.0,Understudied + priority area
+MSR,Montserrat,0,Montserrat,montserrat,Montserrat,163.0,WB_TPROB80,Montserrat,0.0,Understudied + priority area
+MSR,Montserrat,0,Montserrat,montserrat,Montserrat,6862.0,WB_TOTAL,Montserrat,0.0,Understudied + priority area
+CYP,N. Cyprus,0,N. Cyprus,n. cyprus,Cyprus,76.0,WB_SMALL50XENDEMIC100,,,Understudied + priority area
+CYP,N. Cyprus,0,N. Cyprus,n. cyprus,Cyprus,104.0,WB_TPROB80,,,Understudied + priority area
+CYP,N. Cyprus,0,N. Cyprus,n. cyprus,Cyprus,6827.0,WB_TOTAL,,,Understudied + priority area
+MNP,N. Mariana Is.,0,N. Mariana Is.,n. mariana is.,Northern Mariana Islands,21.0,WB_SMALL50XENDEMIC100,N. Mariana Is.,0.0,Understudied + priority area
+MNP,N. Mariana Is.,0,N. Mariana Is.,n. mariana is.,Northern Mariana Islands,107.0,WB_TPROB80,N. Mariana Is.,0.0,Understudied + priority area
+MNP,N. Mariana Is.,0,N. Mariana Is.,n. mariana is.,Northern Mariana Islands,2979.0,WB_TOTAL,N. Mariana Is.,0.0,Understudied + priority area
+NRU,Nauru,0,Nauru,nauru,Nauru,1.0,WB_SMALL50XENDEMIC100,Nauru,0.0,Understudied + priority area
+NRU,Nauru,0,Nauru,nauru,Nauru,4.0,WB_TPROB80,Nauru,0.0,Understudied + priority area
+NRU,Nauru,0,Nauru,nauru,Nauru,1119.0,WB_TOTAL,Nauru,0.0,Understudied + priority area
+NIU,Niue,0,Niue,niue,Niue,6.0,WB_SMALL50XENDEMIC100,Niue,0.0,Understudied + priority area
+NIU,Niue,0,Niue,niue,Niue,10.0,WB_TPROB80,Niue,0.0,Understudied + priority area
+NIU,Niue,0,Niue,niue,Niue,1386.0,WB_TOTAL,Niue,0.0,Understudied + priority area
+NFK,Norfolk Island,0,Norfolk Island,norfolk island,Norfolk Island (Aus.),106.0,WB_SMALL50XENDEMIC100,Norfolk Island,0.0,Understudied + priority area
+NFK,Norfolk Island,0,Norfolk Island,norfolk island,Norfolk Island (Aus.),117.0,WB_TPROB80,Norfolk Island,0.0,Understudied + priority area
+NFK,Norfolk Island,0,Norfolk Island,norfolk island,Norfolk Island (Aus.),3309.0,WB_TOTAL,Norfolk Island,0.0,Understudied + priority area
+PLW,Palau,0,Palau,palau,Palau,124.0,WB_SMALL50XENDEMIC100,Palau,0.0,Understudied + priority area
+PLW,Palau,0,Palau,palau,Palau,73.0,WB_TPROB80,Palau,0.0,Understudied + priority area
+PLW,Palau,0,Palau,palau,Palau,4861.0,WB_TOTAL,Palau,0.0,Understudied + priority area
+PSE,Palestine,0,Palestine,palestine,West Bank and Gaza,7.0,WB_SMALL50XENDEMIC100,Palestine,0.0,Understudied + priority area
+PSE,Palestine,0,Palestine,palestine,West Bank and Gaza,128.0,WB_TPROB80,Palestine,0.0,Understudied + priority area
+PSE,Palestine,0,Palestine,palestine,West Bank and Gaza,6391.0,WB_TOTAL,Palestine,0.0,Understudied + priority area
+PCN,Pitcairn Is.,0,Pitcairn Is.,pitcairn is.,Pitcairn,22.0,WB_SMALL50XENDEMIC100,Pitcairn Is.,0.0,Understudied + priority area
+PCN,Pitcairn Is.,0,Pitcairn Is.,pitcairn is.,Pitcairn,13.0,WB_TPROB80,Pitcairn Is.,0.0,Understudied + priority area
+PCN,Pitcairn Is.,0,Pitcairn Is.,pitcairn is.,Pitcairn,725.0,WB_TOTAL,Pitcairn Is.,0.0,Understudied + priority area
+RWA,Rwanda,0,Rwanda,rwanda,Rwanda,32.0,WB_SMALL50XENDEMIC100,Rwanda,0.0,Understudied + priority area
+RWA,Rwanda,0,Rwanda,rwanda,Rwanda,149.0,WB_TPROB80,Rwanda,0.0,Understudied + priority area
+RWA,Rwanda,0,Rwanda,rwanda,Rwanda,7347.0,WB_TOTAL,Rwanda,0.0,Understudied + priority area
+SSD,S. Sudan,0,S. Sudan,s. sudan,South Sudan,0.0,WB_SMALL50XENDEMIC100,S. Sudan,0.0,Understudied + priority area
+SSD,S. Sudan,0,S. Sudan,s. sudan,South Sudan,18.0,WB_TPROB80,S. Sudan,0.0,Understudied + priority area
+SSD,S. Sudan,0,S. Sudan,s. sudan,South Sudan,4643.0,WB_TOTAL,S. Sudan,0.0,Understudied + priority area
+SHN,Saint Helena,0,Saint Helena,saint helena,"Saint Helena, Ascension and Tristan da Cunha (UK)",96.0,WB_SMALL50XENDEMIC100,Saint Helena,0.0,Understudied + priority area
+SHN,Saint Helena,0,Saint Helena,saint helena,"Saint Helena, Ascension and Tristan da Cunha (UK)",44.0,WB_TPROB80,Saint Helena,0.0,Understudied + priority area
+SHN,Saint Helena,0,Saint Helena,saint helena,"Saint Helena, Ascension and Tristan da Cunha (UK)",1220.0,WB_TOTAL,Saint Helena,0.0,Understudied + priority area
+LCA,Saint Lucia,0,Saint Lucia,saint lucia,St. Lucia,10.0,WB_SMALL50XENDEMIC100,Saint Lucia,0.0,Understudied + priority area
+LCA,Saint Lucia,0,Saint Lucia,saint lucia,St. Lucia,135.0,WB_TPROB80,Saint Lucia,0.0,Understudied + priority area
+LCA,Saint Lucia,0,Saint Lucia,saint lucia,St. Lucia,6399.0,WB_TOTAL,Saint Lucia,0.0,Understudied + priority area
+WSM,Samoa,0,Samoa,samoa,Samoa,69.0,WB_SMALL50XENDEMIC100,Samoa,0.0,Understudied + priority area
+WSM,Samoa,0,Samoa,samoa,Samoa,62.0,WB_TPROB80,Samoa,0.0,Understudied + priority area
+WSM,Samoa,0,Samoa,samoa,Samoa,1845.0,WB_TOTAL,Samoa,0.0,Understudied + priority area
+SMR,San Marino,0,San Marino,san marino,San Marino,0.0,WB_SMALL50XENDEMIC100,San Marino,0.0,Understudied + priority area
+SMR,San Marino,0,San Marino,san marino,San Marino,213.0,WB_TPROB80,San Marino,0.0,Understudied + priority area
+SMR,San Marino,0,San Marino,san marino,San Marino,17842.0,WB_TOTAL,San Marino,0.0,Understudied + priority area
+SYC,Seychelles,0,Seychelles,seychelles,Seychelles,171.0,WB_SMALL50XENDEMIC100,Seychelles,0.0,Understudied + priority area
+SYC,Seychelles,0,Seychelles,seychelles,Seychelles,94.0,WB_TPROB80,Seychelles,0.0,Understudied + priority area
+SYC,Seychelles,0,Seychelles,seychelles,Seychelles,4106.0,WB_TOTAL,Seychelles,0.0,Understudied + priority area
+SLE,Sierra Leone,0,Sierra Leone,sierra leone,Sierra Leone,17.0,WB_SMALL50XENDEMIC100,Sierra Leone,0.0,Understudied + priority area
+SLE,Sierra Leone,0,Sierra Leone,sierra leone,Sierra Leone,19.0,WB_TPROB80,Sierra Leone,0.0,Understudied + priority area
+SLE,Sierra Leone,0,Sierra Leone,sierra leone,Sierra Leone,4524.0,WB_TOTAL,Sierra Leone,0.0,Understudied + priority area
+SXM,Sint Maarten,0,Sint Maarten,sint maarten,Sint Maarten (Dutch part),0.0,WB_SMALL50XENDEMIC100,Sint Maarten,0.0,Understudied + priority area
+SXM,Sint Maarten,0,Sint Maarten,sint maarten,Sint Maarten (Dutch part),142.0,WB_TPROB80,Sint Maarten,0.0,Understudied + priority area
+SXM,Sint Maarten,0,Sint Maarten,sint maarten,Sint Maarten (Dutch part),5755.0,WB_TOTAL,Sint Maarten,0.0,Understudied + priority area
+SLB,Solomon Is.,0,Solomon Is.,solomon is.,Solomon Islands,130.0,WB_SMALL50XENDEMIC100,Solomon Is.,0.0,Understudied + priority area
+SLB,Solomon Is.,0,Solomon Is.,solomon is.,Solomon Islands,66.0,WB_TPROB80,Solomon Is.,0.0,Understudied + priority area
+SLB,Solomon Is.,0,Solomon Is.,solomon is.,Solomon Islands,6311.0,WB_TOTAL,Solomon Is.,0.0,Understudied + priority area
+SOM,Somaliland,0,Somaliland,somaliland,Somalia,53.0,WB_SMALL50XENDEMIC100,,,Understudied + priority area
+SOM,Somaliland,0,Somaliland,somaliland,Somalia,62.0,WB_TPROB80,,,Understudied + priority area
+SOM,Somaliland,0,Somaliland,somaliland,Somalia,4602.0,WB_TOTAL,,,Understudied + priority area
+BLM,St-Barthélemy,0,St-Barthélemy,st-barthélemy,Saint-BarthÃ©lemy (Fr.),1.0,WB_SMALL50XENDEMIC100,St-Barthélemy,0.0,Understudied + priority area
+BLM,St-Barthélemy,0,St-Barthélemy,st-barthélemy,Saint-BarthÃ©lemy (Fr.),138.0,WB_TPROB80,St-Barthélemy,0.0,Understudied + priority area
+BLM,St-Barthélemy,0,St-Barthélemy,st-barthélemy,Saint-BarthÃ©lemy (Fr.),5813.0,WB_TOTAL,St-Barthélemy,0.0,Understudied + priority area
+MAF,St-Martin,0,St-Martin,st-martin,St. Martin (French part),5.0,WB_SMALL50XENDEMIC100,St-Martin,0.0,Understudied + priority area
+MAF,St-Martin,0,St-Martin,st-martin,St. Martin (French part),146.0,WB_TPROB80,St-Martin,0.0,Understudied + priority area
+MAF,St-Martin,0,St-Martin,st-martin,St. Martin (French part),5903.0,WB_TOTAL,St-Martin,0.0,Understudied + priority area
+KNA,St. Kitts and Nevis,0,St. Kitts and Nevis,st. kitts and nevis,St. Kitts and Nevis,2.0,WB_SMALL50XENDEMIC100,St. Kitts and Nevis,0.0,Understudied + priority area
+KNA,St. Kitts and Nevis,0,St. Kitts and Nevis,st. kitts and nevis,St. Kitts and Nevis,170.0,WB_TPROB80,St. Kitts and Nevis,0.0,Understudied + priority area
+KNA,St. Kitts and Nevis,0,St. Kitts and Nevis,st. kitts and nevis,St. Kitts and Nevis,6758.0,WB_TOTAL,St. Kitts and Nevis,0.0,Understudied + priority area
+SPM,St. Pierre and Miquelon,0,St. Pierre and Miquelon,st. pierre and miquelon,Saint-Pierre-et-Miquelon (Fr.),0.0,WB_SMALL50XENDEMIC100,St. Pierre and Miquelon,0.0,Understudied + priority area
+SPM,St. Pierre and Miquelon,0,St. Pierre and Miquelon,st. pierre and miquelon,Saint-Pierre-et-Miquelon (Fr.),66.0,WB_TPROB80,St. Pierre and Miquelon,0.0,Understudied + priority area
+SPM,St. Pierre and Miquelon,0,St. Pierre and Miquelon,st. pierre and miquelon,Saint-Pierre-et-Miquelon (Fr.),3647.0,WB_TOTAL,St. Pierre and Miquelon,0.0,Understudied + priority area
+VCT,St. Vin. and Gren.,0,St. Vin. and Gren.,st. vin. and gren.,St. Vincent and the Grenadines,8.0,WB_SMALL50XENDEMIC100,St. Vin. and Gren.,0.0,Understudied + priority area
+VCT,St. Vin. and Gren.,0,St. Vin. and Gren.,st. vin. and gren.,St. Vincent and the Grenadines,132.0,WB_TPROB80,St. Vin. and Gren.,0.0,Understudied + priority area
+VCT,St. Vin. and Gren.,0,St. Vin. and Gren.,st. vin. and gren.,St. Vincent and the Grenadines,6748.0,WB_TOTAL,St. Vin. and Gren.,0.0,Understudied + priority area
+SUR,Suriname,0,Suriname,suriname,Suriname,73.0,WB_SMALL50XENDEMIC100,Suriname,0.0,Understudied + priority area
+SUR,Suriname,0,Suriname,suriname,Suriname,196.0,WB_TPROB80,Suriname,0.0,Understudied + priority area
+SUR,Suriname,0,Suriname,suriname,Suriname,13996.0,WB_TOTAL,Suriname,0.0,Understudied + priority area
+SWZ,Swaziland,0,Swaziland,swaziland,Eswatini,20.0,WB_SMALL50XENDEMIC100,,,Understudied + priority area
+SWZ,Swaziland,0,Swaziland,swaziland,Eswatini,100.0,WB_TPROB80,,,Understudied + priority area
+SWZ,Swaziland,0,Swaziland,swaziland,Eswatini,10512.0,WB_TOTAL,,,Understudied + priority area
+STP,São Tomé and Principe,0,São Tomé and Principe,são tomé and principe,Sao Tome and Principe,172.0,WB_SMALL50XENDEMIC100,São Tomé and Principe,0.0,Understudied + priority area
+STP,São Tomé and Principe,0,São Tomé and Principe,são tomé and principe,Sao Tome and Principe,80.0,WB_TPROB80,São Tomé and Principe,0.0,Understudied + priority area
+STP,São Tomé and Principe,0,São Tomé and Principe,são tomé and principe,Sao Tome and Principe,4574.0,WB_TOTAL,São Tomé and Principe,0.0,Understudied + priority area
+TJK,Tajikistan,0,Tajikistan,tajikistan,Tajikistan,47.0,WB_SMALL50XENDEMIC100,Tajikistan,0.0,Understudied + priority area
+TJK,Tajikistan,0,Tajikistan,tajikistan,Tajikistan,60.0,WB_TPROB80,Tajikistan,0.0,Understudied + priority area
+TJK,Tajikistan,0,Tajikistan,tajikistan,Tajikistan,4336.0,WB_TOTAL,Tajikistan,0.0,Understudied + priority area
+TON,Tonga,0,Tonga,tonga,Tonga,21.0,WB_SMALL50XENDEMIC100,Tonga,0.0,Understudied + priority area
+TON,Tonga,0,Tonga,tonga,Tonga,24.0,WB_TPROB80,Tonga,0.0,Understudied + priority area
+TON,Tonga,0,Tonga,tonga,Tonga,2123.0,WB_TOTAL,Tonga,0.0,Understudied + priority area
+TKM,Turkmenistan,0,Turkmenistan,turkmenistan,Turkmenistan,9.0,WB_SMALL50XENDEMIC100,Turkmenistan,0.0,Understudied + priority area
+TKM,Turkmenistan,0,Turkmenistan,turkmenistan,Turkmenistan,47.0,WB_TPROB80,Turkmenistan,0.0,Understudied + priority area
+TKM,Turkmenistan,0,Turkmenistan,turkmenistan,Turkmenistan,3581.0,WB_TOTAL,Turkmenistan,0.0,Understudied + priority area
+TCA,Turks and Caicos Is.,0,Turks and Caicos Is.,turks and caicos is.,Turks and Caicos Islands,4.0,WB_SMALL50XENDEMIC100,Turks and Caicos Is.,0.0,Understudied + priority area
+TCA,Turks and Caicos Is.,0,Turks and Caicos Is.,turks and caicos is.,Turks and Caicos Islands,135.0,WB_TPROB80,Turks and Caicos Is.,0.0,Understudied + priority area
+TCA,Turks and Caicos Is.,0,Turks and Caicos Is.,turks and caicos is.,Turks and Caicos Islands,5889.0,WB_TOTAL,Turks and Caicos Is.,0.0,Understudied + priority area
+VIR,U.S. Virgin Is.,0,U.S. Virgin Is.,u.s. virgin is.,Virgin Islands (U.S.),19.0,WB_SMALL50XENDEMIC100,U.S. Virgin Is.,0.0,Understudied + priority area
+VIR,U.S. Virgin Is.,0,U.S. Virgin Is.,u.s. virgin is.,Virgin Islands (U.S.),218.0,WB_TPROB80,U.S. Virgin Is.,0.0,Understudied + priority area
+VIR,U.S. Virgin Is.,0,U.S. Virgin Is.,u.s. virgin is.,Virgin Islands (U.S.),7829.0,WB_TOTAL,U.S. Virgin Is.,0.0,Understudied + priority area
+VAT,Vatican,0,Vatican,vatican,,,,Vatican,0.0,Understudied only
+ESH,W. Sahara,0,W. Sahara,w. sahara,,,,W. Sahara,0.0,Understudied only
+WLF,Wallis and Futuna Is.,0,Wallis and Futuna Is.,wallis and futuna is.,Wallis-et-Futuna (Fr.),18.0,WB_SMALL50XENDEMIC100,Wallis and Futuna Is.,0.0,Understudied + priority area
+WLF,Wallis and Futuna Is.,0,Wallis and Futuna Is.,wallis and futuna is.,Wallis-et-Futuna (Fr.),37.0,WB_TPROB80,Wallis and Futuna Is.,0.0,Understudied + priority area
+WLF,Wallis and Futuna Is.,0,Wallis and Futuna Is.,wallis and futuna is.,Wallis-et-Futuna (Fr.),1614.0,WB_TOTAL,Wallis and Futuna Is.,0.0,Understudied + priority area

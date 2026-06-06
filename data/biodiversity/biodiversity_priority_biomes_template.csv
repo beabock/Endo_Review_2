@@ -1,0 +1,3 @@
+biome_id,biome_name,priority_score,units,source
+TROP_FOREST,Tropical forest,1000,richness,Custom
+MEDIT_MED, Mediterranean,500,richness,Custom

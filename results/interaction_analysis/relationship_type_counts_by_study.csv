@@ -1,0 +1,10 @@
+relationship_type,study_count,percent_of_studies
+Endophytic,9915,50.95
+Pathogenic,5282,27.14
+Unknown/Other,1423,7.31
+Mycorrhizal,1245,6.4
+Antagonistic/Biocontrol,1026,5.27
+Mutualistic,546,2.81
+Saprotrophic,17,0.09
+Commensal,3,0.02
+Absence/Negative,2,0.01

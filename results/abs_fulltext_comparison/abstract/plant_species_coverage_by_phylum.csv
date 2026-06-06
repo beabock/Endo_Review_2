@@ -1,0 +1,11 @@
+phylum,known_species,studied_species,coverage_percent
+Tracheophyta,356032,2561,0.7193173647312601
+Bryophyta,10464,20,0.191131498470948
+Marchantiophyta,6170,17,0.2755267423014587
+Rhodophyta,3398,20,0.5885815185403178
+Chlorophyta,2713,10,0.36859565057132326
+Charophyta,2002,1,0.04995004995004995
+Unassigned,280,0,0
+Anthocerotophyta,242,2,0.8264462809917356
+Langiophytophyta,6,0,0
+Glaucophyta,5,0,0

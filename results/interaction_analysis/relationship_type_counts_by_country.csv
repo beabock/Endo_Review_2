@@ -1,0 +1,833 @@
+country,relationship_type,study_count
+CHN,Endophytic,968
+IND,Endophytic,440
+CHN,Pathogenic,432
+USA,Endophytic,412
+USA,Pathogenic,346
+BRA,Endophytic,277
+IND,Pathogenic,159
+BRA,Pathogenic,155
+IDN,Endophytic,153
+ITA,Pathogenic,120
+CHN,Unknown/Other,110
+NER,Endophytic,110
+CAN,Endophytic,108
+KOR,Endophytic,107
+THA,Endophytic,107
+AUS,Endophytic,100
+EGY,Endophytic,99
+NZL,Endophytic,91
+USA,Unknown/Other,87
+AUS,Pathogenic,85
+CHN,Mycorrhizal,83
+JPN,Endophytic,82
+ESP,Endophytic,77
+IRN,Endophytic,75
+USA,Mycorrhizal,70
+ARG,Endophytic,63
+ITA,Endophytic,62
+MEX,Endophytic,62
+CAN,Pathogenic,61
+ESP,Pathogenic,59
+NER,Pathogenic,59
+ZAF,Pathogenic,57
+CHN,Antagonistic/Biocontrol,56
+KOR,Pathogenic,56
+EGY,Pathogenic,54
+THA,Pathogenic,54
+IRN,Pathogenic,51
+DEU,Endophytic,50
+ATA,Endophytic,49
+PAK,Endophytic,48
+ARG,Mycorrhizal,47
+ZAF,Endophytic,47
+POL,Endophytic,46
+IND,Antagonistic/Biocontrol,44
+IND,Unknown/Other,44
+JPN,Pathogenic,44
+CHL,Endophytic,43
+ARG,Pathogenic,42
+IND,Mycorrhizal,42
+NZL,Pathogenic,42
+DEU,Pathogenic,41
+SAU,Endophytic,41
+MEX,Pathogenic,40
+AUS,Mycorrhizal,39
+IDN,Pathogenic,39
+CAN,Mycorrhizal,38
+CHN,Mutualistic,38
+FIN,Endophytic,38
+GBR,Endophytic,38
+MYS,Endophytic,38
+POL,Pathogenic,37
+USA,Mutualistic,37
+NLD,Pathogenic,36
+BRA,Mycorrhizal,35
+BRA,Antagonistic/Biocontrol,34
+TWN,Endophytic,34
+BRA,Unknown/Other,32
+PRT,Pathogenic,31
+europe,Pathogenic,30
+MYS,Pathogenic,29
+NOR,Pathogenic,29
+FRA,Endophytic,28
+USA,Antagonistic/Biocontrol,25
+global,Pathogenic,25
+GBR,Pathogenic,24
+MNG,Endophytic,24
+PAK,Pathogenic,24
+RUS,Endophytic,24
+TWN,Pathogenic,24
+BGD,Endophytic,23
+CMR,Endophytic,23
+CAN,Unknown/Other,22
+CHE,Endophytic,22
+CHE,Pathogenic,22
+FRA,Pathogenic,22
+TUR,Pathogenic,22
+COL,Pathogenic,21
+IDN,Antagonistic/Biocontrol,21
+MAR,Endophytic,21
+SAU,Pathogenic,21
+LKA,Endophytic,19
+NER,Unknown/Other,19
+NGA,Endophytic,19
+PAN,Endophytic,19
+europe,Endophytic,19
+COL,Endophytic,18
+DZA,Endophytic,18
+MEX,Mycorrhizal,18
+POL,Unknown/Other,18
+PRY,Endophytic,18
+SWE,Pathogenic,18
+EGY,Antagonistic/Biocontrol,17
+PAN,Pathogenic,17
+RUS,Pathogenic,17
+THA,Unknown/Other,17
+TUR,Endophytic,17
+ECU,Endophytic,16
+ESP,Antagonistic/Biocontrol,16
+ITA,Mycorrhizal,16
+NER,Antagonistic/Biocontrol,16
+NOR,Endophytic,16
+POL,Mycorrhizal,16
+CRI,Endophytic,15
+ISR,Pathogenic,15
+KEN,Endophytic,15
+PER,Endophytic,15
+PHL,Endophytic,15
+GBR,Mycorrhizal,14
+HUN,Endophytic,14
+NGA,Pathogenic,14
+PRT,Endophytic,14
+TUN,Endophytic,14
+VNM,Endophytic,14
+ATA,Pathogenic,13
+AUS,Unknown/Other,13
+AUT,Pathogenic,13
+ESP,Unknown/Other,13
+ITA,Unknown/Other,13
+LKA,Pathogenic,13
+MEX,Unknown/Other,13
+NOR,Mycorrhizal,13
+NZL,Mutualistic,13
+uk,Endophytic,13
+uk,Pathogenic,13
+ARG,Unknown/Other,12
+ATA,Unknown/Other,12
+CAN,Antagonistic/Biocontrol,12
+DZA,Pathogenic,12
+FIN,Pathogenic,12
+JPN,Mycorrhizal,12
+MAR,Pathogenic,12
+NOR,Unknown/Other,12
+SWE,Endophytic,12
+CZE,Endophytic,11
+CZE,Pathogenic,11
+ECU,Mycorrhizal,11
+ETH,Pathogenic,11
+JPN,Unknown/Other,11
+NLD,Endophytic,11
+NZL,Unknown/Other,11
+SRB,Pathogenic,11
+multiple,Endophytic,11
+BGD,Pathogenic,10
+CRI,Pathogenic,10
+IDN,Unknown/Other,10
+OMN,Endophytic,10
+UKR,Endophytic,10
+AUT,Endophytic,9
+BEL,Pathogenic,9
+CMR,Pathogenic,9
+DEU,Unknown/Other,9
+GRC,Pathogenic,9
+ITA,Antagonistic/Biocontrol,9
+KOR,Unknown/Other,9
+MLI,Pathogenic,9
+MYS,Unknown/Other,9
+PRI,Endophytic,9
+SVN,Pathogenic,9
+TUN,Pathogenic,9
+UKR,Pathogenic,9
+VEN,Endophytic,9
+ARG,Mutualistic,8
+CHL,Pathogenic,8
+DEU,Mutualistic,8
+DNK,Pathogenic,8
+EGY,Unknown/Other,8
+FRA,Mycorrhizal,8
+FRA,Unknown/Other,8
+GEO,Endophytic,8
+HKG,Endophytic,8
+IND,Mutualistic,8
+IRN,Antagonistic/Biocontrol,8
+NPL,Endophytic,8
+NZL,Mycorrhizal,8
+PAN,Unknown/Other,8
+RUS,Unknown/Other,8
+URY,Pathogenic,8
+UZB,Endophytic,8
+BFA,Pathogenic,7
+CHL,Mycorrhizal,7
+DEU,Mycorrhizal,7
+ECU,Pathogenic,7
+FIN,Unknown/Other,7
+GBR,Unknown/Other,7
+HUN,Pathogenic,7
+IRN,Unknown/Other,7
+IRQ,Endophytic,7
+IRQ,Pathogenic,7
+KEN,Pathogenic,7
+PAK,Antagonistic/Biocontrol,7
+PER,Pathogenic,7
+SAU,Unknown/Other,7
+SWE,Mycorrhizal,7
+VNM,Pathogenic,7
+ZAF,Mycorrhizal,7
+europe,Mycorrhizal,7
+global,Endophytic,7
+not_mentioned,Unknown/Other,7
+worldwide,Pathogenic,7
+BOL,Endophytic,6
+CAN,Mutualistic,6
+CRI,Mycorrhizal,6
+DEU,Antagonistic/Biocontrol,6
+EST,Pathogenic,6
+ETH,Endophytic,6
+FIN,Mycorrhizal,6
+GHA,Pathogenic,6
+JPN,Antagonistic/Biocontrol,6
+KOR,Antagonistic/Biocontrol,6
+MEX,Antagonistic/Biocontrol,6
+MYS,Antagonistic/Biocontrol,6
+NLD,Unknown/Other,6
+NZL,Antagonistic/Biocontrol,6
+PAK,Unknown/Other,6
+TUR,Unknown/Other,6
+europe,Mutualistic,6
+not-specified,Pathogenic,6
+not_mentioned,Pathogenic,6
+BRA,Mutualistic,5
+CHE,Mycorrhizal,5
+CHE,Unknown/Other,5
+EST,Endophytic,5
+GRC,Antagonistic/Biocontrol,5
+MMR,Endophytic,5
+PAK,Mycorrhizal,5
+PHL,Pathogenic,5
+PRY,Pathogenic,5
+PRY,Unknown/Other,5
+SDN,Endophytic,5
+SVN,Mycorrhizal,5
+SWE,Unknown/Other,5
+TWN,Mycorrhizal,5
+TZA,Pathogenic,5
+VEN,Pathogenic,5
+ZAF,Unknown/Other,5
+central europe,Pathogenic,5
+not-specified,Endophytic,5
+ARE,Endophytic,4
+ARG,Antagonistic/Biocontrol,4
+AUS,Antagonistic/Biocontrol,4
+AUT,Unknown/Other,4
+BEL,Endophytic,4
+BGD,Unknown/Other,4
+BGR,Pathogenic,4
+CHL,Antagonistic/Biocontrol,4
+COL,Mycorrhizal,4
+CZE,Mycorrhizal,4
+DNK,Antagonistic/Biocontrol,4
+DNK,Endophytic,4
+DZA,Antagonistic/Biocontrol,4
+DZA,Mycorrhizal,4
+ECU,Unknown/Other,4
+EST,Mycorrhizal,4
+FRA,Mutualistic,4
+GUY,Endophytic,4
+HRV,Pathogenic,4
+ISR,Endophytic,4
+JOR,Endophytic,4
+KEN,Antagonistic/Biocontrol,4
+LTU,Endophytic,4
+MLI,Endophytic,4
+MNE,Pathogenic,4
+PER,Mycorrhizal,4
+PNG,Endophytic,4
+PRI,Pathogenic,4
+PRT,Unknown/Other,4
+ROU,Pathogenic,4
+SAU,Antagonistic/Biocontrol,4
+SGP,Endophytic,4
+SVK,Endophytic,4
+SVK,Pathogenic,4
+TWN,Unknown/Other,4
+TZA,Endophytic,4
+UGA,Endophytic,4
+UZB,Pathogenic,4
+VNM,Antagonistic/Biocontrol,4
+ZAF,Antagonistic/Biocontrol,4
+asia,Pathogenic,4
+multiple,Pathogenic,4
+not_mentioned,Endophytic,4
+notprovided,Endophytic,4
+notprovided,Pathogenic,4
+uk,Mycorrhizal,4
+ATA,Mutualistic,3
+ATA,Mycorrhizal,3
+AUS,Mutualistic,3
+BMU,Endophytic,3
+BOL,Pathogenic,3
+COL,Antagonistic/Biocontrol,3
+COL,Unknown/Other,3
+CRI,Antagonistic/Biocontrol,3
+CUB,Endophytic,3
+CZE,Unknown/Other,3
+DNK,Mutualistic,3
+DZA,Unknown/Other,3
+EGY,Mycorrhizal,3
+ESP,Mycorrhizal,3
+FIN,Mutualistic,3
+FRO,Endophytic,3
+FRO,Unknown/Other,3
+GEO,Pathogenic,3
+GHA,Endophytic,3
+GHA,Unknown/Other,3
+GIN,Endophytic,3
+GRC,Endophytic,3
+GUF,Endophytic,3
+HKG,Pathogenic,3
+HND,Endophytic,3
+HRV,Endophytic,3
+IRL,Pathogenic,3
+ISL,Endophytic,3
+JEY,Endophytic,3
+KAZ,Pathogenic,3
+KOR,Mycorrhizal,3
+LBY,Endophytic,3
+LTU,Pathogenic,3
+MEX,Mutualistic,3
+MLI,Antagonistic/Biocontrol,3
+MLT,Pathogenic,3
+MNG,Mycorrhizal,3
+MNG,Pathogenic,3
+NAM,Pathogenic,3
+NOR,Antagonistic/Biocontrol,3
+OMN,Antagonistic/Biocontrol,3
+OMN,Pathogenic,3
+PER,Antagonistic/Biocontrol,3
+PER,Unknown/Other,3
+PNG,Pathogenic,3
+POL,Mutualistic,3
+PRY,Mycorrhizal,3
+REU,Mycorrhizal,3
+RUS,Mycorrhizal,3
+SDN,Pathogenic,3
+SYR,Pathogenic,3
+THA,Antagonistic/Biocontrol,3
+UGA,Antagonistic/Biocontrol,3
+UGA,Pathogenic,3
+URY,Endophytic,3
+VNM,Unknown/Other,3
+africa,Pathogenic,3
+europe,Unknown/Other,3
+global,Mycorrhizal,3
+global,Unknown/Other,3
+iberian peninsula,Endophytic,3
+multiple,Unknown/Other,3
+red sea,Endophytic,3
+southeast asia,Endophytic,3
+southeast asia,Pathogenic,3
+us,Pathogenic,3
+worldwide,Endophytic,3
+AFG,Unknown/Other,2
+ATA,Saprotrophic,2
+AUT,Mutualistic,2
+AZE,Pathogenic,2
+BDI,Pathogenic,2
+BGD,Mycorrhizal,2
+BLR,Endophytic,2
+BLR,Mycorrhizal,2
+BLR,Pathogenic,2
+BRN,Endophytic,2
+CHL,Mutualistic,2
+CHL,Unknown/Other,2
+CHN,Saprotrophic,2
+CMR,Unknown/Other,2
+COG,Endophytic,2
+COG,Pathogenic,2
+CUB,Mycorrhizal,2
+CUB,Pathogenic,2
+ETH,Mycorrhizal,2
+ETH,Unknown/Other,2
+FRA,Antagonistic/Biocontrol,2
+GBR,Mutualistic,2
+GEO,Unknown/Other,2
+GIN,Unknown/Other,2
+GRL,Endophytic,2
+GRL,Unknown/Other,2
+GUF,Pathogenic,2
+HND,Mycorrhizal,2
+HRV,Antagonistic/Biocontrol,2
+IDN,Mycorrhizal,2
+IRL,Endophytic,2
+ISR,Antagonistic/Biocontrol,2
+ISR,Unknown/Other,2
+JPN,Mutualistic,2
+KAZ,Endophytic,2
+KEN,Unknown/Other,2
+LKA,Unknown/Other,2
+LVA,Pathogenic,2
+MDG,Endophytic,2
+MDG,Mycorrhizal,2
+MDG,Pathogenic,2
+MNE,Unknown/Other,2
+MNG,Unknown/Other,2
+MOZ,Endophytic,2
+MOZ,Pathogenic,2
+MYS,Mycorrhizal,2
+NGA,Unknown/Other,2
+NLD,Mutualistic,2
+NLD,Mycorrhizal,2
+NPL,Pathogenic,2
+OMN,Unknown/Other,2
+PAN,Mutualistic,2
+PHL,Mycorrhizal,2
+PHL,Unknown/Other,2
+PRT,Antagonistic/Biocontrol,2
+PYF,Antagonistic/Biocontrol,2
+SAU,Mutualistic,2
+SAU,Mycorrhizal,2
+SDN,Mycorrhizal,2
+SGS,Endophytic,2
+SGS,Pathogenic,2
+SRB,Endophytic,2
+SVN,Endophytic,2
+SYR,Endophytic,2
+TUN,Antagonistic/Biocontrol,2
+TUR,Antagonistic/Biocontrol,2
+TWN,Mutualistic,2
+UKR,Antagonistic/Biocontrol,2
+UKR,Mycorrhizal,2
+URY,Antagonistic/Biocontrol,2
+VEN,Unknown/Other,2
+YEM,Endophytic,2
+ZAF,Mutualistic,2
+ZMB,Pathogenic,2
+ZWE,Endophytic,2
+ZWE,Pathogenic,2
+asia,Endophytic,2
+central europe,Mycorrhizal,2
+europe,Antagonistic/Biocontrol,2
+"extract from source)""",Mycorrhizal,2
+indian subcontinent,Endophytic,2
+northern europe,Pathogenic,2
+not-specified,Unknown/Other,2
+not_mentioned_in_text,Endophytic,2
+notprovided,Mutualistic,2
+notspecified,Antagonistic/Biocontrol,2
+notspecified,Unknown/Other,2
+uk,Antagonistic/Biocontrol,2
+uk,Mutualistic,2
+various,Endophytic,2
+"'or']""",Endophytic,1
+21 countries,Endophytic,1
+68 degrees 29n,Endophytic,1
+69?03'n,Pathogenic,1
+8 countries,Endophytic,1
+89 countries,Pathogenic,1
+AGO,Pathogenic,1
+ALB,Pathogenic,1
+ARE,Antagonistic/Biocontrol,1
+ARE,Mutualistic,1
+ARE,Pathogenic,1
+ASM,Pathogenic,1
+ATA,Antagonistic/Biocontrol,1
+AUT,Antagonistic/Biocontrol,1
+AUT,Mycorrhizal,1
+AZE,Endophytic,1
+BEL,Mycorrhizal,1
+BEL,Unknown/Other,1
+BEN,Endophytic,1
+BEN,Unknown/Other,1
+BGD,Antagonistic/Biocontrol,1
+BGR,Antagonistic/Biocontrol,1
+BGR,Unknown/Other,1
+BIH,Endophytic,1
+BIH,Pathogenic,1
+BIH,Unknown/Other,1
+BRA,Saprotrophic,1
+BRB,Pathogenic,1
+BRN,Pathogenic,1
+BTN,Endophytic,1
+BTN,Pathogenic,1
+BWA,Endophytic,1
+CAF,Endophytic,1
+CHE,Mutualistic,1
+CIV,Pathogenic,1
+CMR,Antagonistic/Biocontrol,1
+COD,Endophytic,1
+COD,Pathogenic,1
+CRI,Unknown/Other,1
+CUB,Antagonistic/Biocontrol,1
+DMA,Pathogenic,1
+DNK,Mycorrhizal,1
+DNK,Unknown/Other,1
+DOM,Endophytic,1
+DOM,Pathogenic,1
+ECU,Antagonistic/Biocontrol,1
+ECU,Saprotrophic,1
+EGY,Mutualistic,1
+ERI,Endophytic,1
+ERI,Mycorrhizal,1
+ESP,Mutualistic,1
+ETH,Mutualistic,1
+FRA,Saprotrophic,1
+FRO,Mutualistic,1
+FSM,Pathogenic,1
+GAB,Pathogenic,1
+GBR,Antagonistic/Biocontrol,1
+GBR,Saprotrophic,1
+GEO,Antagonistic/Biocontrol,1
+GEO,Mutualistic,1
+GIN,Mycorrhizal,1
+GNB,Unknown/Other,1
+GRC,Unknown/Other,1
+GRL,Mutualistic,1
+GRL,Mycorrhizal,1
+GRL,Pathogenic,1
+GTM,Pathogenic,1
+GUF,Antagonistic/Biocontrol,1
+GUF,Mycorrhizal,1
+GUM,Pathogenic,1
+HKG,Unknown/Other,1
+HND,Pathogenic,1
+HRV,Mycorrhizal,1
+HRV,Unknown/Other,1
+HUN,Mutualistic,1
+HUN,Mycorrhizal,1
+HUN,Unknown/Other,1
+IDN,Mutualistic,1
+IMN,Endophytic,1
+IND,Saprotrophic,1
+IRL,Unknown/Other,1
+IRN,Mutualistic,1
+IRN,Mycorrhizal,1
+IRQ,Antagonistic/Biocontrol,1
+IRQ,Unknown/Other,1
+ISL,Mutualistic,1
+ISL,Unknown/Other,1
+ITA,Mutualistic,1
+JAM,Endophytic,1
+JAM,Unknown/Other,1
+JEY,Pathogenic,1
+JEY,Unknown/Other,1
+JOR,Mycorrhizal,1
+JOR,Pathogenic,1
+KAZ,Mutualistic,1
+KGZ,Endophytic,1
+KGZ,Mutualistic,1
+KOR,Mutualistic,1
+KWT,Endophytic,1
+LAO,Pathogenic,1
+LBN,Antagonistic/Biocontrol,1
+LBN,Pathogenic,1
+LBY,Pathogenic,1
+LBY,Unknown/Other,1
+LKA,Antagonistic/Biocontrol,1
+LSO,Mycorrhizal,1
+LTU,Mycorrhizal,1
+LTU,Unknown/Other,1
+LUX,Endophytic,1
+LUX,Pathogenic,1
+LUX,Unknown/Other,1
+MAR,Antagonistic/Biocontrol,1
+MAR,Mutualistic,1
+MAR,Mycorrhizal,1
+MAR,Unknown/Other,1
+MDA,Pathogenic,1
+MDG,Antagonistic/Biocontrol,1
+MLI,Mycorrhizal,1
+MLT,Endophytic,1
+MNG,Antagonistic/Biocontrol,1
+MNG,Mutualistic,1
+MRT,Pathogenic,1
+MTQ,Endophytic,1
+MUS,Endophytic,1
+MUS,Pathogenic,1
+MUS,Unknown/Other,1
+MWI,Endophytic,1
+MYS,Mutualistic,1
+NAM,Endophytic,1
+NAM,Mycorrhizal,1
+NAM,Unknown/Other,1
+NCL,Endophytic,1
+NCL,Pathogenic,1
+NCL,Unknown/Other,1
+NER,Mutualistic,1
+NGA,Antagonistic/Biocontrol,1
+NIC,Endophytic,1
+NIC,Mycorrhizal,1
+NIC,Pathogenic,1
+NLD,Antagonistic/Biocontrol,1
+NOR,Mutualistic,1
+NOR,Saprotrophic,1
+NZL,Saprotrophic,1
+PAN,Antagonistic/Biocontrol,1
+PAN,Mycorrhizal,1
+PHL,Antagonistic/Biocontrol,1
+PNG,Mycorrhizal,1
+PNG,Unknown/Other,1
+POL,Antagonistic/Biocontrol,1
+PRI,Mycorrhizal,1
+PRY,Antagonistic/Biocontrol,1
+PYF,Endophytic,1
+PYF,Pathogenic,1
+QAT,Antagonistic/Biocontrol,1
+QAT,Pathogenic,1
+REU,Endophytic,1
+REU,Unknown/Other,1
+ROU,Antagonistic/Biocontrol,1
+ROU,Endophytic,1
+RUS,Antagonistic/Biocontrol,1
+RUS,Mutualistic,1
+SEN,Endophytic,1
+SEN,Mycorrhizal,1
+SEN,Pathogenic,1
+SGP,Unknown/Other,1
+SGS,Mutualistic,1
+SGS,Saprotrophic,1
+SGS,Unknown/Other,1
+SRB,Unknown/Other,1
+SVK,Unknown/Other,1
+SVN,Unknown/Other,1
+SWE,Antagonistic/Biocontrol,1
+SYR,Antagonistic/Biocontrol,1
+SYR,Mycorrhizal,1
+TCD,Pathogenic,1
+TGO,Pathogenic,1
+THA,Saprotrophic,1
+TLS,Endophytic,1
+TTO,Pathogenic,1
+TTO,Unknown/Other,1
+TUN,Mutualistic,1
+TUN,Mycorrhizal,1
+TUN,Unknown/Other,1
+TUR,Mycorrhizal,1
+TWN,Antagonistic/Biocontrol,1
+TWN,Saprotrophic,1
+TZA,Unknown/Other,1
+UGA,Unknown/Other,1
+URY,Unknown/Other,1
+USA,Saprotrophic,1
+UZB,Antagonistic/Biocontrol,1
+UZB,Unknown/Other,1
+VEN,Mutualistic,1
+VUT,Unknown/Other,1
+WSM,Pathogenic,1
+XKX,Pathogenic,1
+ZWE,Mycorrhizal,1
+[unavailable],Endophytic,1
+"a common crop in many countries)""",Antagonistic/Biocontrol,1
+"abstract analysis)""",Antagonistic/Biocontrol,1
+"abstract analysis)""",Endophytic,1
+"abstract does not specify)""",Endophytic,1
+"abstract-based analysis)""",Mycorrhizal,1
+"abstract-based analysis)""",Pathogenic,1
+africa,Antagonistic/Biocontrol,1
+africa,Endophytic,1
+africa,Unknown/Other,1
+africa and middle eastern countries,Pathogenic,1
+americas,Antagonistic/Biocontrol,1
+americas,Pathogenic,1
+americas,Unknown/Other,1
+"and the americas)""",Pathogenic,1
+andes,Mycorrhizal,1
+arabian peninsula,Unknown/Other,1
+"as cultivated on the yamuna river bank)""",Endophytic,1
+"as mangroves are found in tropical and subtropical regions)""",Endophytic,1
+asia,Mycorrhizal,1
+asia,Unknown/Other,1
+asia and africa,Pathogenic,1
+asia and africa,Unknown/Other,1
+asian and african countries,Endophytic,1
+"assumed as location of mangroves)""",Endophytic,1
+"assumed to be in the mediterranean region)""",Endophytic,1
+"assumed: wherever a-wh-20-2 was collected)""",Endophytic,1
+australasia,Endophytic,1
+baltic sea,Endophytic,1
+banana-exporting countries,Pathogenic,1
+"based on pitch pine distribution)""",Endophytic,1
+"but context suggests it's relevant to the mediterranean area)""",Pathogenic,1
+"but likely multiple due to mention of various mountain ecosystems)""",Mycorrhizal,1
+"but likely tropical)""",Endophytic,1
+"but plant is native to asia)""",Endophytic,1
+caribbean,Endophytic,1
+central and northern europe,Antagonistic/Biocontrol,1
+central asia,Mycorrhizal,1
+central europe,Endophytic,1
+central europe,Unknown/Other,1
+circum mediterranean countries,Antagonistic/Biocontrol,1
+circum mediterranean countries,Endophytic,1
+circum-mediterranean,Antagonistic/Biocontrol,1
+cisural region,Endophytic,1
+cosmopolitan,Pathogenic,1
+cumbria,Mycorrhizal,1
+czechia,Mycorrhizal,1
+data collected from web of science and pubmed databases,Endophytic,1
+earth,Endophytic,1
+east africa,Antagonistic/Biocontrol,1
+east africa,Pathogenic,1
+east asia,Antagonistic/Biocontrol,1
+east asia,Endophytic,1
+east asia,Unknown/Other,1
+eastern africa,Endophytic,1
+eastern pre-pyrenees,Pathogenic,1
+eleven african countries,Endophytic,1
+eurasia,Mutualistic,1
+europe and africa,Antagonistic/Biocontrol,1
+europe and temperate asia,Endophytic,1
+europe and western asia,Pathogenic,1
+"europe""",Mycorrhizal,1
+"extract from citation or database search)""",Endophytic,1
+"extract from citation>""",Pathogenic,1
+"extract from reference list if available)""",Pathogenic,1
+"extract from source if possible)""",Endophytic,1
+"extract from source needed)""",Pathogenic,1
+"extract from source)""",Endophytic,1
+"extract from source)""",Pathogenic,1
+"extract from the journal's website or database)""",Pathogenic,1
+"extract from the publication if available)""",Endophytic,1
+"extract from the source article if possible)""",Pathogenic,1
+"extract from the source if available)""",Endophytic,1
+"extract if available)""",Endophytic,1
+"extracted from context)""",Endophytic,1
+"extracted from the title or database search]""",Pathogenic,1
+"extracted text)""",Endophytic,1
+"field experiment location)""",Endophytic,1
+five regions of rice seed production,Pathogenic,1
+foreign countries,Pathogenic,1
+"full text may contain country information)""",Endophytic,1
+geographically diverse,Mycorrhizal,1
+geographically diverse,Pathogenic,1
+global,Mutualistic,1
+"global)""",Pathogenic,1
+iberian peninsula,Mutualistic,1
+iberian peninsula,Unknown/Other,1
+"indo-pacific """,Endophytic,1
+introduced range,Unknown/Other,1
+leningrad region,Endophytic,1
+"likely in locations where wheat is cultivated)""",Pathogenic,1
+"likely where the study was conducted)""",Endophytic,1
+local,Endophytic,1
+"location is a high-elevation landscape)""",Endophytic,1
+"location is a high-elevation landscape)""",Mycorrhizal,1
+"ma""",Pathogenic,1
+"mangrove study)""",Endophytic,1
+many parts of the world,Endophytic,1
+many parts of the world,Pathogenic,1
+"marine environment)""",Endophytic,1
+mediterranean,Endophytic,1
+mediterranean basin,Endophytic,1
+mediterranean island,Endophytic,1
+mediterranean region,Antagonistic/Biocontrol,1
+mediterranean sea,Endophytic,1
+middle east,Endophytic,1
+middle east,Pathogenic,1
+middle eastern countries,Endophytic,1
+"mo""",Endophytic,1
+monoculture areas from indigenous 'mapuche' communities,Pathogenic,1
+more than 80 countries where coffee is grown,Pathogenic,1
+multiple,Mutualistic,1
+multiple countries across sub-saharan africa,Endophytic,1
+multiple countries in sub-saharan africa,Pathogenic,1
+neolithic and early agricultural sites,Endophytic,1
+nine countries across six continents,Unknown/Other,1
+"no location specified in text)""",Mutualistic,1
+none specified,Pathogenic,1
+north and south of the alps,Endophytic,1
+north temperate zone,Endophytic,1
+northern europe,Endophytic,1
+northern fennoscandia,Mycorrhizal,1
+northern hemisphere,Pathogenic,1
+northwest mediterranean sea,Pathogenic,1
+northwestern mediterranean sea,Endophytic,1
+not specific,Mycorrhizal,1
+not specific,Pathogenic,1
+not specifically mentioned,Pathogenic,1
+not-mentioned-specifically,Endophytic,1
+not-specified,Mutualistic,1
+not-specified-in-text,Antagonistic/Biocontrol,1
+not-specified-in-text,Endophytic,1
+not_mentioned,Mutualistic,1
+not_mentioned_specifically_in_text,Endophytic,1
+not_specific_in_text,Endophytic,1
+not_specific_in_text,Unknown/Other,1
+not_specificied_in_text,Antagonistic/Biocontrol,1
+notprovided,Antagonistic/Biocontrol,1
+notprovided,Mycorrhizal,1
+notprovided,Unknown/Other,1
+notspecified,Pathogenic,1
+nw mediterranean sea,Endophytic,1
+occurrences on six continents,Mutualistic,1
+pacific northwest,Pathogenic,1
+pampa region,Endophytic,1
+"please check the original source)""",Endophytic,1
+"please check the source)""",Mycorrhizal,1
+"please check the source>""",Endophytic,1
+"possibly multiple locations)""",Pathogenic,1
+"presumed culture isolation)""",Endophytic,1
+pyrenees mountains,Endophytic,1
+red sea coast,Unknown/Other,1
+saskatchewan,Mycorrhizal,1
+"silwood park)""",Pathogenic,1
+south asia,Endophytic,1
+south asia and asia pacific regions,Pathogenic,1
+south east asia,Unknown/Other,1
+southeast iberian peninsula,Pathogenic,1
+southeastern asian countries,Pathogenic,1
+southern africa,Endophytic,1
+southern baltics,Pathogenic,1
+southern cone,Endophytic,1
+"study conducted in a salt marsh)""",Endophytic,1
+"study conducted in natural forests)""",Pathogenic,1
+"study does not specify a particular country)""",Pathogenic,1
+"study may be global as it focuses on common bean)""",Endophytic,1
+"study was conducted in lake water)""",Unknown/Other,1
+"study was not location-specific)""",Endophytic,1
+"sub-saharan africa""",Endophytic,1
+"subarctic and temperate regions""",Endophytic,1
+three production areas,Pathogenic,1
+tropical africa,Pathogenic,1
+tropical countries,Pathogenic,1
+u.s.,Endophytic,1
+"uk""",Endophytic,1
+"uk""",Pathogenic,1
+ussr,Mycorrhizal,1
+west asia,Unknown/Other,1
+"west nusa tenggara""",Endophytic,1
+western and southern europe,Endophytic,1
+western world,Unknown/Other,1
+wide geographic sampling,Unknown/Other,1
+worldwide,Mutualistic,1
+worldwide,Mycorrhizal,1
+xiong'an new area,Unknown/Other,1

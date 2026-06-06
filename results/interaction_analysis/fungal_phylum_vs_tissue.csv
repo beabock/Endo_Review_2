@@ -1,0 +1,15 @@
+fungal_phylum,tissue_group,study_count
+Charophyta,Root,1
+Chlorophyta,Leaf,3
+Chlorophyta,Root,1
+Marchantiophyta,Leaf,1
+Marchantiophyta,Root,1
+Marchantiophyta,Seed,1
+Marchantiophyta,Stem/Wood,1
+Rhodophyta,Leaf,1
+Rhodophyta,Root,3
+Rhodophyta,Stem/Wood,1
+Tracheophyta,Leaf,11
+Tracheophyta,Root,40
+Tracheophyta,Seed,11
+Tracheophyta,Stem/Wood,11

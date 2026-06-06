@@ -1,0 +1,235 @@
+iso_a3,country_name,study_count,study_count_percentile,bias_class,gdp_current_usd,gdp_log10,gdp_bias_class
+CHN,China,590,1,Over-studied (top 10%),18743803170827.2,13.272857715075011,Developing + high studies (research focus)
+IND,India,293,0.9957081545064378,Over-studied (top 10%),3909891533858.08,12.592164709595279,Developing + high studies (research focus)
+BRA,Brazil,236,0.9914163090128756,Over-studied (top 10%),2185821648943.86,12.339614723011916,Developing + high studies (research focus)
+USA,United States of America,229,0.9871244635193133,Over-studied (top 10%),28750956130731.2,13.458652291995941,Developing + high studies (research focus)
+IDN,Indonesia,128,0.9828326180257511,Over-studied (top 10%),1396300098190.97,12.144978768560598,Developing + high studies (research focus)
+EGY,Egypt,100,0.9785407725321889,Over-studied (top 10%),389059911003.566,11.590016483111897,Developing + high studies (research focus)
+ITA,Italy,70,0.9742489270386266,Over-studied (top 10%),2380825077243.59,12.376727488316035,Developing + high studies (research focus)
+DEU,Germany,69,0.9699570815450643,Over-studied (top 10%),4685592577804.69,12.670764523077906,Developing + high studies (research focus)
+JPN,Japan,65,0.9656652360515021,Over-studied (top 10%),4027597523550.58,12.605046065150125,Developing + high studies (research focus)
+ESP,Spain,60,0.9613733905579399,Over-studied (top 10%),1725671652742.19,12.236958165094311,Developing + high studies (research focus)
+CAN,Canada,58,0.9570815450643777,Over-studied (top 10%),2243636826633.76,12.350952559824094,Developing + high studies (research focus)
+KOR,South Korea,56,0.9527896995708155,Over-studied (top 10%),1875388209406.8,12.273091181264805,Developing + high studies (research focus)
+ZAF,South Africa,51,0.9484978540772532,Over-studied (top 10%),401144998373.585,11.603301381625652,Developing + high studies (research focus)
+POL,Poland,50,0.944206008583691,Over-studied (top 10%),917767106146.761,11.96273248801221,Developing + high studies (research focus)
+THA,Thailand,47,0.9399141630901288,Over-studied (top 10%),526517658841.684,11.721412941540292,Developing + high studies (research focus)
+PAK,Pakistan,45,0.9356223175965666,Over-studied (top 10%),371570000121.266,11.57004064259895,Developing + high studies (research focus)
+AUS,Australia,43,0.9313304721030042,Over-studied (top 10%),1757022451652.83,12.244777311049441,Developing + high studies (research focus)
+MEX,Mexico,40,0.9227467811158798,Over-studied (top 10%),1856365616165.94,12.268663515765258,Developing + high studies (research focus)
+NER,Niger,40,0.9227467811158798,Over-studied (top 10%),19876128485.7857,10.298331795503932,Developing + high studies (research focus)
+MYS,Malaysia,37,0.9184549356223176,Over-studied (top 10%),422227005428.688,11.62554600711845,Developing + high studies (research focus)
+SAU,Saudi Arabia,36,0.9141630901287554,Over-studied (top 10%),1239804533333.33,12.093353220012046,Developing + high studies (research focus)
+NZL,New Zealand,34,0.9098712446351931,Over-studied (top 10%),260172385097.616,11.415261198312523,Developing + high studies (research focus)
+ARG,Argentina,33,0.9055793991416309,Over-studied (top 10%),638365455340.04,11.805069377463727,Developing + high studies (research focus)
+IRN,Iran,29,0.9012875536480687,Over-studied (top 10%),475252089215.416,11.676924034706827,Developing + high studies (research focus)
+NLD,Netherlands,27,0.8969957081545065,Well-studied (top 25%),1214927698572.66,12.084550433452657,Balanced
+TUR,Turkey,26,0.8927038626609443,Well-studied (top 25%),1359123768774.12,12.13325900761409,Balanced
+FIN,Finland,25,0.8841201716738197,Well-studied (top 25%),298696961297.656,11.47523080446428,Balanced
+TWN,Taiwan,25,0.8841201716738197,Well-studied (top 25%),NA,NA,GDP unknown
+CHL,Chile,23,0.8798283261802575,Well-studied (top 25%),330267137371.592,11.518865362161858,Balanced
+BGD,Bangladesh,19,0.871244635193133,Well-studied (top 25%),450119432068.852,11.653327762234428,Balanced
+COL,Colombia,19,0.871244635193133,Well-studied (top 25%),418818154879.271,11.622025499160088,Balanced
+PRT,Portugal,18,0.8669527896995708,Well-studied (top 25%),313271185085.102,11.495920449991663,Balanced
+CZE,Czechia,17,0.8583690987124464,Well-studied (top 25%),347034062928.479,11.540372104807693,Balanced
+RUS,Russia,17,0.8583690987124464,Well-studied (top 25%),2173835806671.66,12.337226738025617,Balanced
+AUT,Austria,15,0.8497854077253219,Well-studied (top 25%),534790720466.822,11.728183862903675,Balanced
+SWE,Sweden,15,0.8497854077253219,Well-studied (top 25%),603715224265.798,11.780832127868148,Balanced
+HUN,Hungary,14,0.8412017167381974,Well-studied (top 25%),222722738925.641,11.34776455868558,Balanced
+NGA,Nigeria,14,0.8412017167381974,Well-studied (top 25%),252261880141.151,11.401851628261783,Balanced
+ATA,Antarctica,13,0.8283261802575107,Well-studied (top 25%),NA,NA,GDP unknown
+KEN,Kenya,13,0.8283261802575107,Well-studied (top 25%),120339557905.932,11.080408411681423,Balanced
+CHE,Switzerland,13,0.8283261802575107,Well-studied (top 25%),936564198048.516,11.97153755202907,Balanced
+DZA,Algeria,12,0.8154506437768241,Well-studied (top 25%),269322281664.773,11.430272285100166,Balanced
+PRY,Paraguay,12,0.8154506437768241,Well-studied (top 25%),44458118397.4445,10.647951078090832,Balanced
+GBR,United Kingdom,12,0.8154506437768241,Well-studied (top 25%),3686033044482.13,12.566559224255794,Balanced
+CRI,Costa Rica,11,0.7939914163090128,Well-studied (top 25%),95350423176.5962,10.979322624837218,Balanced
+DNK,Denmark,11,0.7939914163090128,Well-studied (top 25%),424524722037.047,11.627902986291733,Balanced
+MAR,Morocco,11,0.7939914163090128,Well-studied (top 25%),160610994054.734,11.205775270045308,Balanced
+PAN,Panama,11,0.7939914163090128,Well-studied (top 25%),86523959131.7472,10.93713638351014,Balanced
+PER,Peru,11,0.7939914163090128,Well-studied (top 25%),289221969062.941,11.461231278527174,Balanced
+ECU,Ecuador,10,0.7811158798283262,Well-studied (top 25%),124676074700,11.095783120497925,Balanced
+LKA,Sri Lanka,10,0.7811158798283262,Well-studied (top 25%),98963185509.6499,10.995473666279482,Balanced
+UKR,Ukraine,10,0.7811158798283262,Well-studied (top 25%),190741262414.705,11.280444652671521,Balanced
+CMR,Cameroon,9,0.7682403433476395,Well-studied (top 25%),53296694320.2057,10.726700273135114,Balanced
+ETH,Ethiopia,9,0.7682403433476395,Well-studied (top 25%),149740297952.986,11.17533869295129,Balanced
+OMN,Oman,9,0.7682403433476395,Well-studied (top 25%),107137198769.386,11.029940287034952,Balanced
+IRQ,Iraq,8,0.759656652360515,Well-studied (top 25%),279641257615.385,11.446601246590262,Balanced
+PHL,Philippines,8,0.759656652360515,Well-studied (top 25%),461617509782.355,11.664282273842717,Balanced
+CUB,Cuba,7,0.7339055793991416,Moderate coverage (top 50%),107352000000,11.030810139884263,Balanced
+GRC,Greece,7,0.7339055793991416,Moderate coverage (top 50%),256238371778.118,11.408644166016266,Balanced
+ISR,Israel,7,0.7339055793991416,Moderate coverage (top 50%),540379921261.681,11.732699203697035,Balanced
+NPL,Nepal,7,0.7339055793991416,Moderate coverage (top 50%),42914268286.7109,10.632601711950006,Balanced
+SRB,Serbia,7,0.7339055793991416,Moderate coverage (top 50%),90097765959.1114,10.954714022458985,Balanced
+VNM,Vietnam,7,0.7339055793991416,Moderate coverage (top 50%),476388230307.175,11.6779610232226,Balanced
+TUN,Tunisia,6,0.7253218884120172,Moderate coverage (top 50%),51332285656.5422,10.71039060238513,Balanced
+ARE,United Arab Emirates,6,0.7253218884120172,Moderate coverage (top 50%),552324846834.581,11.742194580794616,Balanced
+BEL,Belgium,5,0.703862660944206,Moderate coverage (top 50%),671370081636.406,11.8269619838144,Balanced
+EST,Estonia,5,0.703862660944206,Moderate coverage (top 50%),43130419829.35,10.634783685567298,Balanced
+MNG,Mongolia,5,0.703862660944206,Moderate coverage (top 50%),23794540024.5132,10.376477313810273,Balanced
+SVN,Slovenia,5,0.703862660944206,Moderate coverage (top 50%),72972015197.3859,10.863156339907867,Balanced
+UZB,Uzbekistan,5,0.703862660944206,Moderate coverage (top 50%),114965293466.611,11.060566752259195,Balanced
+BOL,Bolivia,4,0.6866952789699571,Moderate coverage (top 50%),54881327452.9667,10.73942460740945,Developing + low studies (biased)
+IRL,Ireland,4,0.6866952789699571,Moderate coverage (top 50%),609157459747.205,11.78472956695204,Developing + low studies (biased)
+JOR,Jordan,4,0.6866952789699571,Moderate coverage (top 50%),53352289577.4648,10.727153061614707,Developing + low studies (biased)
+TZA,Tanzania,4,0.6866952789699571,Moderate coverage (top 50%),78844405385.2195,10.89677088223653,Developing + low studies (biased)
+BLR,Belarus,3,0.6394849785407726,Moderate coverage (top 50%),75961865471.9129,10.880595621602234,Developing + low studies (biased)
+BGR,Bulgaria,3,0.6394849785407726,Moderate coverage (top 50%),113343355779.985,11.054396066741644,Developing + low studies (biased)
+COG,Congo,3,0.6394849785407726,Moderate coverage (top 50%),15719986076.6464,10.196452157044464,Developing + low studies (biased)
+HRV,Croatia,3,0.6394849785407726,Moderate coverage (top 50%),92983810328.9088,10.96840733891002,Developing + low studies (biased)
+HND,Honduras,3,0.6394849785407726,Moderate coverage (top 50%),37093565854.0437,10.569298584644223,Developing + low studies (biased)
+MDG,Madagascar,3,0.6394849785407726,Moderate coverage (top 50%),17420501490.1231,10.241060653040089,Developing + low studies (biased)
+MMR,Myanmar,3,0.6394849785407726,Moderate coverage (top 50%),74068349523.8095,10.86963266731005,Developing + low studies (biased)
+NAM,Namibia,3,0.6394849785407726,Moderate coverage (top 50%),13372354511.716,10.126207881564053,Developing + low studies (biased)
+ROU,Romania,3,0.6394849785407726,Moderate coverage (top 50%),382564217988.866,11.58270434714265,Developing + low studies (biased)
+SEN,Senegal,3,0.6394849785407726,Moderate coverage (top 50%),32808056600.9436,10.515980505531326,Developing + low studies (biased)
+SYR,Syria,3,0.6394849785407726,Moderate coverage (top 50%),23622827079.5047,10.373331870904838,Developing + low studies (biased)
+BFA,Burkina Faso,2,0.5708154506437768,Moderate coverage (top 50%),23124729853.0218,10.364076667939623,Developing + low studies (biased)
+COD,Dem. Rep. Congo,2,0.5708154506437768,Moderate coverage (top 50%),70962185790.7094,10.851026984250723,Developing + low studies (biased)
+FRO,Faeroe Is.,2,0.5708154506437768,Moderate coverage (top 50%),4052937169.76536,9.607769871189088,Developing + low studies (biased)
+GHA,Ghana,2,0.5708154506437768,Moderate coverage (top 50%),82308110386.4641,10.915442631354964,Developing + low studies (biased)
+GIN,Guinea,2,0.5708154506437768,Moderate coverage (top 50%),25008678293.4084,10.398090739909337,Developing + low studies (biased)
+LBY,Libya,2,0.5708154506437768,Moderate coverage (top 50%),48487151215.345,10.685626668590668,Developing + low studies (biased)
+MLI,Mali,2,0.5708154506437768,Moderate coverage (top 50%),26794747239.8805,10.428049664613708,Developing + low studies (biased)
+MLT,Malta,2,0.5708154506437768,Moderate coverage (top 50%),24971574502.4475,10.397445926258714,Developing + low studies (biased)
+PNG,Papua New Guinea,2,0.5708154506437768,Moderate coverage (top 50%),31800428265.5246,10.502432968792663,Developing + low studies (biased)
+SGP,Singapore,2,0.5708154506437768,Moderate coverage (top 50%),547386645891.847,11.73829419810475,Developing + low studies (biased)
+SVK,Slovakia,2,0.5708154506437768,Moderate coverage (top 50%),140934076532.375,11.149016014121912,Developing + low studies (biased)
+SDN,Sudan,2,0.5708154506437768,Moderate coverage (top 50%),49672435513.1126,10.696115454619221,Developing + low studies (biased)
+UGA,Uganda,2,0.5708154506437768,Moderate coverage (top 50%),53911907086.1525,10.731684694884532,Developing + low studies (biased)
+URY,Uruguay,2,0.5708154506437768,Moderate coverage (top 50%),80961511073.5797,10.908278605286155,Developing + low studies (biased)
+VEN,Venezuela,2,0.5708154506437768,Moderate coverage (top 50%),119802963257.783,11.078467560211788,Developing + low studies (biased)
+ZMB,Zambia,2,0.5708154506437768,Moderate coverage (top 50%),25303185342.2511,10.40317519664951,Developing + low studies (biased)
+AFG,Afghanistan,1,0.44206008583690987,Under-studied (bottom 50%),17152234636.8715,10.234320709057542,Developing + low studies (biased)
+ALB,Albania,1,0.44206008583690987,Under-studied (bottom 50%),27046429296.6673,10.43210993712782,Developing + low studies (biased)
+AGO,Angola,1,0.44206008583690987,Under-studied (bottom 50%),100998916781.079,11.004316715975486,Developing + low studies (biased)
+BEN,Benin,1,0.44206008583690987,Under-studied (bottom 50%),21482643706.4249,10.332087725652393,Developing + low studies (biased)
+BTN,Bhutan,1,0.44206008583690987,Under-studied (bottom 50%),3012896789.24928,9.478984254598265,Developing + low studies (biased)
+BIH,Bosnia and Herz.,1,0.44206008583690987,Under-studied (bottom 50%),29613572022.8993,10.47149079564564,Developing + low studies (biased)
+BDI,Burundi,1,0.44206008583690987,Under-studied (bottom 50%),3082433067.32634,9.488893654998044,Developing + low studies (biased)
+CAF,Central African Rep.,1,0.44206008583690987,Under-studied (bottom 50%),2751494281.06887,9.439568614474883,Developing + low studies (biased)
+PYF,Fr. Polynesia,1,0.44206008583690987,Under-studied (bottom 50%),6323716355.05009,9.80097238178528,Developing + low studies (biased)
+GAB,Gabon,1,0.44206008583690987,Under-studied (bottom 50%),20895684425.6752,10.320056600769234,Developing + low studies (biased)
+GEO,Georgia,1,0.44206008583690987,Under-studied (bottom 50%),34189423544.9955,10.533891778382495,Developing + low studies (biased)
+GRL,Greenland,1,0.44206008583690987,Under-studied (bottom 50%),3326543974.39193,9.521993268864145,Developing + low studies (biased)
+GUY,Guyana,1,0.44206008583690987,Under-studied (bottom 50%),24662709832.1343,10.392040793285098,Developing + low studies (biased)
+HKG,Hong Kong,1,0.44206008583690987,Under-studied (bottom 50%),406863396487.342,11.60944862025727,Developing + low studies (biased)
+ISL,Iceland,1,0.44206008583690987,Under-studied (bottom 50%),33255181468.938202,10.521859322061719,Developing + low studies (biased)
+JAM,Jamaica,1,0.44206008583690987,Under-studied (bottom 50%),22014397089.7689,10.342706795897206,Developing + low studies (biased)
+KAZ,Kazakhstan,1,0.44206008583690987,Under-studied (bottom 50%),291480274648.826,11.464609170069215,Developing + low studies (biased)
+KWT,Kuwait,1,0.44206008583690987,Under-studied (bottom 50%),160227273053.334,11.204736441388997,Developing + low studies (biased)
+LTU,Lithuania,1,0.44206008583690987,Under-studied (bottom 50%),84869215513.3648,10.928750187804186,Developing + low studies (biased)
+LUX,Luxembourg,1,0.44206008583690987,Under-studied (bottom 50%),93279851863.4062,10.969787847717722,Developing + low studies (biased)
+MWI,Malawi,1,0.44206008583690987,Under-studied (bottom 50%),11316411329.4619,10.053708724828514,Developing + low studies (biased)
+MUS,Mauritius,1,0.44206008583690987,Under-studied (bottom 50%),14937861786.17,10.17428843677486,Developing + low studies (biased)
+MDA,Moldova,1,0.44206008583690987,Under-studied (bottom 50%),18200340853.6517,10.260079521472653,Developing + low studies (biased)
+MOZ,Mozambique,1,0.44206008583690987,Under-studied (bottom 50%),22745341305.0622,10.356892458017724,Developing + low studies (biased)
+NCL,New Caledonia,1,0.44206008583690987,Under-studied (bottom 50%),8548919387.12607,9.931911221878137,Developing + low studies (biased)
+NIC,Nicaragua,1,0.44206008583690987,Under-studied (bottom 50%),19693982967.5926,10.294333557982576,Developing + low studies (biased)
+PRI,Puerto Rico,1,0.44206008583690987,Under-studied (bottom 50%),126029527033.705,11.100472306431126,Developing + low studies (biased)
+QAT,Qatar,1,0.44206008583690987,Under-studied (bottom 50%),219162637362.637,11.340766518013577,Developing + low studies (biased)
+TTO,Trinidad and Tobago,1,0.44206008583690987,Under-studied (bottom 50%),25633544529.4849,10.408808663272096,Developing + low studies (biased)
+ZWE,Zimbabwe,1,0.44206008583690987,Under-studied (bottom 50%),41539411516.4448,10.61846033964802,Developing + low studies (biased)
+ASM,American Samoa,0,0,No studies,871000000,8.940018155007664,Developing + low studies (biased)
+AND,Andorra,0,0,No studies,4039842405.48117,9.60636442358465,Developing + low studies (biased)
+AIA,Anguilla,0,0,No studies,NA,NA,GDP unknown
+ATG,Antigua and Barb.,0,0,No studies,2207622874.07407,9.343924885317433,Developing + low studies (biased)
+ARM,Armenia,0,0,No studies,25955275380.0321,10.414225641012745,Developing + low studies (biased)
+ABW,Aruba,0,0,No studies,4265650673.00236,9.629985286884786,Developing + low studies (biased)
+AZE,Azerbaijan,0,0,No studies,74315882352.9412,10.871081638540256,Developing + low studies (biased)
+BHS,Bahamas,0,0,No studies,15832800000,10.199557725792058,Developing + low studies (biased)
+BHR,Bahrain,0,0,No studies,47109734308.5106,10.673110654892593,Developing + low studies (biased)
+BRB,Barbados,0,0,No studies,7498050000,9.874948332144706,Developing + low studies (biased)
+BLZ,Belize,0,0,No studies,3203631800,9.505642595921215,Developing + low studies (biased)
+BMU,Bermuda,0,0,No studies,9233600000,9.965371056964587,Developing + low studies (biased)
+BWA,Botswana,0,0,No studies,19402063512.9066,10.287847921920465,Developing + low studies (biased)
+IOT,Br. Indian Ocean Ter.,0,0,No studies,NA,NA,GDP unknown
+VGB,British Virgin Is.,0,0,No studies,NA,NA,GDP unknown
+BRN,Brunei,0,0,No studies,15340808592.48,10.185848251268585,Developing + low studies (biased)
+CPV,Cabo Verde,0,0,No studies,2725414150.72735,9.435432506505856,Developing + low studies (biased)
+KHM,Cambodia,0,0,No studies,46352647037.2406,10.666074540224674,Developing + low studies (biased)
+CYM,Cayman Is.,0,0,No studies,7241244269.45972,9.859813197817418,Developing + low studies (biased)
+TCD,Chad,0,0,No studies,19518819751.283,10.290453553545747,Developing + low studies (biased)
+COM,Comoros,0,0,No studies,1440991455.45188,9.158661405615446,Developing + low studies (biased)
+COK,Cook Is.,0,0,No studies,NA,NA,GDP unknown
+CUW,Curaçao,0,0,No studies,3561178196.20713,9.55159370568582,Developing + low studies (biased)
+CYP,Cyprus,0,0,No studies,37634533331.8902,10.575586535153299,Developing + low studies (biased)
+CIV,Côte d'Ivoire,0,0,No studies,87113179149.284,10.940083863375412,Developing + low studies (biased)
+DJI,Djibouti,0,0,No studies,4152145939.98458,9.618272609728677,Developing + low studies (biased)
+DMA,Dominica,0,0,No studies,688881481.481481,8.838144510200683,Developing + low studies (biased)
+DOM,Dominican Rep.,0,0,No studies,124282245638.568,11.094409091860273,Developing + low studies (biased)
+SLV,El Salvador,0,0,No studies,35364960000,10.548573171204296,Developing + low studies (biased)
+GNQ,Eq. Guinea,0,0,No studies,12765777677.0622,10.106047276685839,Developing + low studies (biased)
+ERI,Eritrea,0,0,No studies,2065001626.01626,9.314920397963176,Developing + low studies (biased)
+FLK,Falkland Is.,0,0,No studies,NA,NA,GDP unknown
+FJI,Fiji,0,0,No studies,5968125909.27126,9.775837976851495,Developing + low studies (biased)
+ATF,Fr. S. Antarctic Lands,0,0,No studies,NA,NA,GDP unknown
+GMB,Gambia,0,0,No studies,2404888749.21907,9.381094990598502,Developing + low studies (biased)
+GRD,Grenada,0,0,No studies,1371918518.51852,9.137328318361535,Developing + low studies (biased)
+GUM,Guam,0,0,No studies,6910000000,9.839478047374199,Developing + low studies (biased)
+GTM,Guatemala,0,0,No studies,113199581158.203,11.053844819952802,Developing + low studies (biased)
+GGY,Guernsey,0,0,No studies,NA,NA,GDP unknown
+GNB,Guinea-Bissau,0,0,No studies,2218393804.54798,9.346038643689178,Developing + low studies (biased)
+HTI,Haiti,0,0,No studies,25224154990.7946,10.401816626287266,Developing + low studies (biased)
+HMD,Heard I. and McDonald Is.,0,0,No studies,NA,NA,GDP unknown
+IMN,Isle of Man,0,0,No studies,7431257410.92713,9.87106230506933,Developing + low studies (biased)
+JEY,Jersey,0,0,No studies,NA,NA,GDP unknown
+KIR,Kiribati,0,0,No studies,307862564.489711,8.48835688271944,Developing + low studies (biased)
+KGZ,Kyrgyzstan,0,0,No studies,17478259659.2625,10.242498186993645,Developing + low studies (biased)
+LAO,Laos,0,0,No studies,16502933121.3379,10.217561139680774,Developing + low studies (biased)
+LVA,Latvia,0,0,No studies,43684254432.3609,10.640324927922917,Developing + low studies (biased)
+LBN,Lebanon,0,0,No studies,20078620356.9931,10.302733868237446,Developing + low studies (biased)
+LSO,Lesotho,0,0,No studies,2271759454.51107,9.356362344156466,Developing + low studies (biased)
+LBR,Liberia,0,0,No studies,4779300900,9.679364374127365,Developing + low studies (biased)
+LIE,Liechtenstein,0,0,No studies,8239379403.22096,9.915894501514268,Developing + low studies (biased)
+MAC,Macao,0,0,No studies,49467258923.3244,10.694317845932076,Developing + low studies (biased)
+MDV,Maldives,0,0,No studies,7061608267.25451,9.848903622022258,Developing + low studies (biased)
+MHL,Marshall Is.,0,0,No studies,290108489.990234,8.462560438564669,Developing + low studies (biased)
+MRT,Mauritania,0,0,No studies,10908045686.8808,10.03774694825737,Developing + low studies (biased)
+FSM,Micronesia,0,0,No studies,471425099.488675,8.673412701394165,Developing + low studies (biased)
+MCO,Monaco,0,0,No studies,11125783372.4794,10.046330599641056,Developing + low studies (biased)
+MNE,Montenegro,0,0,No studies,8270016670.86774,9.917506385013075,Developing + low studies (biased)
+MSR,Montserrat,0,0,No studies,NA,NA,GDP unknown
+MNP,N. Mariana Is.,0,0,No studies,1096000000,9.03981055414835,Developing + low studies (biased)
+NRU,Nauru,0,0,No studies,162588620.632234,8.211090146611271,Developing + low studies (biased)
+NIU,Niue,0,0,No studies,NA,NA,GDP unknown
+NFK,Norfolk Island,0,0,No studies,NA,NA,GDP unknown
+PRK,North Korea,0,0,No studies,NA,NA,GDP unknown
+MKD,North Macedonia,0,0,No studies,16951682245.4202,10.229212803049483,Developing + low studies (biased)
+PLW,Palau,0,0,No studies,276733062.744141,8.442061049670523,Developing + low studies (biased)
+PSE,Palestine,0,0,No studies,13711100000,10.137072298317332,Developing + low studies (biased)
+PCN,Pitcairn Is.,0,0,No studies,NA,NA,GDP unknown
+RWA,Rwanda,0,0,No studies,14251642235.0968,10.153864911540788,Developing + low studies (biased)
+SGS,S. Geo. and the Is.,0,0,No studies,NA,NA,GDP unknown
+SSD,S. Sudan,0,0,No studies,11997800760.2242,10.079101645611633,Developing + low studies (biased)
+SHN,Saint Helena,0,0,No studies,NA,NA,GDP unknown
+LCA,Saint Lucia,0,0,No studies,2549062962.96296,9.406380562864193,Developing + low studies (biased)
+WSM,Samoa,0,0,No studies,1175749785.65113,9.070314908242663,Developing + low studies (biased)
+SMR,San Marino,0,0,No studies,2027527227.831,9.306966695098907,Developing + low studies (biased)
+SYC,Seychelles,0,0,No studies,2167239562.46013,9.33590692004343,Developing + low studies (biased)
+SLE,Sierra Leone,0,0,No studies,6971127235.3123,9.843303009445696,Developing + low studies (biased)
+SXM,Sint Maarten,0,0,No studies,1797836665.95136,9.254750233393779,Developing + low studies (biased)
+SLB,Solomon Is.,0,0,No studies,1583964703.75061,9.19974549976791,Developing + low studies (biased)
+SOM,Somalia,0,0,No studies,11967000000,10.077985291029503,Developing + low studies (biased)
+BLM,St-Barthélemy,0,0,No studies,NA,NA,GDP unknown
+MAF,St-Martin,0,0,No studies,649206262.847519,8.812382700782967,Developing + low studies (biased)
+KNA,St. Kitts and Nevis,0,0,No studies,1122388888.88889,9.05014335873473,Developing + low studies (biased)
+SPM,St. Pierre and Miquelon,0,0,No studies,NA,NA,GDP unknown
+VCT,St. Vin. and Gren.,0,0,No studies,1157207407.40741,9.063411204949906,Developing + low studies (biased)
+SUR,Suriname,0,0,No studies,4416775112.09627,9.64510528695093,Developing + low studies (biased)
+STP,São Tomé and Principe,0,0,No studies,822154621.088897,8.91495350217607,Developing + low studies (biased)
+TJK,Tajikistan,0,0,No studies,14204575548.5536,10.152428260961095,Developing + low studies (biased)
+TLS,Timor-Leste,0,0,No studies,1865608515.41321,9.270820515384091,Developing + low studies (biased)
+TGO,Togo,0,0,No studies,10651180146.531,10.027397730096924,Developing + low studies (biased)
+TON,Tonga,0,0,No studies,591139749.44287,8.771690163177826,Developing + low studies (biased)
+TKM,Turkmenistan,0,0,No studies,51387209872.2994,10.7108550378066,Developing + low studies (biased)
+TCA,Turks and Caicos Is.,0,0,No studies,1745378000,9.241889497505106,Developing + low studies (biased)
+TUV,Tuvalu,0,0,No studies,62280311.5852172,7.794350776654625,Developing + low studies (biased)
+VIR,U.S. Virgin Is.,0,0,No studies,4672000000,9.669502834104343,Developing + low studies (biased)
+VUT,Vanuatu,0,0,No studies,1117972034.22642,9.048430939925133,Developing + low studies (biased)
+VAT,Vatican,0,0,No studies,NA,NA,GDP unknown
+ESH,W. Sahara,0,0,No studies,NA,NA,GDP unknown
+WLF,Wallis and Futuna Is.,0,0,No studies,NA,NA,GDP unknown
+YEM,Yemen,0,0,No studies,21606160663.0318,10.334577601173088,Developing + low studies (biased)
+SWZ,eSwatini,0,0,No studies,4858885840.77236,9.686536695460404,Developing + low studies (biased)
+ALA,Åland,0,0,No studies,NA,NA,GDP unknown

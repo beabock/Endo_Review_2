@@ -1,0 +1,28 @@
+Dataset Description Summary
+This report contains aggregate statistics for manuscript inclusion.
+
+#1. Corpus Size
+- Total unique papers analyzed: 18,751
+- Total unique fungal-plant interactions: 40,122
+- Total expanded metadata rows: 65,294
+
+#2. Document Types & Sources
+- Document Types:
+  - Abstract: 15,682 (83.6%)
+  - Full-text: 3,068 (16.4%)
+
+#3. Temporal Coverage
+- Publication Year Range: 1926 - 2026
+- Median Publication Year: 2018
+- Papers with known publication year: 18,110 (96.6%)
+
+#4. Taxonomic Resolution Quality
+- Fungal taxa successfully resolved to GBIF: 65,294 records (100.0%)
+- Plant hosts successfully resolved to GBIF: 65,294 records (100.0%)
+
+#5. Scope & Diversity
+- Unique countries represented: 340
+- Unique biomes represented: 1,784
+- Unique plant tissues sampled: 1,095
+- Unique standardized fungal taxa (IDs): 4,015
+- Unique standardized plant hosts (IDs): 4,295

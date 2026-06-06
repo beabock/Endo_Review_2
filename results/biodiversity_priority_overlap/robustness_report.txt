@@ -1,0 +1,258 @@
+FAOSTAT land area coverage: 219/234 countries matched
+Country area summary saved to: C:\Users\beabo\OneDrive - Northern Arizona University\NAU\Endo-Review\Endo_Review_Ollama\results\biodiversity_priority_overlap\country_land_area_summary.csv
+
+================================================================================
+TOTAL SPECIES ANALYSIS
+================================================================================
+Metric source: WB_TOTAL
+Countries available: 227
+Understudied countries: 80
+High-priority countries (top quartile): 57
+Contingency table (rows=understudied, cols=high_priority):
+high_priority   0   1
+understudied         
+0              94  53
+1              76   4
+
+Chi-square statistic: 24.9421
+P-value: 5.9078e-07
+Degrees of freedom: 1
+Significance (alpha=0.05): YES
+Spearman r: 0.5800
+P-value: 8.4269e-22
+Sample size: 227
+Observed overlap (understudied AND high-priority): 4
+Expected by chance: 20.1
+
+Binomial test p-value: 3.5889e-06
+Significance (alpha=0.05): YES
+Sensitivity analysis across priority thresholds:
+  Top 75% priority (threshold=4815.5): 45/80 understudied (56.2%)
+  Top 50% priority (threshold=8879.0): 18/80 understudied (22.5%)
+  Top 25% priority (threshold=19127.5): 4/80 understudied (5.0%)
+  Top 10% priority (threshold=34054.6): 0/80 understudied (0.0%)
+Kruskal-Wallis H=68.7769, p=7.8005e-15
+Median study counts by quartile: {'Q1 (lowest)': 0.0, 'Q2': 1.0, 'Q3': 4.0, 'Q4 (highest)': 27.0}
+Regional subsampling (chi-square by continent):
+  Africa: chi2=0.9739, p=3.2371e-01, n=28, significant=NO
+  Asia: chi2=1.7898, p=1.8095e-01, n=21, significant=NO
+  Europe: chi2=0.0000, p=1.0000e+00, n=32, significant=NO
+  Europe/Asia: <3 countries, skipped
+  Middle East: chi2=0.6000, p=4.3858e-01, n=12, significant=NO
+  North America: insufficient variation, skipped
+  Oceania: chi2=3.5122, p=6.0920e-02, n=7, significant=NO
+  Other: chi2=5.8808, p=1.5307e-02, n=111, significant=YES
+  South America: chi2=0.0000, p=1.0000e+00, n=12, significant=NO
+
+
+================================================================================
+ENDEMIC SPECIES ANALYSIS
+================================================================================
+Metric source: WB_SMALL50XENDEMIC100
+Countries available: 227
+Understudied countries: 80
+High-priority countries (top quartile): 57
+Contingency table (rows=understudied, cols=high_priority):
+high_priority   0   1
+understudied         
+0              92  55
+1              78   2
+
+Chi-square statistic: 31.7530
+P-value: 1.7508e-08
+Degrees of freedom: 1
+Significance (alpha=0.05): YES
+Spearman r: 0.5743
+P-value: 2.5671e-21
+Sample size: 227
+Observed overlap (understudied AND high-priority): 2
+Expected by chance: 20.1
+
+Binomial test p-value: 7.6403e-08
+Significance (alpha=0.05): YES
+Sensitivity analysis across priority thresholds:
+  Top 75% priority (threshold=13.5): 45/80 understudied (56.2%)
+  Top 50% priority (threshold=53.0): 22/80 understudied (27.5%)
+  Top 25% priority (threshold=198.5): 2/80 understudied (2.5%)
+  Top 10% priority (threshold=841.4): 0/80 understudied (0.0%)
+Kruskal-Wallis H=78.9851, p=5.0666e-17
+Median study counts by quartile: {'Q1 (lowest)': 0.0, 'Q2': 2.0, 'Q3': 3.0, 'Q4 (highest)': 35.0}
+Regional subsampling (chi-square by continent):
+  Africa: chi2=0.0000, p=1.0000e+00, n=28, significant=NO
+  Asia: chi2=1.7898, p=1.8095e-01, n=21, significant=NO
+  Europe: chi2=0.0000, p=1.0000e+00, n=32, significant=NO
+  Europe/Asia: <3 countries, skipped
+  Middle East: chi2=0.6000, p=4.3858e-01, n=12, significant=NO
+  North America: insufficient variation, skipped
+  Oceania: chi2=0.1094, p=7.4086e-01, n=7, significant=NO
+  Other: chi2=7.8983, p=4.9481e-03, n=111, significant=YES
+  South America: chi2=0.0000, p=1.0000e+00, n=12, significant=NO
+
+
+================================================================================
+THREATENED SPECIES PROBABILITY ANALYSIS
+================================================================================
+Metric source: WB_TPROB80
+Countries available: 227
+Understudied countries: 80
+High-priority countries (top quartile): 58
+Contingency table (rows=understudied, cols=high_priority):
+high_priority   0   1
+understudied         
+0              91  56
+1              78   2
+
+Chi-square statistic: 32.6607
+P-value: 1.0973e-08
+Degrees of freedom: 1
+Significance (alpha=0.05): YES
+Spearman r: 0.5853
+P-value: 2.9215e-22
+Sample size: 227
+Observed overlap (understudied AND high-priority): 2
+Expected by chance: 20.4
+
+Binomial test p-value: 4.2834e-08
+Significance (alpha=0.05): YES
+Sensitivity analysis across priority thresholds:
+  Top 75% priority (threshold=78.0): 46/80 understudied (57.5%)
+  Top 50% priority (threshold=149.0): 21/80 understudied (26.2%)
+  Top 25% priority (threshold=403.0): 2/80 understudied (2.5%)
+  Top 10% priority (threshold=930.4): 0/80 understudied (0.0%)
+Kruskal-Wallis H=80.5623, p=2.3250e-17
+Median study counts by quartile: {'Q1 (lowest)': 0.0, 'Q2': 1.0, 'Q3': 3.5, 'Q4 (highest)': 38.0}
+Regional subsampling (chi-square by continent):
+  Africa: chi2=0.0000, p=1.0000e+00, n=28, significant=NO
+  Asia: chi2=1.7898, p=1.8095e-01, n=21, significant=NO
+  Europe: chi2=0.0000, p=1.0000e+00, n=32, significant=NO
+  Europe/Asia: <3 countries, skipped
+  Middle East: chi2=0.6000, p=4.3858e-01, n=12, significant=NO
+  North America: insufficient variation, skipped
+  Oceania: chi2=3.5122, p=6.0920e-02, n=7, significant=NO
+  Other: chi2=2.2353, p=1.3489e-01, n=111, significant=NO
+  South America: chi2=0.0000, p=1.0000e+00, n=12, significant=NO
+
+
+================================================================================
+SUMMARY AND INTERPRETATION
+================================================================================
+
+KEY FINDING: Understudied endophyte regions are enriched in high-priority biodiversity areas across metrics
+• Total species: 80 understudied countries; overlap=4; Spearman p=8.427e-22
+• Endemic species: 80 understudied countries; overlap=2; Spearman p=2.567e-21
+• Threatened species probability: 80 understudied countries; overlap=2; Spearman p=2.921e-22
+
+Conclusion:
+Metric-by-metric tests are more defensible for peer review than a composite max score.
+They show whether study counts are uneven across biodiversity-priority classes and whether that pattern holds across independent biodiversity indicators.
+Area-normalized summary saved to: C:\Users\beabo\OneDrive - Northern Arizona University\NAU\Endo-Review\Endo_Review_Ollama\results\biodiversity_priority_overlap\area_normalized_summary.csv
+
+================================================================================
+GDP AND BIODIVERSITY CORRELATION ANALYSIS
+================================================================================
+
+Total species vs GDP:
+  Spearman r (raw metric): 0.6189, p: 1.3688e-23
+  Spearman r (density): -0.4180, p: 4.4982e-10
+
+Endemic species vs GDP:
+  Spearman r (raw metric): 0.5213, p: 4.9557e-16
+  Spearman r (density): -0.1887, p: 6.7455e-03
+
+Threatened species probability vs GDP:
+  Spearman r (raw metric): 0.5947, p: 1.8019e-21
+  Spearman r (density): -0.3303, p: 1.3224e-06
+
+================================================================================
+STATISTICAL MODELING OF STUDY COUNT
+================================================================================
+
+--- Model for Total species (raw counts) ---
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:        study_count_log   R-squared:                       0.704
+Model:                            OLS   Adj. R-squared:                  0.701
+Method:                 Least Squares   F-statistic:                     245.6
+Date:                Thu, 04 Jun 2026   Prob (F-statistic):           2.23e-55
+Time:                        10:25:15   Log-Likelihood:                -116.05
+No. Observations:                 210   AIC:                             238.1
+Df Residuals:                     207   BIC:                             248.1
+Df Model:                           2                                         
+Covariance Type:            nonrobust                                         
+================================================================================
+                   coef    std err          t      P>|t|      [0.025      0.975]
+--------------------------------------------------------------------------------
+Intercept       -5.2070      0.374    -13.915      0.000      -5.945      -4.469
+gdp_log10        0.5568      0.037     14.851      0.000       0.483       0.631
+metric_value  7.611e-06   2.52e-06      3.025      0.003    2.65e-06    1.26e-05
+==============================================================================
+Omnibus:                        5.875   Durbin-Watson:                   1.504
+Prob(Omnibus):                  0.053   Jarque-Bera (JB):                6.272
+Skew:                           0.268   Prob(JB):                       0.0435
+Kurtosis:                       3.656   Cond. No.                     2.78e+05
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+[2] The condition number is large, 2.78e+05. This might indicate that there are
+strong multicollinearity or other numerical problems.
+
+--- Model for Endemic species (raw counts) ---
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:        study_count_log   R-squared:                       0.719
+Model:                            OLS   Adj. R-squared:                  0.716
+Method:                 Least Squares   F-statistic:                     264.5
+Date:                Thu, 04 Jun 2026   Prob (F-statistic):           9.54e-58
+Time:                        10:25:15   Log-Likelihood:                -110.51
+No. Observations:                 210   AIC:                             227.0
+Df Residuals:                     207   BIC:                             237.1
+Df Model:                           2                                         
+Covariance Type:            nonrobust                                         
+================================================================================
+                   coef    std err          t      P>|t|      [0.025      0.975]
+--------------------------------------------------------------------------------
+Intercept       -5.3105      0.321    -16.557      0.000      -5.943      -4.678
+gdp_log10        0.5729      0.031     18.728      0.000       0.513       0.633
+metric_value     0.0001   2.58e-05      4.566      0.000     6.7e-05       0.000
+==============================================================================
+Omnibus:                        5.346   Durbin-Watson:                   1.521
+Prob(Omnibus):                  0.069   Jarque-Bera (JB):                6.547
+Skew:                           0.173   Prob(JB):                       0.0379
+Kurtosis:                       3.793   Cond. No.                     1.45e+04
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+[2] The condition number is large, 1.45e+04. This might indicate that there are
+strong multicollinearity or other numerical problems.
+
+--- Model for Threatened species probability (raw counts) ---
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:        study_count_log   R-squared:                       0.722
+Model:                            OLS   Adj. R-squared:                  0.719
+Method:                 Least Squares   F-statistic:                     268.5
+Date:                Thu, 04 Jun 2026   Prob (F-statistic):           3.15e-58
+Time:                        10:25:15   Log-Likelihood:                -109.39
+No. Observations:                 210   AIC:                             224.8
+Df Residuals:                     207   BIC:                             234.8
+Df Model:                           2                                         
+Covariance Type:            nonrobust                                         
+================================================================================
+                   coef    std err          t      P>|t|      [0.025      0.975]
+--------------------------------------------------------------------------------
+Intercept       -5.0639      0.339    -14.953      0.000      -5.732      -4.396
+gdp_log10        0.5459      0.033     16.653      0.000       0.481       0.611
+metric_value     0.0002   4.29e-05      4.827      0.000       0.000       0.000
+==============================================================================
+Omnibus:                        7.793   Durbin-Watson:                   1.534
+Prob(Omnibus):                  0.020   Jarque-Bera (JB):                9.720
+Skew:                           0.279   Prob(JB):                      0.00775
+Kurtosis:                       3.894   Cond. No.                     1.07e+04
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+[2] The condition number is large, 1.07e+04. This might indicate that there are
+strong multicollinearity or other numerical problems.

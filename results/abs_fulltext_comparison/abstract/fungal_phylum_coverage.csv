@@ -1,0 +1,13 @@
+phylum,known_species,studied_species,coverage_percent
+Ascomycota,96560,1737,1.7988815244407623
+Basidiomycota,44920,218,0.4853072128227961
+Mucoromycota,762,37,4.8556430446194225
+Chytridiomycota,638,2,0.31347962382445144
+Glomeromycota,345,55,15.942028985507246
+Blastocladiomycota,236,0,0
+Unassigned,179,0,0
+Zoopagomycota,162,0,0
+Entomophthoromycota,96,0,0
+Neocallimastigomycota,45,0,0
+Zygomycota,15,0,0
+Sanchytriomycota,2,0,0

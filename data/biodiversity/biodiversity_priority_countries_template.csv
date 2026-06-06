@@ -1,0 +1,4 @@
+iso3,country_name,priority_score,priority_rank,source
+AUS,Australia,11533,1,WorldBank_WB_GBIOD_N_SPP_SMALL50XENDEMIC100
+BRA,Brazil,5194,2,WorldBank_WB_GBIOD_N_SPP_SMALL50XENDEMIC100
+ECU,Ecuador,1822,3,WorldBank_WB_GBIOD_N_SPP_SMALL50XENDEMIC100
