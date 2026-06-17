@@ -97,13 +97,21 @@ if (!is.null(country_lookup)) {
     left_join(country_lookup, by = c("country" = "iso_a3"))
 }
 
+# Group EU Countries
+eu_iso3 <- c("AUT", "BEL", "BGR", "HRV", "CYP", "CZE", "DNK", "EST", "FIN", 
+             "FRA", "DEU", "GRC", "HUN", "IRL", "ITA", "LVA", "LTU", "LUX", 
+             "MLT", "NLD", "POL", "PRT", "ROU", "SVK", "SVN", "ESP", "SWE")
+
+paper_biome <- paper_biome %>%
+  mutate(
+    country_name = if_else(country %in% eu_iso3, "European Union", country_name),
+    country = if_else(country %in% eu_iso3, "EUU", country)
+  )
+
 # 1. Overall Biome Distribution
 biome_counts <- paper_biome %>%
   count(biome_clean, name = "study_count", sort = TRUE)
-
-biome_counts_pct <- biome_counts %>%
-  mutate(percent = study_count / sum(study_count) * 100)
-
+  
 # ... (existing code for p1 and ggsave) ...
 
 # 2. Biome x Plant Family Heatmap (Top 10 of each)
@@ -144,6 +152,6 @@ p4 <- ggplot(biome_country, aes(x = biome_clean, y = fct_reorder(.data[[country_
     y = y_axis_label
   )
 
-ggsave(file.path(OUTPUT_DIR, "biome_country_heatmap.png"), p4, width = 6.5, height = 5, dpi = 300)
+ggsave(file.path(OUTPUT_DIR, "biome_country_heatmap_eu_grouped.png"), p4, width = 6.5, height = 5, dpi = 300)
 
 cat("Biome analysis complete. Plots saved to:", OUTPUT_DIR, "\n")

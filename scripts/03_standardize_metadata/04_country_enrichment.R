@@ -90,6 +90,9 @@ known_territories <- c(
   "Somaliland"
 )
 
+# Temporarily disable S2 geometry to avoid invalid loop errors in st_make_valid
+sf_use_s2(FALSE)
+
 world <- ne_countries(scale = 50, returnclass = "sf") %>%
   apply_disputed_parent_iso_world() %>%
   filter(!is.na(iso_a3), iso_a3 != "-99") %>%
