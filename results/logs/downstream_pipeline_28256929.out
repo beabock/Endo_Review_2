@@ -1,4 +1,0 @@
---- Environment Preflight ---
-Python executable: /packages/spack/0.23.1/opt/spack/__spack.pkg.builtin.python.Python_object_at_0x1491ef17a278_/_3.11.9-_zjoogbc/bin/python
-Python version: 3.11.9
-Python dependency check failed (pandas): No module named 'pandas'

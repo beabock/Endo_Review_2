@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # BMB 2026-06-05
-# Standardizes columns and values across the dataset — expands multi-value cells
+# Standardizes columns and values across the dataset - expands multi-value cells
 # and fixes values displaced during LLM extraction.
 
 import argparse

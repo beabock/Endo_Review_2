@@ -1,5 +1,5 @@
 # BMB 2026-06-05
-# Cleans up taxon names in the Ollama extraction output — strips AI-generated
+# Cleans up taxon names in the Ollama extraction output - strips AI-generated
 # prefixes, filters non-plant hosts, and standardizes values for the rest of the pipeline.
 
 library(tidyverse)

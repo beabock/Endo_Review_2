@@ -1,7 +1,0 @@
-{
-  "processed_rows": "5",
-  "total_rows": "5",
-  "output_csv": "/tmp/taxa_synonym_resolution_uaph8ttx/Ollama_test.csv",
-  "unresolved_csv": "/tmp/taxa_synonym_resolution_uaph8ttx/taxa_unresolved_review.csv",
-  "status": "complete"
-}

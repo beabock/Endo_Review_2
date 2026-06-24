@@ -6,7 +6,7 @@ This repository contains the data and code for our upcoming paper auditing the g
 
 - `data/`: Raw and processed datasets, including publication metadata, GBIF taxonomic data, and country-level GDP information.
 - `scripts/`: Python and R scripts that make up the analysis pipeline.
-- `results/`: Output tables, statistical summaries, and figures. (Check out `ANALYSIS_SUMMARY.md` for a quick breakdown of what the output files contain).
+- `results/`: Output tables, statistical summaries, and figures.
 
 ## Dependencies
 

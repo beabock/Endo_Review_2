@@ -4,6 +4,14 @@
 results/logs/taxa_synonym_resolution_taxonomy_index.pkl
 results/logs/*.out
 results/logs/*.err
+results/logs/test_checkpoint.json
+data/Ollama_cleaned.csv
+data/Ollama_cleaned_synresolved.csv
+data/Ollama_cleaned_synresolved_filtered.csv
+data/Ollama_cleaned_synresolved_standardized.csv
+data/Ollama_cleaned_synresolved_standardized_final.csv
+data/Ollama_extraction_all.csv
+data/Ollama_python_healed.csv
 manuscript/
 __pycache__/
 *.pyc

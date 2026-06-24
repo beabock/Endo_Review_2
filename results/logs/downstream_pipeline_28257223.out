@@ -1,8 +1,0 @@
---- Environment Preflight ---
-Python executable: /scratch/bmb646/Endo-Review/Endo_Review_Ollama/.venv/bin/python
-Python version: 3.11.9
-Python dependency check: pandas OK
-R version: 4.5.2 
---- Starting Python Processing ---
-Step 1: Standardizing Metadata...
-[2026-04-30T08:52:34.941] error: *** JOB 28257223 ON cn56 CANCELLED AT 2026-04-30T08:52:34 DUE to SIGNAL Terminated ***

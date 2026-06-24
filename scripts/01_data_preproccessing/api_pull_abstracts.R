@@ -1,5 +1,5 @@
 # BMB 2024-09-22
-# Manual step — pulls abstracts from PubMed, Scopus, and Web of Science APIs.
+# Manual step - pulls abstracts from PubMed, Scopus, and Web of Science APIs.
 # Needs credentials; run interactively, not part of the automated pipeline.
 
 # Inputs/Outputs: Outputs CSV files containing abstracts: pubmed_pull_8-14-25.csv, scopus_results.csv, wos_results.csv

@@ -9,7 +9,7 @@ import sys
 input_file = "data/Ollama_extraction_all.csv"
 output_file = "data/Ollama_python_healed.csv"
 
-# The exact 15 columns we need to lock in
+# The 15 columns we need to lock in
 HEADERS = [
     "relevance", "doc_type_ai", "doc_type_pages", "page_count", "doi", 
     "plant_host", "fungal_taxon", "tissue", "presence_absence", 
