@@ -79,5 +79,5 @@ unique_fungi <- df %>%
 write_csv(unique_plants %>% select(-countries), OUTPUT_PLANTS)
 write_csv(unique_fungi %>% select(-countries), OUTPUT_FUNGI)
 
-cat("Done! Found", nrow(unique_plants), "plant taxa and", nrow(unique_fungi), "fungal taxa unique to undersampled countries.\n")
+cat("Found", nrow(unique_plants), "plant taxa and", nrow(unique_fungi), "fungal taxa unique to undersampled countries.\n")
 cat("Results saved to:\n  ", OUTPUT_PLANTS, "\n  ", OUTPUT_FUNGI, "\n")

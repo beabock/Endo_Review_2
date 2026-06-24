@@ -65,7 +65,7 @@ phylum_matrix <- continent_phylum_counts %>%
 output_file <- file.path(OUTPUT_DIR, "continent_phylum_counts.csv")
 write_csv(phylum_matrix, output_file)
 
-cat("\nAnalysis complete! Saved matrix to:", output_file, "\n\n")
+cat("\nSaved matrix to:", output_file, "\n\n")
 
 cat("Bryophyta studies by continent:\n")
 print(continent_phylum_counts %>% filter(phylum == "Bryophyta") %>% arrange(desc(study_count)))

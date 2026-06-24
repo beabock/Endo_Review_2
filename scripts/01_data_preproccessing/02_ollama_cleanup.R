@@ -70,4 +70,4 @@ ds_final <- ds %>%
 
 # 4. Save the final dataset
 write.csv(ds_final, "data/Ollama_cleaned.csv", row.names = FALSE)
-message(sprintf("Complete! %d rows ready for GBIF.", nrow(ds_final)))
+message(sprintf("%d rows written to data/Ollama_cleaned.csv.", nrow(ds_final)))
