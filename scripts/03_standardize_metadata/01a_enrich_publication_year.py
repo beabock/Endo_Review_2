@@ -110,7 +110,7 @@ def main():
     print("Finished querying. Cache saved.")
 
     print("Mapping publication year to dataset...")
-    # Clean up DOIs in the dataframe to match what we queried
+    # Normalize DOIs to match CrossRef format (strip URL prefix)
     clean_dois = df['doi'].astype(str).str.strip().str.replace(r'^https?://(dx\.)?doi\.org/', '', regex=True)
     df['publication_year'] = clean_dois.map(doi_year_cache)
 

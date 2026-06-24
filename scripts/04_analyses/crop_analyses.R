@@ -178,15 +178,6 @@ if (file.exists(FUNGAL_GENERA_FILE)) {
               value = fungal_interest$percent_of_fungal_studies[i])
   }
   
-  # Also calculate overall Phylum level dominance
-  ascomycota_studies <- df %>%
-    filter(!is.na(fungal_taxon_accepted_ids), fungal_taxon_accepted_ids != "") %>%
-    # We use the Python output that already mapped all IDs to phyla for us, 
-    # but we can get it straight from the FUNGAL_GENERA_FILE
-    # Wait, FUNGAL_GENERA_FILE only has top genera.
-    # We should pull it directly from the python phylum output.
-    invisible()
-
 } else {
   message("Warning: Fungal genera file not found: ", FUNGAL_GENERA_FILE)
 }
