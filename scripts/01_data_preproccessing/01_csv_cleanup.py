@@ -123,8 +123,8 @@ def heal_and_align():
             parts = []
 
         # middle columns (5-12)
-        # We now have the remaining parts that belong in Host, Taxon, Tissue, etc.
-        # If there are exactly 8 parts left, perfect! 1-to-1 mapping.
+        # Remaining parts map to middle columns (Host, Taxon, Tissue, etc.)
+        # Exactly 8 parts: direct 1-to-1 mapping.
         if len(parts) == 8:
             middle_exact += 1
             for i in range(8):
@@ -172,7 +172,6 @@ def heal_and_align():
         writer.writerow(HEADERS)
         writer.writerows(clean_rows)
         
-    print("Done! The dataset is structurally perfect.")
     print("Repair report:")
     print(f"  Raw lines (non-empty): {raw_line_count}")
     print(f"  Assembled rows: {len(data_lines)}")

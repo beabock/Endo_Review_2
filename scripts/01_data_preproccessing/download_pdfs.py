@@ -75,7 +75,7 @@ def main():
         time.sleep(0.2)
 
     print(f"\nDone.")
-    print(f"Successfully downloaded: {downloaded_count}")
+    print(f"Downloaded: {downloaded_count}")
     print(f"Missing/No OA: {missing_count}")
 
 if __name__ == "__main__":

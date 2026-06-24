@@ -140,7 +140,7 @@ def main() -> int:
 			print(f"  - {failed}")
 		return 1
 
-	print("\n[SUMMARY] Pipeline completed successfully.")
+	print("\nPipeline complete.")
 	return 0
 
 

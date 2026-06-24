@@ -171,8 +171,7 @@ if (nrow(unmatched) > 0) {
   cat("Found", nrow(unmatched), "unmatched country terms. Saving to results/unmatched_countries.csv\n")
   write.csv(unmatched, "results/unmatched_countries.csv", row.names = FALSE)
 } else {
-  cat("All country terms were successfully matched or excluded.\n")
-  # Create an empty file if it doesn't exist, or clear it if it does
+  cat("All country terms matched or excluded.\n")
   file.create("results/unmatched_countries.csv")
 }
 

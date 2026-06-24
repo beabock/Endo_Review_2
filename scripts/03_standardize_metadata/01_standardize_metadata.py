@@ -101,7 +101,7 @@ BIOME_MAP = {
     'savanna': 'savanna', 'cerrado': 'savanna', 'antarctic': 'antarctic', 'antarctica': 'antarctic'
 }
 
-# Use comprehensive country mapping from shared utility (replaces old minimal COUNTRY_MAP)
+# Country alias lookup from shared utility
 COUNTRY_MAP = ALIAS_TO_COUNTRY
 
 DOC_TYPE_MAP = {
