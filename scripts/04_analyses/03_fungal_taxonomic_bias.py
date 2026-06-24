@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # BMB 2026-06-05
 # Summarizes fungal taxon representation at species, genus, and family level by phylum.
-#
 
 import pandas as pd
 import csv
