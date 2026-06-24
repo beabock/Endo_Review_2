@@ -27,7 +27,7 @@ normalize_name <- function(x) {
 }
 
 load_known_species_reference <- function() {
-  # Prefer the species-reference cache from 02_taxonomy; support legacy and new names.
+  # Check both qs and rds cache paths from 02_taxonomy.
   cache_candidates <- list(
     c(file.path(CACHE_DIR, "gbif_reference_species.qs"), file.path(CACHE_DIR, "gbif_reference_species.rds")),
     c(file.path(CACHE_DIR, "Taxon_reference_species.qs"), file.path(CACHE_DIR, "Taxon_reference_species.rds"))

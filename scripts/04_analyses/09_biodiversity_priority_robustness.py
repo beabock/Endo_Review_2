@@ -424,7 +424,7 @@ print("\nBryophyte-specific analysis:")
 try:
     wb_biodiv_raw = pd.read_csv("data/biodiversity/World_Bank/WB_Pre-processed/WB_BIODIVERSITY_2021.csv")
 except FileNotFoundError:
-    print("\n[!] World Bank raw biodiversity file not found. Skipping Bryophyte analysis.")
+    print("\nWorld Bank raw biodiversity file not found. Skipping Bryophyte analysis.")
     print("    Expected file: data/biodiversity/World_Bank/WB_Pre-processed/WB_BIODIVERSITY_2021.csv")
     exit()
 
@@ -432,7 +432,7 @@ except FileNotFoundError:
 bryophytes = wb_biodiv_raw[wb_biodiv_raw['phylum'] == 'BRYOPHYTA'].copy()
 
 if bryophytes.empty:
-    print("\n[!] No Bryophyte species found in the World Bank dataset. Skipping analysis.")
+    print("\nNo Bryophyte species found in the World Bank dataset. Skipping analysis.")
 else:
     print(f"\nFound {len(bryophytes)} Bryophyte species records across all countries.")
 
