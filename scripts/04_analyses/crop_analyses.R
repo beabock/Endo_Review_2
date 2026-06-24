@@ -149,8 +149,7 @@ message("Total papers with resolved fungal host: ", total_fungal_papers)
 if (file.exists(FUNGAL_GENERA_FILE)) {
   fungal_genera <- read_csv(FUNGAL_GENERA_FILE, show_col_types = FALSE)
   
-  # The Python script calculates study_count per genus. Let's add percentages
-  # relative to the total number of papers with a resolved fungal host.
+  # study_count per genus comes from 03_fungal_taxonomic_bias.py; add percentage relative to total fungal papers.
   fungal_genera <- fungal_genera %>%
     mutate(percent_of_fungal_studies = (study_count / total_fungal_papers) * 100)
     
