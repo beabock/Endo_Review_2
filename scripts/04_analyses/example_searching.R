@@ -1,3 +1,7 @@
+# BMB 2026-06-05
+# Quick exploratory search - finds undersampled countries/fungi/plants in the
+# cleaned dataset. Not part of the main pipeline.
+
 library(dplyr)
 library(readr)
 library(tidyr)

@@ -2,7 +2,6 @@
 # BMB 2026-06-05
 # Plots the relationship type breakdown from Stage 04 - bar charts, country heatmap,
 # and trends over time.
-# =================================================================================
 
 library(dplyr)
 library(ggplot2)
@@ -40,9 +39,7 @@ clean_relationship_order <- function(df, count_col) {
     mutate(relationship_type = fct_reorder(relationship_type, .data[[count_col]], .desc = TRUE))
 }
 
-# -----------------------------------------------------------------------------
 # 1) Interaction-level bar plot
-# -----------------------------------------------------------------------------
 if (nrow(by_interaction) > 0) {
   p_interaction <- by_interaction %>%
     clean_relationship_order("interaction_count") %>%
@@ -72,9 +69,7 @@ if (nrow(by_interaction) > 0) {
   ggsave(OUT_INTERACTION, p_interaction, width = 6.5, height = 5, dpi = 300)
 }
 
-# -----------------------------------------------------------------------------
 # 2) Study-level bar plot
-# -----------------------------------------------------------------------------
 if (nrow(by_study) > 0) {
   p_study <- by_study %>%
     clean_relationship_order("study_count") %>%
@@ -104,9 +99,7 @@ if (nrow(by_study) > 0) {
   ggsave(OUT_STUDY, p_study, width = 6.5, height = 5, dpi = 300)
 }
 
-# -----------------------------------------------------------------------------
 # 3) Country x relationship heatmap
-# -----------------------------------------------------------------------------
 if (nrow(by_country) > 0) {
   top_relationships <- by_country %>%
     group_by(relationship_type) %>%
@@ -145,9 +138,7 @@ if (nrow(by_country) > 0) {
   ggsave(OUT_COUNTRY, p_country, width = 6.5, height = 6, dpi = 300)
 }
 
-# -----------------------------------------------------------------------------
 # 4) Trends over time (optional)
-# -----------------------------------------------------------------------------
 if (file.exists(BY_YEAR_FILE)) {
   by_year <- read_csv(BY_YEAR_FILE, show_col_types = FALSE)
 

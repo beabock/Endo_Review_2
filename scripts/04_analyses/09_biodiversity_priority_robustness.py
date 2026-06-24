@@ -373,7 +373,6 @@ for source_name, metric_label in metric_sources:
 if gdp_correlation_rows:
     pd.DataFrame(gdp_correlation_rows).to_csv(OUTPUT_GDP_CORRELATION, index=False)
 
-# ===== STATISTICAL MODELING =====
 try:
     import statsmodels.formula.api as smf
 
@@ -425,9 +424,7 @@ if modeling_results:
     print(f"Modeling results saved to: {OUTPUT_MODELING_RESULTS}")
 print("\nRobustness tests complete")
 
-# ==============================================================================
 # BRYOPHYTE-SPECIFIC ANALYSIS
-# ==============================================================================
 
 print("\n" + "="*80)
 print("BRYOPHYTE-SPECIFIC ANALYSIS")

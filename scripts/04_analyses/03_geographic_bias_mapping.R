@@ -13,7 +13,6 @@ library(scales)
 
 source("scripts/05_plotting/theme_utils.R")
 
-# ==================== CONFIG ====================
 INPUT_FILE <- "data/country_enriched_data.csv"
 RESULTS_DIR <- "results/country_analysis"
 INTERACTIVE_MAP_FILE <- file.path(RESULTS_DIR, "interactive_study_density.html")
@@ -57,7 +56,6 @@ world_data <- world %>%
     continent = ifelse(is.na(continent), "Unknown", continent)
   )
 
-# ==================== ANALYSIS 1: BIAS METRICS ====================
 message("Computing geographic bias metrics...")
 
 # Global statistics
@@ -101,7 +99,6 @@ bias_metrics <- country_data %>%
 
 write_csv(bias_metrics, BIAS_METRICS_FILE)
 
-# ==================== ANALYSIS 2: CONTINENTAL BREAKDOWN ====================
 message("Computing continental breakdown...")
 
 continental_data <- world_data %>%
@@ -129,7 +126,6 @@ write_csv(continental_data, CONTINENTAL_FILE)
 cat("\n=== Continental Breakdown ===\n")
 print(continental_data)
 
-# ==================== VISUALIZATION 1: INTERACTIVE LEAFLET MAP ====================
 message("Creating interactive leaflet map...")
 
 # Prepare data for leaflet
@@ -196,7 +192,6 @@ interactive_map <- leaflet(map_data) %>%
 htmlwidgets::saveWidget(interactive_map, file = INTERACTIVE_MAP_FILE)
 cat("  Saved: ", INTERACTIVE_MAP_FILE, "\n", sep = "")
 
-# ==================== VISUALIZATION 2: REGIONAL HEATMAP ====================
 message("Creating regional heatmap...")
 
 # Create a heatmap of continents vs bias classes
@@ -243,7 +238,6 @@ heatmap_plot <- ggplot(heatmap_data, aes(x = bias_class, y = continent, fill = c
 ggsave(BIAS_HEATMAP_FILE, heatmap_plot, width = 11, height = 7, dpi = 300)
 cat("  Saved: ", BIAS_HEATMAP_FILE, "\n", sep = "")
 
-# ==================== SUMMARY OUTPUT ====================
 message("\n=== Geographic Bias Mapping Complete ===")
 message("Total studies across all countries: ", total_studies)
 message("Countries with ≥1 study: ", countries_with_studies, " / ", total_countries)

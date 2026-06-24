@@ -2,19 +2,6 @@
 # BMB 2026-06-05
 # Tests whether understudied endophyte regions overlap with global biodiversity
 # priority areas (hotspots, endemic species richness, threatened species counts).
-#     - biome_clean or biome
-#     - priority_score or richness_estimate
-#     - priority_label or source
-#
-# Outputs:
-#   - results/biodiversity_priority_overlap/overlap_by_country.csv
-#   - results/biodiversity_priority_overlap/overlap_by_biome.csv
-#   - results/biodiversity_priority_overlap/summary_metrics.csv
-#   - results/biodiversity_priority_overlap/priority_overlap_scatter.png
-#
-# Usage:
-#   Rscript scripts/04_analyses/08_biodiversity_priority_overlap.R
-# =================================================================================
 
 library(dplyr)
 library(readr)

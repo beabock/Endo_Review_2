@@ -40,7 +40,6 @@ phylum_common_names <- tibble(
 # Create output directory
 dir.create(PLOTS_OUTPUT_DIR, recursive = TRUE, showWarnings = FALSE)
 
-# --- Load Year-Enriched Data for Time-Series ---
 TIME_SERIES_INPUT_FILE <- "data/Ollama_cleaned_synresolved_standardized_year.csv"
 time_df <- if (file.exists(TIME_SERIES_INPUT_FILE)) {
   read_csv(TIME_SERIES_INPUT_FILE, show_col_types = FALSE)
@@ -48,15 +47,6 @@ time_df <- if (file.exists(TIME_SERIES_INPUT_FILE)) {
   NULL
 }
 
-# =================================================================================
-# DATA LOADING AND PREPARATION
-# =================================================================================
-
-#' Load and prepare taxonomy coverage data
-#' @param filename CSV filename in TAXONOMY_RESULTS_DIR
-#' @param level_name Name of the taxonomic level for labeling
-#' @param phylum_order Optional factor levels for consistent phylum ordering
-#' @return Prepared data frame ready for plotting
 load_taxonomy_data <- function(filename, level_name, phylum_order = NULL) {
   file_path <- file.path(TAXONOMY_RESULTS_DIR, filename)
   
@@ -120,9 +110,7 @@ family_data <- load_taxonomy_data(
   phylum_order = phylum_order
 )
 
-# =================================================================================
 # TAXONOMY SUMMARY PLOTS
-# =================================================================================
 
 prepare_taxonomy_summary <- function(data, known_col, studied_col) {
   data %>%
@@ -456,9 +444,7 @@ build_taxonomy_views <- function(data, taxon_label, known_col, studied_col) {
   )
 }
 
-# =================================================================================
 # GENERATE PLOTS
-# =================================================================================
 
 cat("Generating taxonomy bias plots...\n")
 
@@ -466,9 +452,7 @@ species_views <- build_taxonomy_views(species_data, "Species", "known_species", 
 genus_views <- build_taxonomy_views(genus_data, "Genera", "known_genera", "studied_genera")
 family_views <- build_taxonomy_views(family_data, "Families", "known_families", "studied_families")
 
-# =================================================================================
 # SAVE PLOTS
-# =================================================================================
 
 cat("Saving plots to", PLOTS_OUTPUT_DIR, "\n")
 
@@ -500,9 +484,7 @@ compound_heatmap <- plot_compound_taxonomy_heatmap(
 )
 save_plot(compound_heatmap, "13_compound_taxonomy_heatmap.png", width = 6.5, height = 7.5)
 
-# =================================================================================
 # VISUALIZATION 14: Plant Family Research Over Time
-# =================================================================================
 if (!is.null(time_df)) {
 
   # --- Load Taxonomy Lookup for Family ---

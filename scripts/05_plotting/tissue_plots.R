@@ -155,9 +155,7 @@ cat("  Plant tissue parts saved to: ", PLANT_COUNTS_FILE, "\n", sep = "")
 cat("  Raw plot saved to: ", RAW_PLOT_FILE, "\n", sep = "")
 cat("  Plant tissue-part plot saved to: ", PLANT_PLOT_FILE, "\n", sep = "")
 
-# ============================================================================
 # VISUALIZATION 1: Tissue × Country Heatmap (Geographic bias in tissue choice)
-# ============================================================================
 tissue_country <- df %>%
 	transmute(
 		paper_id = as.character(paper_id),
@@ -210,9 +208,7 @@ p_tissue_country <- ggplot(tissue_country_filtered, aes(x = tissue_token, y = fc
 tissue_country_file <- file.path(OUTPUT_DIR, "tissue_country_heatmap.png")
 ggsave(tissue_country_file, p_tissue_country, width = 6.5, height = 6, dpi = 300)
 
-# ============================================================================
 # VISUALIZATION 2: Tissue × Plant Family Heatmap (Host-tissue specialization)
-# ============================================================================
 tissue_family <- df %>%
 	transmute(
 		paper_id = as.character(paper_id),
@@ -265,9 +261,7 @@ p_tissue_family <- ggplot(tissue_family_filtered, aes(x = tissue_token, y = fct_
 tissue_family_file <- file.path(OUTPUT_DIR, "tissue_family_heatmap.png")
 ggsave(tissue_family_file, p_tissue_family, width = 6.5, height = 6, dpi = 300)
 
-# ============================================================================
 # VISUALIZATION 3: Tissue Co-occurrence Network (shared tissues in papers)
-# ============================================================================
 tissue_cooccurrence <- paper_tissue %>%
 	group_by(paper_id) %>%
 	filter(n() > 1) %>%
@@ -306,9 +300,7 @@ p_cooccurrence <- ggplot(tissue_cooccurrence, aes(x = tissue1, y = tissue2, size
 cooccurrence_file <- file.path(OUTPUT_DIR, "tissue_cooccurrence_plot.png")
 ggsave(cooccurrence_file, p_cooccurrence, width = 6.5, height = 6, dpi = 300)
 
-# ============================================================================
 # VISUALIZATION 4: Tissue Data Completeness (Sankey-style waterfall)
-# ============================================================================
 completeness_summary <- df %>%
 	transmute(
 		has_tissue = !is.na(tissue) & tissue != "" & !is_missing_tissue(clean_tissue_value(tissue)),
@@ -354,9 +346,7 @@ p_completeness <- ggplot(completeness_stats, aes(x = category, y = count, fill =
 completeness_file <- file.path(OUTPUT_DIR, "tissue_data_completeness.png")
 ggsave(completeness_file, p_completeness, width = 6.5, height = 5, dpi = 300)
 
-# ============================================================================
 # VISUALIZATION 5: Tissue by Biome (Faceted bar chart)
-# ============================================================================
 tissue_biome <- df %>%
 	transmute(
 		paper_id = as.character(paper_id),
@@ -404,9 +394,7 @@ p_biome <- ggplot(tissue_biome_plot, aes(x = tissue_token, y = study_count, fill
 biome_file <- file.path(OUTPUT_DIR, "tissue_by_biome_stacked.png")
 ggsave(biome_file, p_biome, width = 6.5, height = 6, dpi = 300)
 
-# ============================================================================
 # VISUALIZATION 6: Tissue Richness per Study (Distribution)
-# ============================================================================
 tissue_richness <- paper_tissue %>%
 	group_by(paper_id) %>%
 	summarise(n_tissues = n(), .groups = "drop")
@@ -431,9 +419,7 @@ p_richness <- ggplot(tissue_richness, aes(x = n_tissues)) +
 richness_file <- file.path(OUTPUT_DIR, "tissue_richness_distribution.png")
 ggsave(richness_file, p_richness, width = 6.5, height = 5, dpi = 300)
 
-# ============================================================================
 # VISUALIZATION 7: Top Tissue × Top Plant Family Tile Plot (Focused cross-tab)
-# ============================================================================
 top_tissue_x_family <- tissue_family %>%
 	filter(tissue_token %in% top_tissues_fam, plant_host %in% top_families) %>%
 	complete(plant_host, tissue_token, fill = list(study_count = 0)) %>%
@@ -463,9 +449,7 @@ p_tile <- ggplot(top_tissue_x_family, aes(x = tissue_token, y = plant_host, fill
 tile_file <- file.path(OUTPUT_DIR, "tissue_family_tile_plot.png")
 ggsave(tile_file, p_tile, width = 6.5, height = 6, dpi = 300)
 
-# ============================================================================
 # VISUALIZATION 8: Cumulative Coverage Curve (Ranked coverage threshold)
-# ============================================================================
 tissue_coverage <- paper_tissue %>%
 	count(tissue_token, name = "study_count", sort = TRUE) %>%
 	mutate(
@@ -498,13 +482,9 @@ p_coverage <- ggplot(tissue_coverage, aes(x = rank, y = pct_coverage)) +
 coverage_file <- file.path(OUTPUT_DIR, "tissue_cumulative_coverage.png")
 ggsave(coverage_file, p_coverage, width = 6.5, height = 5, dpi = 300)
 
-# ============================================================================
 # Summary output
-# ============================================================================
 
-# ============================================================================
 # VISUALIZATION 9: Tissue Research Over Time
-# ============================================================================
 if ("publication_year" %in% names(df)) {
   
   # Get top 8 tissue parts for clarity in the plot

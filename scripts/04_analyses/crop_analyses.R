@@ -133,9 +133,7 @@ overall_stats <- tibble(
   )
 )
 
-# ==========================================
 # FUNGAL TAXONOMY ANALYSIS
-# ==========================================
 message("Analyzing fungal genera...")
 
 FUNGAL_GENERA_FILE <- "results/taxonomy_analysis/top_studied_fungal_genera.csv"

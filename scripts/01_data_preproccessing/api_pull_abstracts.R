@@ -2,10 +2,6 @@
 # Manual step - pulls abstracts from PubMed, Scopus, and Web of Science APIs.
 # Needs credentials; run interactively, not part of the automated pipeline.
 
-# Inputs/Outputs: Outputs CSV files containing abstracts: pubmed_pull_8-14-25.csv, scopus_results.csv, wos_results.csv
-#
-# =============================================================================
-
 # Load required libraries
 library(rentrez)       # PubMed
 library(rscopus)       # Scopus
@@ -15,9 +11,7 @@ library(tibble)
 library(purrr)
 library(xml2)
 
-# -----------------------
 # 1. Define search string
-# -----------------------
 
 base_search <- paste(
   "( (endophyte* AND (fungus OR fungi OR fungal OR mycota))",
@@ -39,9 +33,7 @@ base_search <- paste(
   collapse = " "
 )
 
-# -----------------------
 # 2. Define year ranges
-# -----------------------
 year_ranges <- list(
   c(1700, 1999),
   c(2000, 2005),
@@ -51,9 +43,7 @@ year_ranges <- list(
   c(2021, 2025)
 )
 
-# -----------------------
 # 3. Function to fetch and parse a year chunk
-# -----------------------
 fetch_parse_pubmed <- function(year_start, year_end, batch_size = 200) {
   search_string <- paste0(
     base_search,
@@ -113,14 +103,10 @@ fetch_parse_pubmed <- function(year_start, year_end, batch_size = 200) {
 # Fetch all PubMed
 pubmed_df <- map_dfr(year_ranges, ~fetch_parse_pubmed(.x[1], .x[2]))
 
-# -----------------------
 # 5. Inspect and save
-# -----------------------
 View(pubmed_df[1:30,])
 write.csv(pubmed_df, "data/raw/pubmed_pull_8-14-25.csv", row.names = FALSE)
-# -----------------------
 # 3. Scopus
-# -----------------------
 # Note: Requires API key. Set environment variable or input directly.
 
 # Set API key
@@ -167,9 +153,7 @@ scopus_df <- fetch_parse_scopus(base_search)
 
 write.csv(scopus_df, "scopus_results.csv", row.names = FALSE)
 
-# -----------------------
 # 4. Web of Science (WoS)
-# -----------------------
 # Note: Requires institutional subscription and API key
 
 # Set API credentials
@@ -201,6 +185,4 @@ wos_df <- fetch_parse_wos(base_search, batch_size = 100)
 
 write.csv(wos_df, "wos_results.csv", row.names = FALSE)
 
-# ==========================================
 # End of script
-# ==========================================

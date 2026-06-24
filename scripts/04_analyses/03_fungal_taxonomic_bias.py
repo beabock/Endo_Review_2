@@ -3,7 +3,6 @@
 # Summarizes fungal taxon representation at species, genus, and family level by phylum.
 #
 # Usage: python3 scripts/04_analyses/03_fungal_taxonomic_bias.py
-# =================================================================================
 
 import pandas as pd
 import csv
@@ -11,7 +10,6 @@ import sys
 from pathlib import Path
 from collections import defaultdict
 
-# ==================== CONFIG ====================
 INPUT_FILE = "data/Ollama_cleaned_synresolved_standardized_final.csv"
 GBIF_TAXON_FILE = "data/Reference_datasets/gbif_backbone/Taxon.tsv"
 PLANT_COVERAGE_FILE = "results/taxonomy_analysis/plant_species_coverage_summary.csv"
@@ -45,7 +43,6 @@ OUTPUT_MYCORRHIZAL = Path(RESULTS_DIR) / "mycorrhizal_annotation.csv"
 OUTPUT_DIR = Path(RESULTS_DIR)
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-# ==================== DATA LOADING ====================
 print("Loading study-level fungal data...")
 csv.field_size_limit(min(sys.maxsize, 10**9))
 
@@ -74,7 +71,6 @@ except Exception as e:
 
 print(f"  Loaded {len(study_data)} rows from {INPUT_FILE}")
 
-# ==================== GBIF INDEX BUILDING ====================
 print("Loading GBIF backbone Fungi taxonomy...")
 
 gbif_taxa = {}
@@ -127,7 +123,6 @@ except Exception as e:
 
 print(f"  Indexed {len(gbif_taxa)} accepted Fungi taxa from GBIF")
 
-# ==================== HELPER: LINEAGE BACKFILL ====================
 def resolve_phylum_from_lineage(taxon_id, max_steps=40):
     """Traverse parent lineage to find phylum."""
     current = taxon_id
@@ -139,7 +134,6 @@ def resolve_phylum_from_lineage(taxon_id, max_steps=40):
         steps += 1
     return ""
 
-# ==================== ANALYSIS 1: EXTRACT STUDIED FUNGI ====================
 print("Extracting studied fungal taxa...")
 
 study_fungi_links = []
@@ -169,7 +163,6 @@ df_links = df_links.drop_duplicates(subset=['paper_id', 'fungal_taxon_resolved',
 
 print(f"  Found {len(df_links)} unique fungal host records across {df_links['paper_id'].nunique()} papers")
 
-# ==================== ANALYSIS 2: MATCH TO GBIF & BUILD REFERENCE ====================
 print("Matching studied fungi to GBIF reference...")
 
 # Build full reference dataset of all GBIF fungi by rank
@@ -215,7 +208,6 @@ print(f"    - Families: {total_fungi_family}")
 print(f"    - Missing phylum before backfill: {missing_phylum_count}")
 print(f"    - Backfilled from lineage: {backfilled_count}")
 
-# ==================== ANALYSIS 3: MATCH STUDIED TO REFERENCE ====================
 print("Matching studied fungal IDs to GBIF reference...")
 
 matched_taxa = []
@@ -234,7 +226,6 @@ print(f"  Matched {len(df_matched)} total records")
 print(f"  Unique fungal species studied: {len(unique_studied)}")
 print(f"  Unique papers: {unique_papers}")
 
-# ==================== ANALYSIS 4: COVERAGE BY PHYLUM ====================
 print("Computing fungal coverage by phylum...")
 
 # Reference: known fungi by phylum
@@ -272,7 +263,6 @@ df_phylum_coverage = pd.DataFrame(coverage_phylum)
 df_phylum_coverage.to_csv(OUTPUT_PHYLUM, index=False)
 print(f"  Saved phylum coverage to {OUTPUT_PHYLUM}")
 
-# ==================== ANALYSIS 5: GENUS & FAMILY COVERAGE ====================
 print("Computing fungal coverage by genus and family...")
 
 # Genus coverage
@@ -337,7 +327,6 @@ df_family_coverage = pd.DataFrame(coverage_family)
 df_family_coverage.to_csv(OUTPUT_FAMILY, index=False)
 print(f"  Saved family coverage to {OUTPUT_FAMILY}")
 
-# ==================== ANALYSIS 6: TOP STUDIED GENERA ====================
 print("Identifying top-studied fungal genera...")
 
 if len(df_matched) > 0:
@@ -355,7 +344,6 @@ else:
     top_genera.to_csv(OUTPUT_TOP_GENERA, index=False)
     print(f"  No studied fungi to report.")
 
-# ==================== ANALYSIS 7: FUNGAL VS PLANT COMPARISON ====================
 print("Comparing fungal vs plant research representation...")
 
 # Load plant summary if available
@@ -390,7 +378,6 @@ comparison = pd.DataFrame({
 comparison.to_csv(OUTPUT_COMPARISON, index=False)
 print(f"  Saved comparison to {OUTPUT_COMPARISON}")
 
-# ==================== ANALYSIS 8: MYCORRHIZAL FILTERING ====================
 print("Checking for mycorrhizal associations...")
 
 # Flag records that might be mycorrhizal based on resolved name patterns
@@ -414,7 +401,6 @@ if len(mycorrhizal_summary) > 0:
 else:
     print(f"  No mycorrhizal records found.")
 
-# ==================== SUMMARY OUTPUT ====================
 print("\n" + "="*70)
 print("Fungal Taxonomic Bias Analysis Complete")
 print("="*70)
