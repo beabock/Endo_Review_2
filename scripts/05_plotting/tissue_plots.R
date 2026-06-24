@@ -135,13 +135,13 @@ plant_plot <- ggplot(plant_plot_data, aes(x = tissue_part, y = study_count)) +
 		plot.title = element_text(face = "bold")
 	) +
 	labs(
-		title = "Most frequent plant tissue parts studied for endophytes",
-		subtitle = "Each study contributes at most one count per tissue part",
-		x = "Plant tissue part",
+		title = "Most frequent plant tissues studied for endophytes",
+		subtitle = "Each study contributes at most one count per tissue",
+		x = "Plant tissue",
 		y = "Number of studies"
 	)
 
-ggsave(PLANT_PLOT_FILE, plant_plot, width = 6.5, height = 5, dpi = 300)
+ggsave(PLANT_PLOT_FILE, plant_plot, width = 6.5, height = 6, dpi = 300)
 
 cat("Tissue plotting complete:\n")
 cat("  Input rows: ", nrow(df), "\n", sep = "")
@@ -522,11 +522,11 @@ if ("publication_year" %in% names(df)) {
   p_tissue_time <- ggplot(tissue_time_data, aes(x = publication_year, y = n, color = tissue_part)) +
     geom_line(linewidth = 1, alpha = 0.8) +
     geom_point(size = 1.5) +
-    scale_color_manual(values = endo_palette_discrete, name = "Tissue Part") +
+    scale_color_manual(values = endo_palette_discrete, name = "Tissue") +
     theme_endo_bw(base_size = 11) +
     labs(
       title = "Trends in Tissue Research Over Time",
-      subtitle = "Annual study counts for the top 8 standardized tissue parts (1990-2024)",
+      subtitle = "Annual study counts for the top 8 standardized tissue (1990-2024)",
       x = "Publication Year",
       y = "Number of Studies"
     )

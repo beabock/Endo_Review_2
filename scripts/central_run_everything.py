@@ -5,7 +5,7 @@ Manual-only scripts in scripts/01_data_preproccessing (api pull and combo
 consolidation) are intentionally excluded from this automated runner.
 
 Execution order:
-1) scripts/01_data_preproccessing/ollama_cleanup.R
+1) scripts/01_data_preproccessing/02_ollama_cleanup.R
 2) scripts/02_taxa_resolution/taxa_synonym_resolution.py
 3) all .py/.R scripts in scripts/03_standardize_metadata (sorted)
 4) all .py/.R scripts in scripts/04_analyses (sorted)
@@ -98,7 +98,7 @@ def main() -> int:
 	repo_root = Path(__file__).resolve().parents[1]
 	scripts_root = repo_root / "scripts"
 
-	stage01_script = scripts_root / "01_data_preproccessing" / "ollama_cleanup.R"
+	stage01_script = scripts_root / "01_data_preproccessing" / "02_ollama_cleanup.R"
 	stage02_script = scripts_root / "02_taxa_resolution" / "taxa_synonym_resolution.py"
 
 	stage03_dir = scripts_root / "03_standardize_metadata"

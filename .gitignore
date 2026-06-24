@@ -1,3 +1,8 @@
 /data/Abstracts
 /data/Reference_datasets
 results/logs/taxa_synonym_resolution_taxonomy_index.pkl
+__pycache__/
+*.pyc
+*.pyo
+.Rhistory
+temp*.R

@@ -20,7 +20,7 @@ python scripts/central_run_everything.py
 ```
 
 This script will sequentially run:
-1. Data cleanup (`scripts/01_data_preproccessing/ollama_cleanup.R`)
+1. Data cleanup (`scripts/01_data_preproccessing/02_ollama_cleanup.R`)
 2. Taxa synonym resolution against GBIF (`scripts/02_taxa_resolution`)
 3. Metadata standardization (`scripts/03_standardize_metadata`)
 4. Statistical analyses (`scripts/04_analyses`)
