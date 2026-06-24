@@ -2,11 +2,6 @@
 # BMB 2026-06-05
 # Robustness and statistical tests for the biodiversity priority overlap -
 # chi-square, Spearman, binomial, sensitivity analysis, and regional subsampling.
-         results/biodiversity_priority_overlap/country_land_area_summary.csv
-         results/biodiversity_priority_overlap/area_normalized_summary.csv
-         results/biodiversity_priority_overlap/gdp_biodiversity_correlation.csv
-         results/biodiversity_priority_overlap/modeling_results.csv
-"""
 from pathlib import Path
 import pandas as pd
 import numpy as np

@@ -42,38 +42,6 @@ GBIF_REF_RDS <- file.path(CACHE_DIR, "gbif_reference_species.rds")
 GBIF_MIN_QS <- file.path(CACHE_DIR, "gbif_taxa_min.qs")
 GBIF_REF_QS <- file.path(CACHE_DIR, "gbif_reference_species.qs")
 
-# The step_time, cache_read_object, and cache_write_object functions
-# are now defined in pipeline_helpers.R and sourced above.
-# The fast_read_tsv function remains local to this script.
-
-step_time <- function(label, expr) {
-	message(label)
-	t0 <- proc.time()
-	result <- force(expr)
-	elapsed <- proc.time() - t0
-	message(sprintf("%s completed in %.2f sec", label, as.numeric(elapsed[["elapsed"]])))
-	result
-}
-
-cache_read_object <- function(preferred_path, fallback_path = NULL) {
-	if (!is.null(preferred_path) && file.exists(preferred_path)) {
-		if (requireNamespace("qs", quietly = TRUE)) {
-			return(qs::qread(preferred_path))
-		}
-	}
-	if (!is.null(fallback_path) && file.exists(fallback_path)) {
-		return(readRDS(fallback_path))
-	}
-	stop("No cache file found for: ", preferred_path)
-}
-
-cache_write_object <- function(object, qs_path, rds_path) {
-	if (requireNamespace("qs", quietly = TRUE)) {
-		qs::qsave(object, qs_path, preset = "high")
-	}
-	saveRDS(object, rds_path)
-}
-
 # fast reader wrapper: prefer vroom when available
 fast_read_tsv <- function(path, col_select = NULL) {
 	if (requireNamespace("vroom", quietly = TRUE)) {

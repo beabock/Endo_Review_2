@@ -15,7 +15,7 @@ library(reshape2)
 library(scales)
 source("scripts/05_plotting/theme_utils.R")
 
-# Setup
+OUTPUT_DIR <- "results/biodiversity_priority_overlap"
 INPUT_SENSITIVITY <- "results/biodiversity_priority_overlap/sensitivity_analysis.csv"
 INPUT_COUNTRY_SUMMARY <- "results/country_analysis/country_gdp_latitude_summary.csv"
 INPUT_COUNTRY_AREA <- "results/biodiversity_priority_overlap/country_land_area_summary.csv"
