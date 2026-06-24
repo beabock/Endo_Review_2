@@ -11,3 +11,4 @@ __pycache__/
 .Rhistory
 temp*.R
 .DS_Store
+ZENODO_REVIEW_NOTES.md
