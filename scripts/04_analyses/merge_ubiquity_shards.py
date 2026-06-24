@@ -65,12 +65,12 @@ def merge_shards(input_dir, output_dir, n_shards):
                         row_count += 1
                 print(f"  ✓ shard_{shard_id}: {row_count} rows so far")
             else:
-                print(f"  ⚠ shard_{shard_id} JSONL: not found, skipping")
-    
-    print(f"  → Wrote {row_count} rows to {output_jsonl.name}")
-    
+                print(f"  shard_{shard_id} JSONL: not found, skipping")
+
+    print(f"  Wrote {row_count} rows to {output_jsonl.name}")
+
     # Summary statistics
-    print("\n=== Merge Summary ===")
+    print("\nMerge summary:")
     print(f"Total rows processed: {len(merged_all)}")
     print(f"Positive claims: {len(positive_rows)} ({100*len(positive_rows)/len(merged_all):.1f}%)")
     print(f"Errors: {len(merged_all[merged_all['error'].notna()])}")

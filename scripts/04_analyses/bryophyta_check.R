@@ -53,7 +53,7 @@ bryophyta_counts <- df_matched %>%
 undersampled_bryophyta <- bryophyta_counts %>%
   filter(bryophyta_study_count < 3)
 
-cat("\n--- Countries with <3 Bryophyta studies ---\n")
+cat("\nCountries with <3 Bryophyta studies:\n")
 print(undersampled_bryophyta, n = Inf)
 
 # Also check which valid countries have ZERO Bryophyta studies

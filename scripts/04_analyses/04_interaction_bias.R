@@ -176,7 +176,7 @@ if (nrow(ft_analysis_data) > 0 && n_distinct(ft_analysis_data$fungal_phylum) > 1
 all_stats <- bind_rows(fc_stats, ft_stats)
 write_csv(all_stats, file.path(OUTPUT_DIR, "interaction_statistical_tests.csv"))
 
-cat("\n=== Statistical Test Summary ===\n")
+cat("\nStatistical test summary:\n")
 print(all_stats)
 
 message("Interaction analysis complete. Outputs saved to ", OUTPUT_DIR)

@@ -382,7 +382,7 @@ try:
 
         # Model for raw study count
         model_raw = smf.ols('study_count_log ~ gdp_log10 + metric_value', data=model_df).fit()
-        report.append(f"\n--- Model for {metric_label} (raw counts) ---")
+        report.append(f"\nModel for {metric_label} (raw counts):")
         report.append(str(model_raw.summary()))
         
         for var, params in model_raw.params.items():
@@ -442,7 +442,7 @@ else:
     print(f"\nFound {len(bryophytes)} Bryophyte species records across all countries.")
 
     # Total Species
-    print("\n--- Ranking by Total Bryophyte Species ---")
+    print("\nRanking by total bryophyte species:")
     total_species = bryophytes.groupby('country_iso3').size().reset_index(name='bryophyte_total_species')
     total_species = total_species.sort_values('bryophyte_total_species', ascending=False)
     print("Top 10 countries by total Bryophyte species:")
@@ -454,7 +454,7 @@ else:
 
     # Endemic Species
     # The 'small_range_50km' column is used as the proxy for endemism in the main analysis
-    print("\n--- Ranking by Endemic Bryophyte Species (small_range_50km) ---")
+    print("\nRanking by endemic bryophyte species (small_range_50km):")
     endemic_species = bryophytes[bryophytes['small_range_50km'] == 1]
     endemic_counts = endemic_species.groupby('country_iso3').size().reset_index(name='bryophyte_endemic_species')
     endemic_counts = endemic_counts.sort_values('bryophyte_endemic_species', ascending=False)
@@ -467,7 +467,7 @@ else:
 
     # Threatened Species
     # The 'threat_status_prob_80' is used as the proxy for threat status
-    print("\n--- Ranking by Threatened Bryophyte Species (threat_status_prob_80) ---")
+    print("\nRanking by threatened bryophyte species (threat_status_prob_80):")
     threatened_species = bryophytes[bryophytes['threat_status_prob_80'] == 1]
     threatened_counts = threatened_species.groupby('country_iso3').size().reset_index(name='bryophyte_threatened_species')
     threatened_counts = threatened_counts.sort_values('bryophyte_threatened_species', ascending=False)

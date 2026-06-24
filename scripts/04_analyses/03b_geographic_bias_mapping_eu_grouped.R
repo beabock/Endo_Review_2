@@ -156,7 +156,7 @@ continental_data <- world_data %>%
 
 write_csv(continental_data, CONTINENTAL_FILE)
 
-cat("\n=== Continental Breakdown ===\n")
+cat("\nContinental breakdown:\n")
 print(continental_data)
 
 message("Creating interactive leaflet map...")
@@ -271,7 +271,7 @@ heatmap_plot <- ggplot(heatmap_data, aes(x = bias_class, y = continent, fill = c
 ggsave(BIAS_HEATMAP_FILE, heatmap_plot, width = 11, height = 7, dpi = 300)
 cat("  Saved: ", BIAS_HEATMAP_FILE, "\n", sep = "")
 
-message("\n=== Geographic Bias Mapping Complete ===")
+message("\nGeographic bias mapping complete.")
 message("Total studies across all countries: ", total_studies)
 message("Countries with ≥1 study: ", countries_with_studies, " / ", total_countries)
 message("Top 5 countries by study count:")

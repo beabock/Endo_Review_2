@@ -24,7 +24,7 @@ for d in "${common_dirs[@]}"; do
   if [ -d "$d" ]; then
     echo "FOUND: $d"
     ls -lah -- "$d" | sed -n '1,40p'
-    echo "----"
+    echo ""
   fi
 done
 

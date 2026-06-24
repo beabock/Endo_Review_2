@@ -1280,7 +1280,7 @@ comparison_rows <- list()
 correlation_rows <- list()
 
 for (group in doc_groups) {
-	message("\n=== Processing: ", group, " ===")
+	message("\nProcessing: ", group)
 	group_dir <- file.path(OUTPUT_ROOT, safe_slug(group))
 	dir.create(group_dir, recursive = TRUE, showWarnings = FALSE)
 

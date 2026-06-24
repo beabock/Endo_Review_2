@@ -522,7 +522,7 @@ if ("publication_year" %in% names(df)) {
   tissue_time_file <- "skipped (no publication_year column found)"
 }
 
-cat("\n=== EXTENDED TISSUE VISUALIZATIONS ===\n")
+cat("\nExtended tissue visualizations:\n")
 cat("  1. Tissue × Country Heatmap: ", tissue_country_file, "\n", sep = "")
 cat("  2. Tissue × Plant Family Heatmap: ", tissue_family_file, "\n", sep = "")
 cat("  3. Tissue Co-occurrence Network: ", cooccurrence_file, "\n", sep = "")

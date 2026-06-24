@@ -74,7 +74,7 @@ def main():
         # Respect API etiquette (wait briefly)
         time.sleep(0.2)
 
-    print(f"\n--- DONE ---")
+    print(f"\nDone.")
     print(f"Successfully downloaded: {downloaded_count}")
     print(f"Missing/No OA: {missing_count}")
 

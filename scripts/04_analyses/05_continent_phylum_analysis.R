@@ -67,5 +67,5 @@ write_csv(phylum_matrix, output_file)
 
 cat("\nAnalysis complete! Saved matrix to:", output_file, "\n\n")
 
-cat("=== Snapshot: Bryophyta studies by Continent ===\n")
+cat("Bryophyta studies by continent:\n")
 print(continent_phylum_counts %>% filter(phylum == "Bryophyta") %>% arrange(desc(study_count)))

@@ -78,7 +78,7 @@ load_known_species_reference <- function() {
 
 # Identify Unstudied Plant Taxa
 
-cat("--- Identifying understudied plant taxa ---\n")
+cat("Identifying understudied plant taxa...\n")
 
 all_known_taxa <- load_known_species_reference()
 
@@ -173,7 +173,7 @@ cat("Saved unstudied species to:", file.path(OUTPUT_DIR, "unstudied_plant_specie
 
 # Identify Understudied Countries
 
-cat("\n--- Identifying understudied countries (< 5 studies) ---\n")
+cat("\nIdentifying understudied countries (< 5 studies)...\n")
 
 # Load country study counts
 studied_countries_data <- read_csv(COUNTRY_DATA_FILE, show_col_types = FALSE)
