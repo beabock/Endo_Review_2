@@ -11,7 +11,6 @@ library(sf)
 source("scripts/utils/pipeline_helpers.R")
 source("scripts/utils/disputed_territory_parent_iso.R")
 
-# --- Configuration ---
 STUDIED_SPECIES_FILE <- "results/taxonomy_analysis/top_studied_plant_species.csv"
 COUNTRY_DATA_FILE <- "data/country_enriched_data.csv"
 COUNTRIES_ZERO_FILE <- "results/countries_study_count_zero.csv"
@@ -77,7 +76,7 @@ load_known_species_reference <- function() {
     distinct()
 }
 
-# --- 1. Identify Unstudied Plant Taxa ---
+# Identify Unstudied Plant Taxa
 
 cat("--- Identifying understudied plant taxa ---\n")
 
@@ -172,7 +171,7 @@ cat("Saved unstudied families to:", file.path(OUTPUT_DIR, "unstudied_plant_famil
 cat("Saved unstudied genera to:", file.path(OUTPUT_DIR, "unstudied_plant_genera.csv"), "\n")
 cat("Saved unstudied species to:", file.path(OUTPUT_DIR, "unstudied_plant_species.csv"), "\n")
 
-# --- 2. Identify Understudied Countries ---
+# Identify Understudied Countries
 
 cat("\n--- Identifying understudied countries (< 5 studies) ---\n")
 

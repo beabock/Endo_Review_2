@@ -89,7 +89,7 @@ def heal_and_align():
         # Initialize an empty 15-slot row
         row = ["NA"] * 15
         
-        # --- LEFT ANCHORS (Cols 0 to 4) ---
+        # left anchors (cols 0-4)
         # We know Relevance and Doc Types are at the start. 
         # We look for the DOI to anchor column 4.
         doi_index = -1
@@ -112,7 +112,7 @@ def heal_and_align():
                 row[i] = parts[i]
             parts = parts[5:] if len(parts) > 5 else []
 
-        # --- RIGHT ANCHORS (Cols 13 & 14) ---
+        # right anchors (cols 13-14)
         # The last columns are always data_source (e.g. abstract-csv) and source_file (e.g. doi_...)
         if len(parts) >= 2:
             row[14] = parts[-1]
@@ -122,7 +122,7 @@ def heal_and_align():
             row[14] = parts[-1]
             parts = []
 
-        # --- MIDDLE MESS (Cols 5 to 12) ---
+        # middle columns (5-12)
         # We now have the remaining parts that belong in Host, Taxon, Tissue, etc.
         # If there are exactly 8 parts left, perfect! 1-to-1 mapping.
         if len(parts) == 8:

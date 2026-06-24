@@ -7,7 +7,7 @@ import os
 import time
 from pathlib import Path
 
-# --- CONFIGURATION ---
+# Configuration
 CSV_PATH = "/scratch/bmb646/Abstracts_for_Monsoon.csv"
 SAVE_DIR = Path("/scratch/bmb646/full_corpus")
 EMAIL = "bmb646@nau.edu"  # REQUIRED for Unpaywall

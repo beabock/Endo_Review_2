@@ -2,7 +2,6 @@
 # BMB 2026-06-05
 # Summarizes fungal taxon representation at species, genus, and family level by phylum.
 #
-# Usage: python3 scripts/04_analyses/03_fungal_taxonomic_bias.py
 
 import pandas as pd
 import csv

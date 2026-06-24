@@ -84,7 +84,7 @@ def filter_dataset():
                 guild = str(row.get('primary_guild', '')).lower()
                 relevance = str(row.get('relevance', '')).lower()
 
-                # --- FILTERING LOGIC ---
+                # apply filters in order
 
                 # Rule 1: Relevance Check
                 if relevance != 'relevant':

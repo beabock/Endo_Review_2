@@ -10,7 +10,7 @@ import fitz  # PyMuPDF
 import signal
 from pathlib import Path
 
-# --- CONFIGURATION ---
+# Configuration
 PDF_FOLDER = Path("/scratch/bmb646/Bea_Nick_papers_endoreview")
 OUTPUT_FILE = "/scratch/bmb646/global_endo_extraction_v4.csv"
 MODEL_NAME = "mistral"
@@ -106,7 +106,7 @@ def main():
         data = process_text(content["text"])
         
         if data:
-            # --- FLATTENING LOGIC ---
+            # flatten nested structure
             entries = []
             if isinstance(data, dict):
                 # Check for the "Yuan et al." nested dictionary style

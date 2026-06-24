@@ -33,7 +33,7 @@ cat("Total rows after binding:", nrow(wos), "\n")
 
 write.csv(wos, "data/processed/wos_combined.csv", row.names = FALSE)
 
-# --- Read and bind all Scopus files in the specified folder ---
+# Read and bind all Scopus files in the specified folder
 
 scopus_folder <- "data/raw/All_abstracts_8-14-25/Scopus"
 
@@ -60,7 +60,7 @@ cat("Number of PubMed files read:", length(pubmed), "\n")
 cat("Total rows after binding:", nrow(pubmed), "\n")
 
 
-# --- Data Overview ---
+# Data Overview
 cat("WoS columns:", length(colnames(wos)), "\n")
 cat("Scopus columns:", length(colnames(scopus)), "\n") 
 cat("PubMed columns:", length(colnames(pubmed)), "\n")
@@ -159,7 +159,7 @@ cat("WoS standardized columns:", length(colnames(wos)), "\n")
 
 cat("Wos earliest year:", min(as.numeric(wos$Year), na.rm = TRUE), "\n")
 
-# --- Standardize Scopus column names ---
+# Standardize Scopus column names
 # Rename Scopus columns to match WoS standardized names
 scopus <- scopus %>%
   rename(
@@ -185,7 +185,7 @@ scopus <- scopus %>%
 
 cat("Scopus earliest year:", min(scopus$Year, na.rm = TRUE), "\n")
 
-# --- Standardize PubMed column names ---
+# Standardize PubMed column names
 # Rename PubMed columns to match WoS standardized names  
 pubmed <- pubmed %>%
   rename(
@@ -199,12 +199,12 @@ pubmed <- pubmed %>%
 
 cat("PubMed earliest year:", min(pubmed$Year, na.rm = TRUE), "\n")
 
-# --- Add source column to track origin ---
+# Add source column to track origin
 wos$Source <- "WoS"
 scopus$Source <- "Scopus" 
 pubmed$Source <- "PubMed"
 
-# --- Combine all three datasets ---
+# Combine all three datasets
 # Get common columns across all datasets
 common_cols <- intersect(intersect(colnames(wos), colnames(scopus)), colnames(pubmed))
 cat("Common columns:", length(common_cols), "\n")
@@ -238,7 +238,7 @@ ds <- bind_rows(wos, scopus, pubmed) %>%
 cat("Combined dataset rows:", nrow(ds), "\n")
 write.csv(ds, "data/processed/intermediate_after_combined.csv", row.names = FALSE)
 
-# --- Deduplication Process ---
+# Deduplication Process
 normalize_text <- function(x) {
   x <- tolower(x)
   x <- gsub("\\s+", " ", x)          # collapse whitespace
@@ -286,7 +286,7 @@ cat("After title deduplication:", nrow(deduplicated), "\n")
 write.csv(deduplicated, "data/processed/intermediate_after_title_dedup.csv", row.names = FALSE)
 
 
-# --- Final cleanup and output ---
+# Final cleanup and output
 final_data <- deduplicated %>%
   select(-Abstract_norm, -Title_norm, -Authors_norm) %>%
   relocate(Title, Authors, Year, Source.title, Abstract, DOI)

@@ -2,7 +2,6 @@
 # Manual step - pulls abstracts from PubMed, Scopus, and Web of Science APIs.
 # Needs credentials; run interactively, not part of the automated pipeline.
 
-# Load required libraries
 library(rentrez)       # PubMed
 library(rscopus)       # Scopus
 library(wosr)          # Web of Science
@@ -185,4 +184,3 @@ wos_df <- fetch_parse_wos(base_search, batch_size = 100)
 
 write.csv(wos_df, "wos_results.csv", row.names = FALSE)
 
-# End of script

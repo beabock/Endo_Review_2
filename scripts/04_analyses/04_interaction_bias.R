@@ -59,7 +59,6 @@ df_clean <- df %>%
     tissue = replace_na(tissue, "Unknown")
   )
 
-# --- 1. Fungal Phylum vs Continent ---
 message("Analyzing Fungal Phylum x Continent...")
 
 fungal_continent <- df_clean %>%
@@ -86,7 +85,6 @@ fc_plot <- ggplot(fc_plot_data, aes(x = continent, y = fungal_phylum, fill = stu
 ggsave(file.path(OUTPUT_DIR, "fungal_phylum_vs_continent.png"), fc_plot, width = 8, height = 6)
 write_csv(fungal_continent, file.path(OUTPUT_DIR, "fungal_phylum_vs_continent.csv"))
 
-# --- 2. Fungal Phylum vs Tissue ---
 message("Analyzing Fungal Phylum x Tissue...")
 
 # Standardize tissues a bit for the plot
@@ -117,7 +115,6 @@ ft_plot <- ggplot(ft_plot_data, aes(x = tissue_group, y = fungal_phylum, fill = 
 ggsave(file.path(OUTPUT_DIR, "fungal_phylum_vs_tissue.png"), ft_plot, width = 8, height = 6)
 write_csv(fungal_tissue, file.path(OUTPUT_DIR, "fungal_phylum_vs_tissue.csv"))
 
-# --- 3. Statistical Tests for Interaction Bias ---
 message("Running statistical tests...")
 
 # Test 1: Fungal Phylum vs Continent (Chi-Square)

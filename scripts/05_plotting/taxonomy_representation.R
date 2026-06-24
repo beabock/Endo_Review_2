@@ -484,10 +484,9 @@ compound_heatmap <- plot_compound_taxonomy_heatmap(
 )
 save_plot(compound_heatmap, "13_compound_taxonomy_heatmap.png", width = 6.5, height = 7.5)
 
-# VISUALIZATION 14: Plant Family Research Over Time
+# Plant Family Research Over Time
 if (!is.null(time_df)) {
 
-  # --- Load Taxonomy Lookup for Family ---
   TAXA_LOOKUP_FILE <- "results/taxonomy_analysis/top_studied_plant_species.csv"
   if (!file.exists(TAXA_LOOKUP_FILE)) {
     stop("Taxonomy lookup file not found! Please run the 04_analyses scripts first.\n  Expected file: ", TAXA_LOOKUP_FILE)
