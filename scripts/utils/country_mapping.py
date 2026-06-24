@@ -987,6 +987,57 @@ COUNTRY_TO_ISO = {
     "spitsbergen island": "NOR",
 }
 
+# Regions that span multiple countries. The COUNTRY_TO_ISO dict literal above silently
+# drops all but the last-listed ISO for duplicate keys. This dict preserves all ISOs
+# for each shared region; find_all_countries_in_text() uses it to return every country.
+MULTI_COUNTRY_REGIONS: Dict[str, List[str]] = {
+    "india/bangladesh":            ["IND", "BGD"],
+    "southern iberian":            ["ESP", "PRT"],
+    "great lakes":                 ["USA", "CAN"],
+    "sonoran desert":              ["USA", "MEX"],
+    "chihuahuan desert":           ["USA", "MEX"],
+    "rocky mountains":             ["USA", "CAN"],
+    "appalachian mountains":       ["USA", "CAN"],
+    "cascade range":               ["USA", "CAN"],
+    "coast ranges":                ["USA", "CAN"],
+    "great plains":                ["USA", "CAN"],
+    "magellanic subpolar forests": ["CHL", "ARG"],
+    "valdivian temperate rain forest": ["CHL", "ARG"],
+    "patagonian steppe":           ["ARG", "CHL"],
+    "pampas":                      ["ARG", "URY", "BRA"],
+    "gran chaco":                  ["ARG", "BOL", "PRY", "BRA"],
+    "atlantic forest":             ["BRA", "ARG", "PRY"],
+    "cerrado":                     ["BRA", "BOL", "PRY"],
+    "yungas":                      ["BOL", "PER", "ARG"],
+    "puna":                        ["ARG", "BOL", "CHL", "PER"],
+    "paramo":                      ["COL", "ECU", "PER", "VEN"],
+    "tumbes-chocó-magdalena":      ["COL", "ECU", "PAN", "PER"],
+    "chocó-darién":                ["COL", "PAN"],
+    "sino-japanese":               ["CHN", "JPN"],
+    "sundanian":                   ["IDN", "MYS", "BRN"],
+    "sundaland":                   ["IDN", "MYS", "BRN", "SGP", "THA"],
+    "beringia":                    ["RUS", "USA"],
+    "himalayas":                   ["NPL", "BTN", "IND", "CHN", "PAK"],
+    "tian shan":                   ["CHN", "KAZ", "KGZ", "UZB"],
+    "altai mountains":             ["RUS", "CHN", "MNG", "KAZ"],
+    "sayan mountains":             ["MNG", "RUS"],
+    "zagros mountains":            ["IRN", "IRQ", "TUR"],
+    "iranian plateau":             ["IRN", "AFG", "PAK"],
+    "armenian highlands":          ["ARM", "TUR", "IRN", "AZE", "GEO"],
+    "ethiopian highlands":         ["ETH", "ERI"],
+    "drakensberg":                 ["ZAF", "LSO"],
+    "atlas mountains":             ["MAR", "DZA", "TUN"],
+    "tibesti mountains":           ["TCD", "LBY"],
+    "guinea highlands":            ["GIN", "SLE", "LBR", "CIV"],
+    "cameroon highlands":          ["CMR", "NGA"],
+    "new guinea highlands":        ["IDN", "PNG"],
+    "new guinea":                  ["IDN", "PNG"],
+}
+# Patch COUNTRY_TO_ISO so each shared region maps to its primary (first-listed) country
+# rather than whichever happened to be last in the dict literal.
+for _region_name, _region_isos in MULTI_COUNTRY_REGIONS.items():
+    COUNTRY_TO_ISO[_region_name] = _region_isos[0]
+
 # Reverse mapping: ISO A3 code to canonical country name
 ISO_TO_COUNTRY = {}
 for country_name, iso_code in COUNTRY_TO_ISO.items():
@@ -1151,25 +1202,32 @@ def find_all_countries_in_text(text: str) -> List[str]:
     Find ALL country names in text using word boundaries.
     Returns list of unique ISO A3 codes found, empty list if none.
     Prioritizes longer matches to avoid substring conflicts (e.g., 'united states' over 'united').
+    Shared geographic regions (e.g. 'great plains') return all associated countries.
     """
     if not text or not isinstance(text, str):
         return []
-    
+
     text_lower = text.lower().strip()
     found_countries = set()
-    
+
+    def _add_iso(name: str) -> None:
+        if name in MULTI_COUNTRY_REGIONS:
+            found_countries.update(MULTI_COUNTRY_REGIONS[name])
+        elif name in COUNTRY_TO_ISO:
+            found_countries.add(COUNTRY_TO_ISO[name])
+
     # Check for exact match first
-    if text_lower in COUNTRY_TO_ISO:
-        found_countries.add(COUNTRY_TO_ISO[text_lower])
-    
+    _add_iso(text_lower)
+
     # Sort by length (longest first) to match longer names first
-    sorted_countries = sorted(COUNTRY_TO_ISO.items(), key=lambda x: -len(x[0]))
-    
-    for country_name, iso_code in sorted_countries:
+    all_names = set(COUNTRY_TO_ISO) | set(MULTI_COUNTRY_REGIONS)
+    sorted_names = sorted(all_names, key=lambda x: -len(x))
+
+    for country_name in sorted_names:
         pattern = r"\b" + re.escape(country_name) + r"\b"
         if re.search(pattern, text_lower):
-            found_countries.add(iso_code)
-    
+            _add_iso(country_name)
+
     return list(found_countries)
 
 

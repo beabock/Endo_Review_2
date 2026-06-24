@@ -7,13 +7,24 @@ This repository contains the data and code for our upcoming paper auditing the g
 - `data/`: Raw and processed datasets, including publication metadata, GBIF taxonomic data, and country-level GDP information.
 - `scripts/`: Python and R scripts that make up the analysis pipeline.
 - `results/`: Output tables, statistical summaries, and figures. (Check out `ANALYSIS_SUMMARY.md` for a quick breakdown of what the output files contain).
-- `manuscript/`: Working drafts and review files for the paper.
+
+## Dependencies
+
+You will need **Python 3** and **R** installed. Key R packages include `tidyverse`, `sf`, `leaflet`, and `rnaturalearth`. Key Python packages are listed in `.venv/` (create with `python -m venv .venv && pip install pandas requests`).
+
+### GBIF backbone (required for taxa resolution and taxonomy analysis)
+
+The GBIF taxonomic backbone is not included in this repository due to its size (~1 GB). Download it before running the pipeline:
+
+1. Go to https://www.gbif.org/dataset/d7dddbf4-2cf0-4f39-9b2a-bb099caae36c
+2. Download the **DwC-A** (Darwin Core Archive) format
+3. Unzip and place the contents in `data/Reference_datasets/gbif_backbone/` so that `data/Reference_datasets/gbif_backbone/Taxon.tsv` exists
+
+The taxonomy analysis scripts will cache a processed version of the backbone in `results/taxonomy_analysis/cache/` on first run, which speeds up subsequent runs considerably.
 
 ## Running the analysis
 
-To run the code, you'll need Python 3 and R installed on your machine. 
-
-To reproduce the full analysis, you can just run the central runner script from the root of the repository:
+To reproduce the full analysis, run the central runner script from the root of the repository:
 
 ```bash
 python scripts/central_run_everything.py
@@ -26,4 +37,4 @@ This script will sequentially run:
 4. Statistical analyses (`scripts/04_analyses`)
 5. Plot generation (`scripts/05_plotting`)
 
-*Note: The initial literature API pulls and data consolidation steps in `01_data_preproccessing` are intentionaly kept manual and aren't executed by the automated runner.*
+*Note: The initial literature API pulls and data consolidation steps in `01_data_preproccessing` are intentionally kept manual and aren't executed by the automated runner.*

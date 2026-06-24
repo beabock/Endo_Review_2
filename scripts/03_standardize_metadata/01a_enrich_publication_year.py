@@ -50,6 +50,8 @@ def get_publication_year(doi, cache):
     
     try:
         url = f"https://api.crossref.org/works/{doi}"
+        # Placeholder email keeps this script in the CrossRef polite pool without
+        # exposing the authors' address in a public repository.
         req = urllib.request.Request(url, headers={'User-Agent': 'EndophyteReview/1.0 (mailto:endo-research@example.com)'})
         with urllib.request.urlopen(req, timeout=10) as response:
             data = json.loads(response.read().decode('utf-8'))

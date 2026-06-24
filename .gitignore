@@ -1,6 +1,10 @@
 /data/Abstracts
 /data/Reference_datasets
+/data/Training_labeled_abs_6.csv
 results/logs/taxa_synonym_resolution_taxonomy_index.pkl
+results/logs/*.out
+results/logs/*.err
+manuscript/
 __pycache__/
 *.pyc
 *.pyo
