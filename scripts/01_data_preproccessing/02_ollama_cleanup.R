@@ -37,7 +37,7 @@ clean_taxon <- function(x) {
         str_remove_all("[\\{\\}\\[\\]\\']") %>%
         # Strip parenthetical content 
         str_remove_all("\\(.*?\\)") %>%
-        # Strip AI prefixes
+        # Strip label prefixes (e.g. "taxon:", "genus:")
         str_remove_all("^(taxon|phylum|class|order|family|genus|species|name|role)\\s*:?\\s*") %>%
         str_squish() %>%
         str_to_lower()
@@ -53,7 +53,7 @@ clean_taxon <- function(x) {
     return(x)
 }
 
-message("Scrubbing AI prefixes and non-plant hosts...")
+message("Cleaning taxon strings...")
 # 3. Apply the cleaning
 ds_final <- ds %>%
     mutate(across(where(is.character), ~ str_squish(str_to_lower(.x)))) %>%

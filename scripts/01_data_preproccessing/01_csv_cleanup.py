@@ -129,8 +129,8 @@ def heal_and_align():
             for i in range(8):
                 row[5+i] = parts[i]
         
-        # If there are MORE than 8 parts, the AI hallucinated commas.
-        # We glue the "extra" parts into the interaction_notes (Col 10)
+        # More than 8 parts: extra commas inserted by the model.
+        # Glue the overflow parts into interaction_notes (Col 10).
         elif len(parts) > 8:
             middle_overflow += 1
             overflow_extra_parts += len(parts) - 8
@@ -149,7 +149,7 @@ def heal_and_align():
             row[11] = parts[-2]
             row[12] = parts[-1]
             
-        # If there are FEWER than 8 parts, the AI skipped columns. 
+        # Fewer than 8 parts: some columns were omitted.
         # Map left-to-right until exhausted.
         else:
             middle_short += 1
