@@ -1,5 +1,5 @@
 # BMB 2024-09-22
-# Manual step — combines and deduplicates abstract exports from Web of Science,
+# Manual step - combines and deduplicates abstract exports from Web of Science,
 # Scopus, and PubMed. Not run by the automated pipeline.
 
 library(readr)

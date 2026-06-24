@@ -1,5 +1,5 @@
 # BMB 2026-06-17
-# Biome-level plots — distribution, country and family heatmaps, and trends over time.
+# Biome-level plots - distribution, country and family heatmaps, and trends over time.
 
 library(dplyr)
 library(ggplot2)

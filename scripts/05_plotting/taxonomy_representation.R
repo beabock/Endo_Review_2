@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # BMB 2026-06-05
-# All the taxonomy coverage plots — absolute counts and relative representation
+# All the taxonomy coverage plots - absolute counts and relative representation
 # of plant species, genera, and families by phylum.
 
 library(dplyr)

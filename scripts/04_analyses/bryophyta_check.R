@@ -1,5 +1,5 @@
 # BMB 2026-06-24
-# Exploratory script checking bryophyte representation — how many countries have
+# Exploratory script checking bryophyte representation - how many countries have
 # zero or very few bryophyte endophyte studies.
 
 library(dplyr)

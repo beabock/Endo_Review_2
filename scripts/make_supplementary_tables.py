@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # BMB 2026-06-24
-# Builds the supplementary Excel file for the paper — understudied countries,
+# Builds the supplementary Excel file for the paper - understudied countries,
 # plant families, and plant genera (defined as n < 5 studies).
 
 import pandas as pd
@@ -179,14 +179,14 @@ notes_ws = wb.active
 notes_ws.title = "Notes"
 
 note_lines = [
-    ("Supplementary Tables — Understudied Taxa and Countries", True, 14),
+    ("Supplementary Tables - Understudied Taxa and Countries", True, 14),
     ("", False, 10),
     ("Definition: 'Understudied' is defined as fewer than 5 publications in the endophyte literature dataset (n < 5).", False, 10),
     ("", False, 10),
     ("Sheet descriptions:", True, 10),
-    ("  S1. Understudied Countries — Countries with fewer than 5 endophyte studies, with continent and GDP (current USD, World Bank).", False, 10),
-    ("  S2. Understudied Plant Families — Plant families with no endophyte studies identified in the dataset, with associated phylum.", False, 10),
-    ("  S3. Understudied Plant Genera — Plant genera with no endophyte studies identified in the dataset, with associated family and phylum.", False, 10),
+    ("  S1. Understudied Countries - Countries with fewer than 5 endophyte studies, with continent and GDP (current USD, World Bank).", False, 10),
+    ("  S2. Understudied Plant Families - Plant families with no endophyte studies identified in the dataset, with associated phylum.", False, 10),
+    ("  S3. Understudied Plant Genera - Plant genera with no endophyte studies identified in the dataset, with associated family and phylum.", False, 10),
     ("", False, 10),
     ("Note: The species-level list (>390,000 species) is available in the accompanying Zenodo data repository.", False, 10),
     ("", False, 10),

@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # BMB 2026-06-05
-# Looks at how fungal phylum, tissue type, and continent relate to each other —
+# Looks at how fungal phylum, tissue type, and continent relate to each other -
 # heatmaps and cross-tabulations for the interaction bias analysis.
 
 library(dplyr)

@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # BMB 2026-06-05
-# Plots the relationship type breakdown from Stage 04 — bar charts, country heatmap,
+# Plots the relationship type breakdown from Stage 04 - bar charts, country heatmap,
 # and trends over time.
 # =================================================================================
 

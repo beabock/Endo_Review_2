@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # BMB 2026-06-05
-# Robustness and statistical tests for the biodiversity priority overlap —
+# Robustness and statistical tests for the biodiversity priority overlap -
 # chi-square, Spearman, binomial, sensitivity analysis, and regional subsampling.
          results/biodiversity_priority_overlap/country_land_area_summary.csv
          results/biodiversity_priority_overlap/area_normalized_summary.csv

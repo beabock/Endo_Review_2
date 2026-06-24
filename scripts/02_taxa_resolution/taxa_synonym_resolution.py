@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # BMB 2026-06-05
-# Resolves fungal and plant taxon names against the GBIF backbone — handles synonyms,
+# Resolves fungal and plant taxon names against the GBIF backbone - handles synonyms,
 # abbreviations, and multi-name cells. Designed for HPC batch runs with checkpointing.
 
 from __future__ import annotations

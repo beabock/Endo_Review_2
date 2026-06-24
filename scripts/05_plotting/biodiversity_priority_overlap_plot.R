@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # BMB 2026-06-05
-# Plots the biodiversity priority overlap results — scatter plots, sensitivity
+# Plots the biodiversity priority overlap results - scatter plots, sensitivity
 # panels, and unevenness figures.
 
 library(readr)
