@@ -4,7 +4,6 @@
 
 import re
 import csv
-import sys
 
 input_file = "data/Ollama_extraction_all.csv"
 output_file = "data/Ollama_python_healed.csv"

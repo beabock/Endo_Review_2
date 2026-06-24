@@ -92,7 +92,7 @@ if (!is.null(country_lookup)) {
     left_join(country_lookup, by = c("country" = "iso_a3"))
 }
 
-# 1. Overall Biome Distribution
+# Overall Biome Distribution
 biome_counts <- paper_biome %>%
   count(biome_clean, name = "study_count", sort = TRUE)
 

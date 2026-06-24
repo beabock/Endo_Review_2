@@ -3,9 +3,7 @@
 
 import pandas as pd
 import glob
-import os
 
-# Path to your individual chunks
 path = "/scratch/bmb646/output_parts/endo_results_task_*.csv"
 all_files = glob.glob(path)
 
@@ -18,14 +16,12 @@ for filename in all_files:
         # Read the CSV
         df = pd.read_csv(filename, index_col=None, header=0)
         
-        # 1. Remove the JSON glitch rows (where the LLM leaked 'presence_absence' into the taxon)
+        # Drop rows where the Ollama extraction leaked column names into the taxon field
         if 'fungal_taxon' in df.columns:
-            initial_count = len(df)
             df = df[~df['fungal_taxon'].str.contains('presence_absence', na=False)]
-            # Also catch the Unknowns or generic placeholders if they are messy
             df = df[df['fungal_taxon'] != "Unknown"]
-        
-        # 2. Drop any rows where the PDF was unreadable
+
+        # Drop any rows where the PDF was unreadable
         if 'presence_absence' in df.columns:
             df = df[df['presence_absence'] != 'PDF Unreadable']
             

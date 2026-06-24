@@ -16,7 +16,7 @@ except ImportError:
         return result.pvalue
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent / 'utils'))
-from country_mapping import CONTINENT_MAP, find_country_in_text, get_continent
+from country_mapping import find_country_in_text, get_continent
 
 import warnings
 warnings.filterwarnings('ignore')
