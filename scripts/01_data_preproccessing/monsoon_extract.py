@@ -28,7 +28,7 @@ def extract_content(pdf_path):
             for page in doc[:12]:
                 content["text"] += page.get_text()
     except Exception as e:
-        print(f"   [!] Error reading PDF {pdf_path.name}: {e}")
+        print(f"   Error reading PDF {pdf_path.name}: {e}")
         return None
     return content
 
@@ -75,7 +75,7 @@ def process_text(text, source_type="Full-Text"):
         return json.loads(response_data.get('response', '{}'))
     except Exception as e:
         signal.alarm(0)
-        print(f"   [!] Error: {e}")
+        print(f"   Error: {e}")
         return None
 
 def main():

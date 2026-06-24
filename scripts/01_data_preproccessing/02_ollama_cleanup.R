@@ -6,7 +6,7 @@ library(tidyverse)
 library(stringr)
 library(jsonlite)
 
-message("Loading perfectly structured Python dataset...")
+message("Loading Python-cleaned dataset...")
 # 1. Load the Python-healed file natively
 ds <- read_csv("data/Ollama_python_healed.csv", show_col_types = FALSE)
 

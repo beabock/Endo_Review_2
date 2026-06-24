@@ -100,7 +100,7 @@ biome_counts_pct <- biome_counts %>%
   mutate(percent = study_count / sum(study_count) * 100)
 
 # Biome x Country Heatmap (Top 10 of each)
-# Use country_name if it was successfully joined, otherwise fall back to the country code
+# Use country_name if present, fall back to country code
 country_col_to_use <- if ("country_name" %in% names(paper_biome)) "country_name" else "country"
 y_axis_label <- if (country_col_to_use == "country_name") "Country" else "Country (ISO Code)"
 
