@@ -55,8 +55,8 @@ print(undersampled_bryophyta, n = Inf)
 # Also check which valid countries have ZERO Bryophyta studies
 zero_bryo_countries <- setdiff(valid_countries, bryophyta_counts$country)
 cat("\nPlus", length(zero_bryo_countries), "countries with 0 Bryophyta studies.\n")
-write_csv(tibble(country = zero_bryo_countries, bryophyta_study_count = 0), "results/temp/bryophyta_zero_study_countries.csv")
-write_csv(bryophyta_counts, "results/temp/bryophyta_counts_by_country.csv")
-cat("\nFull country counts saved to results/temp/bryophyta_counts_by_country.csv\n")
+write_csv(tibble(country = zero_bryo_countries, bryophyta_study_count = 0), "results/exploratory/bryophyta_zero_study_countries.csv")
+write_csv(bryophyta_counts, "results/exploratory/bryophyta_counts_by_country.csv")
+cat("\nFull country counts saved to results/exploratory/bryophyta_counts_by_country.csv\n")
 
 

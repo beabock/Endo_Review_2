@@ -3,11 +3,11 @@ library(readr)
 library(tidyr)
 
 INPUT_FILE <- "data/Ollama_cleaned_synresolved_standardized_final.csv"
-OUTPUT_PLANTS <- "results/temp/undersampled_unique_plants.csv"
-OUTPUT_FUNGI <- "results/temp/undersampled_unique_fungi.csv"
+OUTPUT_PLANTS <- "results/exploratory/undersampled_unique_plants.csv"
+OUTPUT_FUNGI <- "results/exploratory/undersampled_unique_fungi.csv"
 
-if (!dir.exists("results/temp")) {
-  dir.create("results/temp", recursive = TRUE)
+if (!dir.exists("results/exploratory")) {
+  dir.create("results/exploratory", recursive = TRUE)
 }
 
 # 1. Load data
