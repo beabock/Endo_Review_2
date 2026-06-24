@@ -42,9 +42,5 @@ if [ -d /scratch ]; then
   find /scratch -maxdepth 3 -type f -iname '*blobs*' -o -iname '*.gguf' -o -iname '*.bin' 2>/dev/null | sed -n '1,200p' || true
 fi
 
-cat <<'EOF'
-
-Done. Next steps:
- - Run this script on the Monsoon node (login or compute node where you can access the Ollama service).
- - Paste the output here and I'll parse it and recommend which models to smoke-test and where to pull new models.
-EOF
+echo ""
+echo "Done. Run on a Monsoon login or compute node with Ollama access."
