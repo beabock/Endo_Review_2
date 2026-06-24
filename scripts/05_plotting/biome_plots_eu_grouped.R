@@ -103,19 +103,11 @@ paper_biome <- paper_biome %>%
     country = if_else(country %in% eu_iso3, "EUU", country)
   )
 
-# 1. Overall Biome Distribution
+# Overall biome distribution
 biome_counts <- paper_biome %>%
   count(biome_clean, name = "study_count", sort = TRUE)
-  
-# ... (existing code for p1 and ggsave) ...
 
-# 2. Biome x Plant Family Heatmap (Top 10 of each)
-# ... (existing code for p2 and ggsave) ...
-
-# 3. Biome Research Over Time (if publication_year exists)
-# ... (existing code for p3 and ggsave) ...
-
-# 4. Biome x Country Heatmap (Top 10 of each)
+# Biome x Country Heatmap (Top 10 of each)
 # Use country_name if it was successfully joined, otherwise fall back to the country code
 country_col_to_use <- if ("country_name" %in% names(paper_biome)) "country_name" else "country"
 y_axis_label <- if (country_col_to_use == "country_name") "Country" else "Country (ISO Code)"
