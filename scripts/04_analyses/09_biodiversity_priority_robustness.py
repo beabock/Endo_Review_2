@@ -34,10 +34,7 @@ OUTPUT_AREA_NORMALIZED = OUTPUT_DIR / 'area_normalized_summary.csv'
 OUTPUT_GDP_CORRELATION = OUTPUT_DIR / 'gdp_biodiversity_correlation.csv'
 OUTPUT_MODELING_RESULTS = OUTPUT_DIR / 'modeling_results.csv'
 
-print("=" * 80)
-print("ROBUSTNESS AND STATISTICAL TESTS FOR BIODIVERSITY PRIORITY OVERLAP")
-print("(Using actual numeric metrics: endemic species count, threatened probability, etc.)")
-print("=" * 80)
+print("Robustness and statistical tests for biodiversity priority overlap")
 
 # Load data
 print("\nLoading data...")
@@ -300,7 +297,7 @@ report.append("=" * 80)
 report.append("\nKEY FINDING: Understudied endophyte regions are enriched in high-priority biodiversity areas across metrics")
 for row in metric_summary_rows:
     spearman_p_text = f"{row['spearman_p']:.3e}" if not np.isnan(row['spearman_p']) else "NA"
-    report.append(f"• {row['metric_label']}: {row['n_understudied']} understudied countries; overlap={row['overlap_observed']}; Spearman p={spearman_p_text}")
+    report.append(f"- {row['metric_label']}: {row['n_understudied']} understudied countries; overlap={row['overlap_observed']}; Spearman p={spearman_p_text}")
 report.append("\nConclusion:")
 report.append("Metric-by-metric tests are more defensible for peer review than a composite max score.")
 report.append("They show whether study counts are uneven across biodiversity-priority classes and whether that pattern holds across independent biodiversity indicators.")
@@ -421,9 +418,7 @@ print("\nRobustness tests complete")
 
 # BRYOPHYTE-SPECIFIC ANALYSIS
 
-print("\n" + "="*80)
-print("BRYOPHYTE-SPECIFIC ANALYSIS")
-print("="*80)
+print("\nBryophyte-specific analysis:")
 
 # Load the raw World Bank biodiversity data
 try:

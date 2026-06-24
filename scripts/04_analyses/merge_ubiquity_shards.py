@@ -16,8 +16,8 @@ def merge_shards(input_dir, output_dir, n_shards):
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     
-    print(f"Merging {n_shards} shards from {input_dir} → {output_dir}")
-    
+    print(f"Merging {n_shards} shards from {input_dir} to {output_dir}")
+
     # 1. Merge ubiquity_claims_all.csv
     print("\n[1/3] Merging ubiquity_claims_all.csv...")
     all_dfs = []
@@ -26,31 +26,31 @@ def merge_shards(input_dir, output_dir, n_shards):
         if shard_csv.exists():
             df = pd.read_csv(shard_csv)
             all_dfs.append(df)
-            print(f"  ✓ shard_{shard_id}: {len(df)} rows")
+            print(f"  shard_{shard_id}: {len(df)} rows")
         else:
-            print(f"  ⚠ shard_{shard_id}: not found, skipping")
-    
+            print(f"  shard_{shard_id}: not found, skipping")
+
     if all_dfs:
         merged_all = pd.concat(all_dfs, ignore_index=True)
         output_csv = output_dir / "ubiquity_claims_all.csv"
         merged_all.to_csv(output_csv, index=False)
-        print(f"  → Wrote {len(merged_all)} rows to {output_csv.name}")
+        print(f"  Wrote {len(merged_all)} rows to {output_csv.name}")
     else:
-        print("  ✗ No all.csv files found!")
+        print("  No all.csv files found.")
         return False
-    
+
     # 2. Extract and merge ubiquity_claims_positive.csv
     print("\n[2/3] Merging ubiquity_claims_positive.csv...")
     positive_rows = merged_all[merged_all['contains_ubiquity_claim'] == True]
     if len(positive_rows) > 0:
         output_positive = output_dir / "ubiquity_claims_positive.csv"
         positive_rows.to_csv(output_positive, index=False)
-        print(f"  → Wrote {len(positive_rows)} positive rows to {output_positive.name}")
+        print(f"  Wrote {len(positive_rows)} positive rows to {output_positive.name}")
     else:
-        print("  → No positive claims found (creating empty file)")
+        print("  No positive claims found (creating empty file)")
         output_positive = output_dir / "ubiquity_claims_positive.csv"
         positive_rows.to_csv(output_positive, index=False)
-    
+
     # 3. Merge ubiquity_claims_all.jsonl
     print("\n[3/3] Merging ubiquity_claims_all.jsonl...")
     output_jsonl = output_dir / "ubiquity_claims_all.jsonl"
@@ -63,7 +63,7 @@ def merge_shards(input_dir, output_dir, n_shards):
                     for line in fin:
                         fout.write(line)
                         row_count += 1
-                print(f"  ✓ shard_{shard_id}: {row_count} rows so far")
+                print(f"  shard_{shard_id}: {row_count} rows so far")
             else:
                 print(f"  shard_{shard_id} JSONL: not found, skipping")
 

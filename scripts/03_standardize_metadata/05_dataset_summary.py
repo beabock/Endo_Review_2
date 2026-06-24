@@ -43,13 +43,10 @@ def summarize_data(file_path: str) -> None:
                     val = 'EMPTY'
                 stats[col][val] += 1
 
-    print("=" * 60)
-    print(f"DATABASE SUMMARY: {total_rows:,} total interactions")
-    print("=" * 60)
+    print(f"Database summary: {total_rows:,} total interactions")
 
     for col in CATEGORICAL_COLUMNS:
-        print(f"\nTOP VALUES FOR: {col}")
-        print("-" * 30)
+        print(f"\nTop values for: {col}")
         top_values = stats[col].most_common(10)
         for val, count in top_values:
             percentage = (count / total_rows) * 100 if total_rows else 0.0
@@ -70,13 +67,10 @@ def summarize_environment(file_path: str) -> None:
                     val = 'NA'
                 stats[col][val] += 1
 
-    print("=" * 60)
-    print(f"ENVIRONMENTAL AUDIT: {total_rows:,} total interactions")
-    print("=" * 60)
+    print(f"Environmental audit: {total_rows:,} total interactions")
 
     for col in ENV_COLUMNS:
-        print(f"\nTOP VALUES FOR: {col}")
-        print("-" * 30)
+        print(f"\nTop values for: {col}")
         top_values = stats[col].most_common(10)
         for val, count in top_values:
             percentage = (count / total_rows) * 100 if total_rows else 0.0

@@ -40,7 +40,4 @@ final_df = pd.concat(li, axis=0, ignore_index=True)
 output_file = "/scratch/bmb646/GLOBAL_ENDOPHYTE_DATABASE_2026.csv"
 final_df.to_csv(output_file, index=False)
 
-print("-" * 30)
-print(f"SUCCESS!")
-print(f"Final interaction count: {len(final_df)}")
-print(f"File saved to: {output_file}")
+print(f"Done. {len(final_df)} interactions saved to: {output_file}")

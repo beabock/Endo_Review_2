@@ -83,7 +83,7 @@ CONTINENT = {
     "ATA":"Antarctica",
 }
 
-# ── build family->phylum and genus->family,phylum from GBIF backbone ───────
+# Build family->phylum and genus->family,phylum from GBIF backbone
 print("Reading GBIF backbone (this takes a moment)...")
 gbif = pd.read_csv(
     GBIF_TAXON, sep="\t", usecols=["canonicalName","taxonRank","taxonomicStatus","kingdom","phylum","family","genus"],
@@ -124,7 +124,7 @@ for gen, grp in sp_gen.groupby("genus"):
 print(f"  Family->phylum mappings: {len(fam_to_phylum)}")
 print(f"  Genus->family mappings:  {len(gen_to_fam)}")
 
-# ── load pipeline results ──────────────────────────────────────────────────
+# Load pipeline results
 metrics  = pd.read_csv(f"{RESULTS}/country_analysis/geographic_bias_metrics.csv")
 families = pd.read_csv(f"{RESULTS}/understudied_analysis/unstudied_plant_families.csv")
 genera   = pd.read_csv(f"{RESULTS}/understudied_analysis/unstudied_plant_genera.csv")
@@ -144,7 +144,7 @@ genera["family"] = genera["genus"].map(gen_to_fam).fillna("")
 genera["phylum"] = genera["genus"].map(gen_to_phylum).fillna("")
 genera = genera.sort_values(["phylum", "family", "genus"])
 
-# ── style helpers ──────────────────────────────────────────────────────────
+# Style helpers
 HEADER_FILL = PatternFill("solid", start_color="2C5F8A")
 HEADER_FONT = Font(name="Arial", bold=True, color="FFFFFF", size=10)
 BODY_FONT   = Font(name="Arial", size=10)
@@ -171,10 +171,10 @@ def set_widths(ws, widths):
     for i, w in enumerate(widths, 1):
         ws.column_dimensions[get_column_letter(i)].width = w
 
-# ── workbook ───────────────────────────────────────────────────────────────
+# Workbook
 wb = Workbook()
 
-# ── Notes sheet ────────────────────────────────────────────────────────────
+# Notes sheet
 notes_ws = wb.active
 notes_ws.title = "Notes"
 
@@ -201,7 +201,7 @@ for i, (text, bold, size) in enumerate(note_lines, 1):
 notes_ws.column_dimensions["A"].width = 110
 notes_ws.row_dimensions[1].height = 22
 
-# ── S1: Countries ──────────────────────────────────────────────────────────
+# S1: Countries
 c_ws = wb.create_sheet("S1. Understudied Countries")
 headers = ["Country", "ISO A3", "Continent", "GDP (current USD)"]
 c_ws.append(headers)
@@ -220,7 +220,7 @@ set_widths(c_ws, [26, 10, 18, 22])
 c_ws.freeze_panes = "A2"
 c_ws.auto_filter.ref = f"A1:D{n + 1}"
 
-# ── S2: Families ───────────────────────────────────────────────────────────
+# S2: Families
 f_ws = wb.create_sheet("S2. Understudied Plant Families")
 headers = ["Plant Family", "Phylum"]
 f_ws.append(headers)
@@ -236,7 +236,7 @@ set_widths(f_ws, [32, 22])
 f_ws.freeze_panes = "A2"
 f_ws.auto_filter.ref = f"A1:B{n + 1}"
 
-# ── S3: Genera ─────────────────────────────────────────────────────────────
+# S3: Genera
 g_ws = wb.create_sheet("S3. Understudied Plant Genera")
 headers = ["Plant Genus", "Family", "Phylum"]
 g_ws.append(headers)

@@ -134,24 +134,19 @@ def filter_dataset():
     after_phylum = after_kingdom - papers_by_filter['phylum_class']
     after_guild = after_phylum - papers_by_filter['guild']
 
-    print("="*70)
-    print("FILTERING COMPLETE")
-    print("="*70)
-    print(f"\nSTARTING DATASET:")
-    print(f"  Interactions: {in_count:,}  |  Unique Papers: {len(initial_papers):,}")
+    print("Filtering complete.")
+    print(f"\nStarting dataset: {in_count:,} interactions | {len(initial_papers):,} unique papers")
 
-    print(f"\nPAPERS LOST BY EACH FILTER:")
-    print(f"  After Relevance Check:    {len(initial_papers):,} → {len(after_relevance):,}  (Lost {len(papers_by_filter['relevance']):,})")
-    print(f"  After Kingdom Check:      {len(after_relevance):,} → {len(after_kingdom):,}  (Lost {len(papers_by_filter['kingdom']):,})")
-    print(f"  After Phylum/Class Check: {len(after_kingdom):,} → {len(after_phylum):,}  (Lost {len(papers_by_filter['phylum_class']):,})")
-    print(f"  After Guild Check:        {len(after_phylum):,} → {len(after_guild):,}  (Lost {len(papers_by_filter['guild']):,})")
+    print(f"\nPapers lost by filter:")
+    print(f"  Relevance check:    {len(initial_papers):,} -> {len(after_relevance):,}  (lost {len(papers_by_filter['relevance']):,})")
+    print(f"  Kingdom check:      {len(after_relevance):,} -> {len(after_kingdom):,}  (lost {len(papers_by_filter['kingdom']):,})")
+    print(f"  Phylum/class check: {len(after_kingdom):,} -> {len(after_phylum):,}  (lost {len(papers_by_filter['phylum_class']):,})")
+    print(f"  Guild check:        {len(after_phylum):,} -> {len(after_guild):,}  (lost {len(papers_by_filter['guild']):,})")
 
-    print(f"\nFINAL DATASET:")
-    print(f"  Interactions: {out_count:,}  |  Unique Papers: {len(final_papers):,}")
-    print(f"  Total Papers Lost: {len(initial_papers) - len(final_papers):,}")
-    print(f"  Output File: {OUTPUT_FILE}")
-    print(f"  Filtered Rows File: {FILTERED_ROWS_FILE}")
-    print("="*70)
+    print(f"\nFinal dataset: {out_count:,} interactions | {len(final_papers):,} unique papers")
+    print(f"  Papers lost: {len(initial_papers) - len(final_papers):,}")
+    print(f"  Output: {OUTPUT_FILE}")
+    print(f"  Filtered rows: {FILTERED_ROWS_FILE}")
 
 if __name__ == "__main__":
     filter_dataset()
