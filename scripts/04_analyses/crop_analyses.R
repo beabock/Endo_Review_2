@@ -22,7 +22,7 @@ if (!dir.exists(OUTPUT_DIR)) {
 # Major crop genera/families based on top global agricultural commodities
 MAJOR_CROP_FAMILIES <- c("Poaceae", "Fabaceae", "Solanaceae")
 
-# We include common crops, forage, and models that dominate agricultural research
+# Crops, forage, and model species dominating agricultural research
 MAJOR_CROP_GENERA <- c(
   "Triticum", "Zea", "Oryza", "Hordeum", "Saccharum", "Sorghum", "Avena", "Secale", # Poaceae staples
   "Glycine", "Phaseolus", "Arachis", "Medicago", "Trifolium", "Vigna", "Cicer", "Lens", "Pisum", # Fabaceae staples
