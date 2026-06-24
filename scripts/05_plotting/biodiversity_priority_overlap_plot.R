@@ -1,6 +1,7 @@
 #!/usr/bin/env Rscript
-# Visualize understudied country enrichment in biodiversity priority regions
-# Shows what % of understudied endophyte countries rank at different priority thresholds
+# BMB 2026-06-05
+# Plots the biodiversity priority overlap results — scatter plots, sensitivity
+# panels, and unevenness figures.
 
 library(readr)
 library(dplyr)

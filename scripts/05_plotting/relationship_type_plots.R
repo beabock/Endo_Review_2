@@ -1,23 +1,7 @@
 #!/usr/bin/env Rscript
-# =================================================================================
-# relationship_type_plots.R
-# =================================================================================
-# Purpose: Plot the relationship-type summaries generated in Stage 04.
-#
-# Inputs:
-#   - results/interaction_analysis/relationship_type_counts_by_interaction.csv
-#   - results/interaction_analysis/relationship_type_counts_by_study.csv
-#   - results/interaction_analysis/relationship_type_counts_by_country.csv
-#   - results/interaction_analysis/relationship_type_counts_by_year.csv (optional)
-#
-# Outputs:
-#   - results/interaction_analysis/relationship_type_by_interaction.png
-#   - results/interaction_analysis/relationship_type_by_study.png
-#   - results/interaction_analysis/relationship_type_country_heatmap.png
-#   - results/interaction_analysis/relationship_type_trends_over_time.png (if year data exists)
-#
-# Usage:
-#   Rscript scripts/05_plotting/relationship_type_plots.R
+# BMB 2026-06-05
+# Plots the relationship type breakdown from Stage 04 — bar charts, country heatmap,
+# and trends over time.
 # =================================================================================
 
 library(dplyr)

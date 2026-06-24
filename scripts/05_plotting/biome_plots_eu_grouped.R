@@ -1,3 +1,6 @@
+# BMB 2026-06-17
+# Same as biome_plots.R but with EU countries grouped together.
+
 library(dplyr)
 library(ggplot2)
 library(readr)

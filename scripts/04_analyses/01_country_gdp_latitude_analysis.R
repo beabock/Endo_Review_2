@@ -1,3 +1,7 @@
+# BMB 2026-06-05
+# Pearson and Spearman correlations between study count and country GDP/latitude.
+# Main numbers for the geographic bias section of the manuscript.
+
 library(dplyr)
 library(readr)
 library(tidyr)

@@ -1,3 +1,7 @@
+# BMB 2026-06-05
+# Static geographic maps (Robinson projection) showing study density by country
+# and top-ranked countries.
+
 library(rnaturalearth)
 library(sf)
 library(ggplot2)

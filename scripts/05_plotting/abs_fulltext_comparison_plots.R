@@ -1,16 +1,6 @@
 #!/usr/bin/env Rscript
-# =============================================================================
-# abs_fulltext_comparison_plots.R
-# =============================================================================
-# Purpose: Create a comparison table and figures for Abstract vs Full-Text runs.
-# Outputs:
-#   - results/abs_fulltext_comparison/abs_fulltext_comparison_table.csv
-#   - results/abs_fulltext_comparison/figures/abs_fulltext_country_bias_scatter.png
-#   - results/abs_fulltext_comparison/figures/abs_fulltext_biome_comparison.png
-#   - results/abs_fulltext_comparison/figures/abs_fulltext_relationship_type_percent.png
-# Usage:
-#   Rscript scripts/05_plotting/abs_fulltext_comparison_plots.R
-# =============================================================================
+# BMB 2026-06-05
+# Figures for the abstract vs full-text comparison.
 
 library(dplyr)
 library(readr)

@@ -1,3 +1,6 @@
+# BMB 2026-06-05
+# Downloads PDFs from Monsoon scratch for full-text extraction. Cluster-only script.
+
 import pandas as pd
 import requests
 import os

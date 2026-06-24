@@ -1,3 +1,7 @@
+# BMB 2026-06-05
+# Fixes malformed rows in the raw Ollama extraction — handles cases where the model
+# added extra commas or skipped columns, and locks output into a clean 15-column schema.
+
 import re
 import csv
 import sys

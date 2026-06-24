@@ -1,19 +1,7 @@
 #!/usr/bin/env Rscript
-# =================================================================================
-# 07_relationship_type_summary.R
-# =================================================================================
-# Purpose: Summarize the types of plant-fungal relationships represented in the
-#          dataset (e.g., Endophytic, Pathogenic, Mycorrhizal, Antagonistic).
-#
-# Outputs:
-#   - results/interaction_analysis/relationship_type_counts_by_interaction.csv
-#   - results/interaction_analysis/relationship_type_counts_by_study.csv
-#   - results/interaction_analysis/relationship_type_counts_by_country.csv
-#   - results/interaction_analysis/relationship_type_counts_by_year.csv (if year present)
-#
-# Usage:
-#   Rscript scripts/04_analyses/07_relationship_type_summary.R
-# =================================================================================
+# BMB 2026-06-05
+# Tallies plant-fungal relationship types (endophytic, pathogenic, mycorrhizal, etc.)
+# by study, country, and year.
 
 library(dplyr)
 library(readr)

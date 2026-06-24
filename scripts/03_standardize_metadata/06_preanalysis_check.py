@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# BMB 2026-06-05
+# Validation checks on the cleaned dataset — completeness report written to results/logs/.
+
 import argparse
 import csv
 import json

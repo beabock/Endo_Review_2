@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
 #!/usr/bin/env python3
-"""
-Centralized country mapping and detection utility.
-Extracted from scripts/utils/country_mapping.R (884 country variants, 240 ISO codes).
-Single source of truth for country name normalization across Python/R scripts.
-"""
+# -*- coding: utf-8 -*-
+# BMB 2026-06-24
+# Centralized country name → ISO A3 lookup for Python scripts. Single source of truth
+# for country normalization across the pipeline. See also country_mapping.R.
 
 import re
 from typing import Dict, List, Optional, Tuple

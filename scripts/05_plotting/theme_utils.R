@@ -1,3 +1,6 @@
+# BMB 2026-06-05
+# Shared ggplot2 theme and color palette. Source this in any script that makes figures.
+
 library(ggplot2)
 library(grid)
 

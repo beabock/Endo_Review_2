@@ -1,3 +1,7 @@
+# BMB 2026-06-05
+# Runs Ollama on abstracts/PDFs on the Monsoon HPC cluster to extract structured
+# metadata (taxon names, tissue, country, etc.) from each paper. Cluster-only.
+
 import os
 import pandas as pd
 import json

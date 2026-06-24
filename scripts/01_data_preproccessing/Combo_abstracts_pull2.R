@@ -1,23 +1,6 @@
-# =============================================================================
-# Combo_abstracts_pull2.R - Combined abstract dataset creation (Pull 2)
-# =============================================================================
-# MANUAL-ONLY STEP:
-# This script is for manual acquisition/consolidation workflows and is
-# intentionally excluded from scripts/central_run_everything.py.
-#
-# Purpose: Combine and deduplicate scientific abstracts from multiple bibliographic databases
-#
-# Description: This script combines and deduplicates scientific abstracts from Web of Science (WoS),
-# Scopus, and PubMed databases to create a comprehensive dataset for analysis of fungal endophyte research.
-# The script processes data collected in the second pull (2025) using a specific search query for fungal
-# endophytes across various plant types and publication years. The workflow involves reading raw data files,
-# standardizing column names across databases, combining datasets, filtering for quality and relevance,
-# and performing multi-stage deduplication (DOI-based, abstract-based, document type filtering, title-based).
-#
-# Dependencies: readr, dplyr, tidyr, stringr, digest, here
-#
-# Author: BB
-# Date: 2024-09-22
+# BMB 2024-09-22
+# Manual step — combines and deduplicates abstract exports from Web of Science,
+# Scopus, and PubMed. Not run by the automated pipeline.
 # Version: 2.0
 #
 # Inputs/Outputs: Reads WoS .txt files, Scopus .csv files, and PubMed .csv file from data/raw/All_abstracts_8-14-25/;

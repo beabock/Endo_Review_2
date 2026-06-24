@@ -1,23 +1,7 @@
 #!/usr/bin/env Rscript
-# =================================================================================
-# 08_biodiversity_priority_overlap.R
-# =================================================================================
-# Purpose: Compare understudied endophyte regions and biomes with current
-#          biodiversity-priority estimates such as hotspots, richness layers,
-#          or other externally supplied priority tables.
-#
-# Expected inputs:
-#   - results/understudied_analysis/unstudied_countries.csv
-#   - data/biodiversity_priority_countries.csv (optional but recommended)
-#   - data/biodiversity_priority_biomes.csv (optional)
-#
-# Optional input formats:
-#   country file columns:
-#     - iso_a3 or country / country_name
-#     - priority_score or richness_estimate
-#     - priority_label or source
-#
-#   biome file columns:
+# BMB 2026-06-05
+# Tests whether understudied endophyte regions overlap with global biodiversity
+# priority areas (hotspots, endemic species richness, threatened species counts).
 #     - biome_clean or biome
 #     - priority_score or richness_estimate
 #     - priority_label or source

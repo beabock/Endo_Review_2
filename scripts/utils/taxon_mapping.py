@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 #!/usr/bin/env python3
-"""
-Centralized taxon mapping and detection utility.
-Single source of truth for taxon aliases, suppressions, and keep-lists across Python/R scripts.
-Extracted from scattered constants in taxa_synonym_resolution.py, 01_standardize_metadata.py,
-02_dataset_filtering.py, and 02_ollama_cleanup.R.
-"""
+# -*- coding: utf-8 -*-
+# BMB 2026-06-05
+# Centralized taxon alias and suppression logic for Python scripts. Single source of
+# truth for what counts as a valid/invalid taxon across the pipeline.
 
 import json
 import os

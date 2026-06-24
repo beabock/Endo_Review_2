@@ -1,23 +1,7 @@
 #!/usr/bin/env python3
-"""
-Biodiversity priority overlap robustness and statistical tests.
-
-Tests use ACTUAL NUMERIC METRICS from World Bank data (endemic species count, 
-threatened probability, etc.) instead of binary priority flags. This gives tests
-real statistical signal.
-
-Tests conducted:
-1. Chi-square independence test (understudied vs high-priority status)
-2. Spearman rank correlation (priority metric vs study count)
-3. Binomial test (observed vs random overlap in top quantile)
-4. Sensitivity analysis (different priority score quantile thresholds)
-5. Quartile-based study-count unevenness test (Kruskal-Wallis)
-6. Regional subsampling (chi-square by continent)
-
-Outputs: results/biodiversity_priority_overlap/robustness_report.txt
-         results/biodiversity_priority_overlap/sensitivity_analysis.csv
-         results/biodiversity_priority_overlap/priority_quartile_unevenness.csv
-         results/biodiversity_priority_overlap/regional_subsampling.csv
+# BMB 2026-06-05
+# Robustness and statistical tests for the biodiversity priority overlap —
+# chi-square, Spearman, binomial, sensitivity analysis, and regional subsampling.
          results/biodiversity_priority_overlap/country_land_area_summary.csv
          results/biodiversity_priority_overlap/area_normalized_summary.csv
          results/biodiversity_priority_overlap/gdp_biodiversity_correlation.csv

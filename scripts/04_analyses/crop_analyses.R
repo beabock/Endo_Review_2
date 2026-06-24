@@ -1,3 +1,7 @@
+# BMB 2026-06-05
+# Quantifies the bias toward crop families (Poaceae, Fabaceae, Solanaceae) and
+# key fungal genera (Fusarium, Aspergillus, Epichloe) in the dataset.
+
 library(dplyr)
 library(readr)
 library(stringr)

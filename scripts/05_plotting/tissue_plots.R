@@ -1,3 +1,7 @@
+# BMB 2026-06-24
+# Plots tissue/plant-part sampling bias — raw term counts, country and family
+# heatmaps, co-occurrence matrix, biome breakdown, and trends over time.
+
 library(dplyr)
 library(ggplot2)
 library(readr)

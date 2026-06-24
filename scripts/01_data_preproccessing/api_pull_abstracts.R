@@ -1,23 +1,7 @@
+# BMB 2024-09-22
+# Manual step — pulls abstracts from PubMed, Scopus, and Web of Science APIs.
+# Needs credentials; run interactively, not part of the automated pipeline.
 
-
-# =============================================================================
-# api_pull_abstracts.R - Pull abstracts from PubMed, Scopus, and Web of Science
-# =============================================================================
-# MANUAL-ONLY STEP:
-# This script requires interactive/API-credentialed execution and is intentionally
-# excluded from scripts/central_run_everything.py.
-#
-# Purpose: Fetch and parse abstracts from multiple academic databases
-#
-# Description: Script to retrieve abstracts from PubMed, Scopus, and Web of Science using their respective APIs,
-# with functions for batch processing and XML parsing. Focuses on endophyte-related literature with specific
-# search criteria covering fungal endophytes across various plant types and publication years.
-#
-# Dependencies: rentrez (PubMed), rscopus (Scopus), wosr (Web of Science), dplyr, tibble, purrr, xml2
-#
-# Author: BB
-# Date: 2024-09-22
-#
 # Inputs/Outputs: Outputs CSV files containing abstracts: pubmed_pull_8-14-25.csv, scopus_results.csv, wos_results.csv
 #
 # =============================================================================

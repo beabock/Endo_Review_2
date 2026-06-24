@@ -1,3 +1,6 @@
+# BMB 2026-06-05
+# Merges per-task Ollama extraction output chunks from Monsoon into a single CSV.
+
 import pandas as pd
 import glob
 import os

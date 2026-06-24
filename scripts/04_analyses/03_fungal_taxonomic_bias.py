@@ -1,23 +1,6 @@
 #!/usr/bin/env python3
-# =================================================================================
-# 03_fungal_taxonomic_bias.py
-# =================================================================================
-# Purpose: Analyze fungal taxonomic representation and bias in the endophyte dataset
-#
-# Analyses:
-#   - Fungal species/genus/family coverage by phylum
-#   - Comparison of fungal vs plant research representation
-#   - Identification of well-studied vs under-studied fungal phyla
-#   - Filtering and accounting for mycorrhizal associations
-#   - Top-studied fungal genera
-#
-# Output files:
-#   - fungal_phylum_coverage.csv (phylum-level diversity metrics)
-#   - fungal_genus_coverage.csv (genus representation by phylum)
-#   - fungal_family_coverage.csv (family representation by phylum)
-#   - top_studied_fungal_genera.csv (top 100 genera by study count)
-#   - fungal_vs_plant_comparison.csv (comparative analysis)
-#   - mycorrhizal_annotation.csv (flag mycorrhizal records if available)
+# BMB 2026-06-05
+# Summarizes fungal taxon representation at species, genus, and family level by phylum.
 #
 # Usage: python3 scripts/04_analyses/03_fungal_taxonomic_bias.py
 # =================================================================================

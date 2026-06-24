@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# BMB 2026-06-05
+# Filters out low-quality records — irrelevant papers, bad taxon entries,
+# and clear non-endophyte studies.
+
 import csv
 import os
 from importlib import util

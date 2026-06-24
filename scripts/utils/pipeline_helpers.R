@@ -1,7 +1,6 @@
-# pipeline_helpers.R
-
-# Define shared directory paths to ensure consistency across all analysis scripts.
-# This avoids errors from typos or case-sensitivity issues on different filesystems.
+# BMB 2026-06-05
+# Shared path constants and helper functions. Source this at the top of analysis
+# scripts to keep directory references consistent.
 
 RESULTS_DIR <- "results"
 TAXONOMY_DIR <- file.path(RESULTS_DIR, "taxonomy_analysis")

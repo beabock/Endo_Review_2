@@ -1,22 +1,6 @@
 #!/usr/bin/env python3
-"""
-Merge per-shard ubiquity claims outputs into final aggregated files.
-
-Usage:
-  python scripts/04_analyses/merge_ubiquity_shards.py \
-    --input-dir results/ubiquity_claims \
-    --output-dir results/ubiquity_claims_final \
-    --n-shards 4
-
-Combines:
-  - results/ubiquity_claims/shard_0/ubiquity_claims_all.csv
-  - results/ubiquity_claims/shard_1/ubiquity_claims_all.csv
-  - ...etc...
-Into:
-  - results/ubiquity_claims_final/ubiquity_claims_all.csv
-  - results/ubiquity_claims_final/ubiquity_claims_positive.csv
-  - results/ubiquity_claims_final/ubiquity_claims_all.jsonl
-"""
+# BMB 2026-06-05
+# Merges the 4 shard outputs from the parallel ubiquity claims detection into one final file.
 
 import argparse
 import os

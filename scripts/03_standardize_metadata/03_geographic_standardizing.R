@@ -1,3 +1,7 @@
+# BMB 2026-06-05
+# Maps free-text location mentions to ISO codes. Handles ambiguous terms
+# (regions, biomes, etc.) and flags anything that couldn't be resolved.
+
 library(rnaturalearth)
 library(sf)
 library(ggplot2)

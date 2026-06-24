@@ -1,19 +1,7 @@
 #!/usr/bin/env python3
-# =================================================================================
-# 05_manuscript_summary.py
-# =================================================================================
-# Purpose: Generate a comprehensive dataset description report for the manuscript,
-#          aggregating high-level statistics about the endophyte review data.
-#
-# Inputs:
-#  - data/Ollama_cleaned_synresolved_standardized_year.csv
-#
-# Outputs:
-#  - results/manuscript_dataset_summary.md
-#  - results/manuscript_dataset_summary.txt
-#
-# Usage: python3 scripts/04_analyses/05_manuscript_summary.py
-# =================================================================================
+# BMB 2026-06-05
+# Generates the high-level dataset statistics (corpus size, temporal range,
+# taxonomic resolution) for the manuscript methods section.
 
 import pandas as pd
 from pathlib import Path

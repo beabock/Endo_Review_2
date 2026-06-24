@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# BMB 2026-06-05
+# Quick QA summary — prints column completeness stats after filtering. Not in main pipeline.
+
 import argparse
 import csv
 from collections import Counter

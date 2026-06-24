@@ -1,17 +1,7 @@
 #!/usr/bin/env Rscript
-# =================================================================================
-# taxonomy_representation.R
-# =================================================================================
-# Purpose: Create publication-ready plots showing absolute and relative 
-#          representation of plant taxa (species, genera, families) by phylum
-#
-# Output plots:
-#   - Absolute counts: known vs. studied taxa by phylum
-#   - Relative coverage: percentage of known taxa that are studied by phylum
-#   - Separate visualizations for species, genera, and families
-#
-# Usage: Rscript scripts/05_plotting/taxonomy_representation.R
-# =================================================================================
+# BMB 2026-06-05
+# All the taxonomy coverage plots — absolute counts and relative representation
+# of plant species, genera, and families by phylum.
 
 library(dplyr)
 library(readr)

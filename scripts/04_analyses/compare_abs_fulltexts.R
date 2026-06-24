@@ -1,10 +1,7 @@
 #!/usr/bin/env Rscript
-# =================================================================================
-# compare_abs_fulltexts.R
-# =================================================================================
-# Purpose: Compare abstract-only vs full-text results across core analysis metrics.
-# Outputs are written to results/abs_fulltext_comparison/<doc_type>/
-# =================================================================================
+# BMB 2026-06-05
+# Compares analysis results between abstract-only and full-text extraction runs
+# across all core metrics.
 
 suppressPackageStartupMessages({
 	library(dplyr)

@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
+# BMB 2026-06-05
+# Quick helper to find Ollama model files and check what's available on Monsoon.
 set -euo pipefail
-
-# Quick helper to discover Ollama model files and common model directories on Monsoon
-# Usage: run on the cluster node where Ollama is (login or compute). Avoid running as root.
 
 echo "== Environment summary =="
 echo "USER: ${USER:-$(whoami)}"

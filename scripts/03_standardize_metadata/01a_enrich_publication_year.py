@@ -1,12 +1,6 @@
 #!/usr/bin/env python3
-# =================================================================================
-# 01a_enrich_publication_year.py
-# =================================================================================
-# Purpose: Enrich the dataset with publication year by querying the CrossRef API
-#          using the DOI column.
-#
-# Usage: python3 scripts/03_standardize_metadata/01a_enrich_publication_year.py
-# =================================================================================
+# BMB 2026-06-24
+# Looks up missing publication years via CrossRef using DOIs.
 
 import pandas as pd
 import json

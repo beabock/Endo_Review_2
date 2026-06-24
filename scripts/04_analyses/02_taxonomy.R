@@ -1,3 +1,7 @@
+# BMB 2026-06-05
+# Computes plant and fungal taxonomic coverage against the GBIF backbone —
+# how much of known diversity we've actually studied.
+
 library(dplyr)
 library(readr)
 library(stringr)

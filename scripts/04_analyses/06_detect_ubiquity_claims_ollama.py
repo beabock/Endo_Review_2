@@ -1,19 +1,7 @@
 #!/usr/bin/env python3
-"""
-Detect claims that fungal endophytes are ubiquitous (or equivalent wording)
-from full-text documents using an Ollama model.
-
-Inputs:
-- A directory with full-text files (.pdf, .txt, .md)
-- Optional CSV with abstract text for papers without full text
-
-Outputs:
-- results/ubiquity_claims/ubiquity_claims_all.csv
-- results/ubiquity_claims/ubiquity_claims_positive.csv
-- results/ubiquity_claims/ubiquity_claims_all.jsonl
-
-This script is intended to run on Monsoon and uses the Ollama Python SDK.
-"""
+# BMB 2026-06-05
+# Uses Ollama to scan full-text PDFs for explicit ubiquity claims about endophytes.
+# Designed for Monsoon HPC; outputs per-shard CSVs merged by merge_ubiquity_shards.py.
 
 from __future__ import annotations
 

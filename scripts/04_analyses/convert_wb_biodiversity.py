@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# BMB 2026-06-05
+# Reshapes World Bank biodiversity CSVs into a format that joins cleanly with country data.
+
 import csv
 import os
 

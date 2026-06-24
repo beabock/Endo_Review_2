@@ -1,21 +1,7 @@
 #!/usr/bin/env Rscript
-# =================================================================================
-# 04_interaction_bias.R
-# =================================================================================
-# Purpose: Analyze relationships between different metadata categories to reveal 
-#          complex interaction biases (e.g., Fungal Phylum vs Continent).
-#
-# Analyses:
-#   - Fungal Phylum x Continent Heatmap
-#   - Plant Phylum x Continent Heatmap
-#   - Fungal Phylum x Tissue Heatmap
-#   - Plant Family representation bias
-#
-# Outputs:
-#   - results/interaction_analysis/ (various CSVs and PNGs)
-#
-# Usage: Rscript scripts/04_analyses/04_interaction_bias.R
-# =================================================================================
+# BMB 2026-06-05
+# Looks at how fungal phylum, tissue type, and continent relate to each other —
+# heatmaps and cross-tabulations for the interaction bias analysis.
 
 library(dplyr)
 library(ggplot2)

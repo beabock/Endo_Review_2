@@ -1,5 +1,6 @@
-# Parent-ISO crosswalk for disputed territories and non-sovereign geometries.
-# Purpose: Keep country joins stable across standardization, enrichment, and plotting.
+# BMB 2026-06-05
+# Maps disputed territories and non-sovereign geometries to their parent ISO code
+# for stable country joins across the pipeline.
 
 # Name-based mapping for world geometries that lack ISO A3 codes in rnaturalearth.
 disputed_territory_parent_iso <- dplyr::tribble(

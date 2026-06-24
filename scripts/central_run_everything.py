@@ -1,19 +1,7 @@
 #!/usr/bin/env python3
-"""Run the endophyte pipeline scripts sequentially.
-
-Manual-only scripts in scripts/01_data_preproccessing (api pull and combo
-consolidation) are intentionally excluded from this automated runner.
-
-Execution order:
-1) scripts/01_data_preproccessing/02_ollama_cleanup.R
-2) scripts/02_taxa_resolution/taxa_synonym_resolution.py
-3) all .py/.R scripts in scripts/03_standardize_metadata (sorted)
-4) all .py/.R scripts in scripts/04_analyses (sorted)
-5) all .py/.R scripts in scripts/05_plotting (sorted)
-
-If scripts/05_plotting has no runnable files, the runner falls back to
-scripts/plotting for compatibility with older layouts.
-"""
+# BMB 2026-06-24
+# Runs the full analysis pipeline sequentially. Pass --dry-run to preview the
+# execution order, or --continue-on-error to keep going past failures.
 
 from __future__ import annotations
 

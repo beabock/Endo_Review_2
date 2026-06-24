@@ -1,13 +1,6 @@
 #!/usr/bin/env Rscript
-# =================================================================================
-# 03_identify_understudied_taxa.R
-# =================================================================================
-# Purpose: To identify plant taxa (families, genera, species) and countries that
-#          are not represented in the endophyte literature dataset.
-#
-# Output:
-#   - CSV files listing unstudied taxa and countries.
-# =================================================================================
+# BMB 2026-06-05
+# Finds plant families, genera, species, and countries with zero or very few studies.
 
 library(dplyr)
 library(readr)

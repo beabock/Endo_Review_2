@@ -1,7 +1,6 @@
-# Country ISO 3-letter code mapping
-# Created: 2026-04-14
-# Purpose: Centralized mapping of country names and variants to ISO A3 codes
-# Usage: source("scripts/utils/country_mapping.R")
+# BMB 2026-04-14
+# Centralized country name → ISO A3 lookup table (tribble). Source this in R scripts
+# that need country normalization. See also country_mapping.py for Python.
 
 country_iso_mapping <- tribble(
   ~country_clean, ~iso_a3,

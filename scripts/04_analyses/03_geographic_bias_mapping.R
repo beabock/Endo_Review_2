@@ -1,23 +1,6 @@
 #!/usr/bin/env Rscript
-# =================================================================================
-# 03_geographic_bias_mapping.R
-# =================================================================================
-# Purpose: Create interactive geographic visualizations and identify geographic biases
-#
-# Analyses:
-#   - Interactive leaflet map showing study density by country
-#   - Regional/continental breakdown of research effort
-#   - Identification of over-studied vs under-studied regions
-#   - Static heatmaps and bar plots for publication
-#
-# Output files:
-#   - interactive_study_density.html (leaflet map)
-#   - geographic_bias_metrics.csv (country-level metrics and bias classification)
-#   - continental_breakdown.csv (regional study summaries)
-#   - geographic_bias_heatmap.png (static heatmap by region)
-#
-# Usage: Rscript scripts/04_analyses/03_geographic_bias_mapping.R
-# =================================================================================
+# BMB 2026-06-05
+# Makes the interactive Leaflet map and static heatmaps showing study density by country.
 
 library(dplyr)
 library(readr)

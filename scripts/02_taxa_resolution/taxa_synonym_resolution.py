@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
-"""Resolve fungal_taxon and plant_host names against GBIF backbone.
-
-This script is designed for non-interactive CLI/HPC execution and preserves the
-input row count (one output row per input row).
-"""
+# BMB 2026-06-05
+# Resolves fungal and plant taxon names against the GBIF backbone — handles synonyms,
+# abbreviations, and multi-name cells. Designed for HPC batch runs with checkpointing.
 
 from __future__ import annotations
 

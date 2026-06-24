@@ -1,3 +1,7 @@
+# BMB 2026-06-17
+# Adds country-level metadata (GDP, population, centroid coordinates) to each
+# record. Used for the geographic bias analyses in Stage 04.
+
 library(dplyr)
 library(rnaturalearth)
 library(sf)

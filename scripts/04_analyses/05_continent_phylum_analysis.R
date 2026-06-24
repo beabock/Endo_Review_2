@@ -1,10 +1,6 @@
 #!/usr/bin/env Rscript
-# =================================================================================
-# 05_continent_phylum_analysis.R
-# =================================================================================
-# Purpose: Summarize plant phyla studied across different continents, 
-#          specifically identifying understudied groups (e.g., Bryophyta) by region.
-# =================================================================================
+# BMB 2026-06-17
+# Breaks down which plant phyla are understudied by continent, with a focus on bryophytes.
 
 library(dplyr)
 library(readr)
