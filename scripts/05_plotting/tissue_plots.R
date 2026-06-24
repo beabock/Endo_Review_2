@@ -155,7 +155,7 @@ cat("  Plant tissue parts saved to: ", PLANT_COUNTS_FILE, "\n", sep = "")
 cat("  Raw plot saved to: ", RAW_PLOT_FILE, "\n", sep = "")
 cat("  Plant tissue-part plot saved to: ", PLANT_PLOT_FILE, "\n", sep = "")
 
-# Tissue × Country Heatmap (Geographic bias in tissue choice)
+# Tissue x Country Heatmap (Geographic bias in tissue choice)
 tissue_country <- df %>%
 	transmute(
 		paper_id = as.character(paper_id),
@@ -208,7 +208,7 @@ p_tissue_country <- ggplot(tissue_country_filtered, aes(x = tissue_token, y = fc
 tissue_country_file <- file.path(OUTPUT_DIR, "tissue_country_heatmap.png")
 ggsave(tissue_country_file, p_tissue_country, width = 6.5, height = 6, dpi = 300)
 
-# Tissue × Plant Family Heatmap (Host-tissue specialization)
+# Tissue x Plant Family Heatmap (Host-tissue specialization)
 tissue_family <- df %>%
 	transmute(
 		paper_id = as.character(paper_id),
@@ -419,7 +419,7 @@ p_richness <- ggplot(tissue_richness, aes(x = n_tissues)) +
 richness_file <- file.path(OUTPUT_DIR, "tissue_richness_distribution.png")
 ggsave(richness_file, p_richness, width = 6.5, height = 5, dpi = 300)
 
-# Top Tissue × Top Plant Family Tile Plot (Focused cross-tab)
+# Top Tissue x Top Plant Family Tile Plot (Focused cross-tab)
 top_tissue_x_family <- tissue_family %>%
 	filter(tissue_token %in% top_tissues_fam, plant_host %in% top_families) %>%
 	complete(plant_host, tissue_token, fill = list(study_count = 0)) %>%
@@ -523,12 +523,12 @@ if ("publication_year" %in% names(df)) {
 }
 
 cat("\nExtended tissue visualizations:\n")
-cat("  1. Tissue × Country Heatmap: ", tissue_country_file, "\n", sep = "")
-cat("  2. Tissue × Plant Family Heatmap: ", tissue_family_file, "\n", sep = "")
+cat("  1. Tissue x Country Heatmap: ", tissue_country_file, "\n", sep = "")
+cat("  2. Tissue x Plant Family Heatmap: ", tissue_family_file, "\n", sep = "")
 cat("  3. Tissue Co-occurrence Network: ", cooccurrence_file, "\n", sep = "")
 cat("  4. Data Completeness Waterfall: ", completeness_file, "\n", sep = "")
 cat("  5. Tissue by Biome (Stacked): ", biome_file, "\n", sep = "")
 cat("  6. Tissue Richness Distribution: ", richness_file, "\n", sep = "")
-cat("  7. Top Tissue × Family Tile: ", tile_file, "\n", sep = "")
+cat("  7. Top Tissue x Family Tile: ", tile_file, "\n", sep = "")
 cat("  8. Cumulative Coverage Curve: ", coverage_file, "\n", sep = "")
 cat("  9. Tissue Trends Over Time: ", tissue_time_file, "\n", sep = "")

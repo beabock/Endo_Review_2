@@ -1,5 +1,5 @@
 # BMB 2026-04-14
-# Centralized country name → ISO A3 lookup table (tribble). Source this in R scripts
+# Centralized country name -> ISO A3 lookup table (tribble). Source this in R scripts
 # that need country normalization. See also country_mapping.py for Python.
 
 country_iso_mapping <- tribble(

@@ -62,7 +62,7 @@ load_taxonomy_data <- function(filename, level_name, phylum_order = NULL) {
   # Identify the known/studied column pair for this level
   known_col <- colnames(data)[grepl("^known_", colnames(data))]
   
-  # Only filter if we have a valid known column
+  # Only filter if a valid known column exists
   if (length(known_col) > 0) {
     data <- data %>%
       filter(.data[[known_col]] > 0)
@@ -266,7 +266,7 @@ plot_coverage_lollipop <- function(summary_data, title, taxon_label) {
 
 plot_taxonomy_heatmap <- function(summary_data, title, taxon_label) {
   # Remove redundant count from labels for heatmap view as it is shown in the 'Known' column
-  # We also convert to factor to preserve the phylum ordering
+  # Convert to factor to preserve phylum ordering
   summary_data <- summary_data %>%
     mutate(phylum_label = sub("\n.*$", "", phylum_label)) %>%
     mutate(phylum_label = factor(phylum_label, levels = rev(unique(phylum_label))))

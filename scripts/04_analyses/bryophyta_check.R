@@ -31,7 +31,7 @@ gbif_taxa <- read_tsv(
   distinct(taxonID, .keep_all = TRUE)
 
 cat("Matching plants to phyla...\n")
-# Extract accepted IDs from our data
+# Extract accepted IDs from the dataset
 df_matched <- df %>%
   filter(!is.na(plant_host_accepted_ids), plant_host_accepted_ids != "", !is.na(country), country %in% valid_countries) %>%
   mutate(accepted_id = str_split(plant_host_accepted_ids, "\\s*;\\s*")) %>%

@@ -240,7 +240,7 @@ cat("  Saved: ", BIAS_HEATMAP_FILE, "\n", sep = "")
 
 message("\nGeographic bias mapping complete.")
 message("Total studies across all countries: ", total_studies)
-message("Countries with ≥1 study: ", countries_with_studies, " / ", total_countries)
+message("Countries with >=1 study: ", countries_with_studies, " / ", total_countries)
 message("Top 5 countries by study count:")
 print(bias_metrics %>% slice_head(n = 5) %>% select(country_name, study_count, bias_class))
 
