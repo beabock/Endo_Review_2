@@ -6,7 +6,7 @@ RESULTS_DIR <- "results"
 TAXONOMY_DIR <- file.path(RESULTS_DIR, "taxonomy_analysis")
 CACHE_DIR <- file.path(TAXONOMY_DIR, "cache")
 
-# Helper function to read cached objects, with fallback from qs to rds.
+# Read cached object, preferring qs format with rds fallback.
 cache_read_object <- function(qs_path, rds_path) {
   if (file.exists(qs_path)) {
     if (requireNamespace("qs", quietly = TRUE)) {

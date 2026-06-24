@@ -170,7 +170,7 @@ write.csv(na_countries, "results/countries_study_count_NA.csv", row.names = FALS
 write.csv(zero_countries, "results/countries_study_count_zero.csv", row.names = FALSE)
 
 
-# === TIME SERIES PLOT: TOP COUNTRIES OVER TIME ===
+# Time series: top countries over time
 cat("\nGenerating time series plot for top countries...\n")
 
 TIME_SERIES_INPUT_FILE <- "data/Ollama_cleaned_synresolved_standardized_year.csv"
@@ -222,7 +222,7 @@ if (file.exists(TIME_SERIES_INPUT_FILE)) {
 }
 
 
-# === SCATTER PLOTS: GDP AND LATITUDE ===
+# Scatter plots: GDP and latitude
 
 # Load analysis data for scatter plots
 analysis_data <- country_papers %>%
