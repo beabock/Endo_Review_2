@@ -173,7 +173,7 @@ make_scatter <- function(df, metric_name, output_path, plot_title, plot_subtitle
   return(p)
 }
 
-# ===== PLOT 1: Observed vs expected overlap (percent) =====
+# PLOT 1: Observed vs expected overlap (percent)
 p1 <- ggplot(sensitivity, aes(x = priority_label, group = 1)) +
   geom_line(aes(y = expected_overlap_pct, color = "Expected by chance"), linewidth = 1.0, linetype = "dashed") +
   geom_point(aes(y = expected_overlap_pct, color = "Expected by chance"), size = 2.8) +
@@ -214,7 +214,7 @@ p1 <- ggplot(sensitivity, aes(x = priority_label, group = 1)) +
 ggsave(OUTPUT_PLOT, p1, width = 6.5, height = 5, dpi = 300, bg = "white")
 cat("Main plot saved to:", OUTPUT_PLOT, "\n")
 
-# ===== PLOT 2: Observed vs expected counts =====
+# PLOT 2: Observed vs expected counts
 p2 <- ggplot(sensitivity, aes(x = priority_label, group = 1)) +
   geom_linerange(aes(ymin = expected_overlap_count, ymax = n_overlap_countries, color = "Observed minus expected"), linewidth = 1.2) +
   geom_point(aes(y = n_overlap_countries, color = "Observed overlap"), size = 3.2) +
@@ -262,7 +262,7 @@ p2_combined <- grid.arrange(
 ggsave(OUTPUT_PLOT_DETAILED, p2_combined, width = 6.5, height = 8, dpi = 300, bg = "white")
 cat("Detailed plot saved to:", OUTPUT_PLOT_DETAILED, "\n")
 
-# ===== PLOT 3: Metric scatter plots (combined + standalone) =====
+# PLOT 3: Metric scatter plots (combined + standalone)
 scatter_total <- make_scatter(
   plot_data,
   "Total species",
@@ -290,7 +290,7 @@ scatter_threatened <- make_scatter(
   "World Bank threatened species probability"
 )
 
-# ===== PLOT 3B: Area-normalized hotspot plots (count metrics only) =====
+# PLOT 3B: Area-normalized hotspot plots (count metrics only)
 make_hotspot_scatter <- function(df, metric_name, output_path, plot_title, plot_subtitle, x_label) {
   metric_df <- df %>% filter(metric_label == metric_name)
 
@@ -465,7 +465,7 @@ if (!is.null(scatter_total)) cat("Standalone total-species scatter saved to:", O
 if (!is.null(scatter_endemic)) cat("Standalone endemic-species scatter saved to:", OUTPUT_SCATTER_ENDEMIC, "\n")
 if (!is.null(scatter_threatened)) cat("Standalone threatened-probability scatter saved to:", OUTPUT_SCATTER_THREATENED, "\n")
 
-# ===== PLOT 4: Study-count unevenness across biodiversity-metric quartiles =====
+# PLOT 4: Study-count unevenness across biodiversity-metric quartiles
 unevenness_data <- plot_data %>%
   group_by(metric_label) %>%
   mutate(metric_quartile = ntile(metric_value, 4)) %>%
@@ -642,7 +642,7 @@ if (!is.null(uneven_total)) cat("Standalone unevenness plot saved to:", OUTPUT_U
 if (!is.null(uneven_endemic)) cat("Standalone unevenness plot saved to:", OUTPUT_Unevenness_ENDEMIC, "\n")
 if (!is.null(uneven_threatened)) cat("Standalone unevenness plot saved to:", OUTPUT_Unevenness_THREATENED, "\n")
 
-# ===== PLOT 5: GDP vs Biodiversity and Study Count =====
+# PLOT 5: GDP vs Biodiversity and Study Count
 
 gdp_corr_data <- plot_data %>%
   select(metric_label, gdp_log10, study_count_log, metric_value, metric_density_per_1000_km2) %>%
@@ -678,7 +678,7 @@ gdp_corr_plot <- ggplot(gdp_corr_data, aes(x = gdp_log10, y = value)) +
 ggsave(OUTPUT_GDP_CORR_PLOT, gdp_corr_plot, width = 6.5, height = 5, dpi = 300, bg = "white")
 cat("GDP correlation plot saved to:", OUTPUT_GDP_CORR_PLOT, "\n")
 
-# ===== PLOT 6: Biodiversity Distribution of Studied vs. Understudied Countries =====
+# PLOT 6: Biodiversity Distribution of Studied vs. Understudied Countries
 
 plot_data_dist <- plot_data %>%
   mutate(
@@ -716,7 +716,7 @@ dist_plot <- ggplot(plot_data_dist, aes(x = understudied_cat, y = log10(metric_v
 ggsave(OUTPUT_UNDERSTUDIED_DIST_PLOT, dist_plot, width = 6.5, height = 5, dpi = 300, bg = "white")
 cat("Understudied distribution plot saved to:", OUTPUT_UNDERSTUDIED_DIST_PLOT, "\n")
 
-# ===== PLOT 7: Modeling Results =====
+# PLOT 7: Modeling Results
 
 modeling_results <- read_csv("results/biodiversity_priority_overlap/modeling_results.csv", show_col_types = FALSE)
 
@@ -753,7 +753,7 @@ modeling_plot <- ggplot(modeling_plot_data, aes(x = coefficient, y = variable, c
 ggsave(OUTPUT_MODELING_PLOT, modeling_plot, width = 6.5, height = 6, dpi = 300, bg = "white")
 cat("Modeling results plot saved to:", OUTPUT_MODELING_PLOT, "\n")
 
-# ===== PLOT 8: Correlation Heatmap =====
+# PLOT 8: Correlation Heatmap
 
 corr_data <- plot_data %>%
   select(study_count_log, gdp_log10, metric_value, metric_density_per_1000_km2, metric_label) %>%

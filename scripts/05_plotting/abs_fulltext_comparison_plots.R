@@ -94,9 +94,7 @@ add_overlap_row <- function(label, abs_set, full_set) {
 	)
 }
 
-# -----------------------------------------------------------------------------
 # 1) Comparison table
-# -----------------------------------------------------------------------------
 if (!file.exists(SUMMARY_FILE)) {
 	stop("Missing input file: ", SUMMARY_FILE)
 }
@@ -226,9 +224,7 @@ comparison_table <- bind_rows(summary_table, corr_table, overlap_table) %>%
 write_csv(comparison_table, TABLE_FILE)
 message("Saved comparison table to: ", TABLE_FILE)
 
-# -----------------------------------------------------------------------------
 # 2) Geographic bias scatter (country study counts)
-# -----------------------------------------------------------------------------
 if (file.exists(COUNTRY_ABS_FILE) && file.exists(COUNTRY_FULL_FILE)) {
 	abs_country <- read_csv(COUNTRY_ABS_FILE, show_col_types = FALSE) %>%
 		select(iso_a3, study_count)
@@ -265,9 +261,7 @@ if (file.exists(COUNTRY_ABS_FILE) && file.exists(COUNTRY_FULL_FILE)) {
 	message("Skipping country scatter: missing country_gdp_latitude_summary.csv files.")
 }
 
-# -----------------------------------------------------------------------------
 # 3) Relationship type distribution (percent of studies)
-# -----------------------------------------------------------------------------
 if (file.exists(REL_ABS_FILE) && file.exists(REL_FULL_FILE)) {
 	rel_abs <- read_csv(REL_ABS_FILE, show_col_types = FALSE) %>%
 		mutate(doc_type_group = "Abstract")
@@ -315,9 +309,7 @@ if (file.exists(REL_ABS_FILE) && file.exists(REL_FULL_FILE)) {
 	message("Skipping relationship-type plot: missing input files.")
 }
 
-# -----------------------------------------------------------------------------
 # 4) Biome comparison (top biomes)
-# -----------------------------------------------------------------------------
 input_file <- if (file.exists(INPUT_YEAR)) INPUT_YEAR else INPUT_FINAL
 if (file.exists(input_file)) {
 	df <- read_csv(input_file, show_col_types = FALSE)
