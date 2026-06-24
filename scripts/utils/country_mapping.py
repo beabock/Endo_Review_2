@@ -1077,11 +1077,7 @@ def get_continent(iso):
 
 # Tissue, guild, and biome extraction functions for multi-column field recovery
 def extract_tissue_values(row, headers: List[str]) -> List[Tuple[str, str]]:
-    """
-    Extract tissue information from relevant columns (handles displaced values).
-    Returns list of (tissue_value, source_column) tuples.
-    Checks columns where tissue data might be embedded by LLM extraction.
-    """
+    """Return (tissue_value, source_column) tuples found across relevant columns."""
     tissue_keywords = [
         'root', 'leaf', 'stem', 'seed', 'fruit', 'flower', 'reproductive',
         'rhizosphere', 'rhizome', 'tuber', 'nodule', 'bark', 'wood', 'xylem',
@@ -1109,10 +1105,7 @@ def extract_tissue_values(row, headers: List[str]) -> List[Tuple[str, str]]:
 
 
 def extract_guild_values(row, headers: List[str]) -> List[Tuple[str, str]]:
-    """
-    Extract fungal guild information from relevant columns (handles displaced values).
-    Returns list of (guild_value, source_column) tuples.
-    """
+    """Return (guild_value, source_column) tuples found across relevant columns."""
     guild_keywords = [
         'pgpr', 'endophyte', 'endophytic', 'biocontrol', 'pathogen', 'pathogenic',
         'mycorrhiza', 'mycorrhizal', 'antagonist', 'saprotroph', 'decomposer',
@@ -1140,10 +1133,7 @@ def extract_guild_values(row, headers: List[str]) -> List[Tuple[str, str]]:
 
 
 def extract_biome_values(row, headers: List[str]) -> List[Tuple[str, str]]:
-    """
-    Extract biome information from relevant columns (handles displaced values).
-    Returns list of (biome_value, source_column) tuples.
-    """
+    """Return (biome_value, source_column) tuples found across relevant columns."""
     biome_keywords = [
         'forest', 'tropical', 'rainforest', 'woodland', 'grassland', 'prairie',
         'savanna', 'desert', 'mountain', 'alpine', 'tundra', 'wetland',
@@ -1173,10 +1163,7 @@ def extract_biome_values(row, headers: List[str]) -> List[Tuple[str, str]]:
 
 
 def find_country_in_text(text: str) -> Optional[str]:
-    """
-    Find country name in text using word boundaries.
-    Returns the ISO A3 code if found, None otherwise.
-    """
+    """Return ISO A3 code for the first country name found in text, or None."""
     if not text or not isinstance(text, str):
         return None
     
@@ -1196,12 +1183,7 @@ def find_country_in_text(text: str) -> Optional[str]:
 
 
 def find_all_countries_in_text(text: str) -> List[str]:
-    """
-    Find ALL country names in text using word boundaries.
-    Returns list of unique ISO A3 codes found, empty list if none.
-    Prioritizes longer matches to avoid substring conflicts (e.g., 'united states' over 'united').
-    Shared geographic regions (e.g. 'great plains') return all associated countries.
-    """
+    """Return list of unique ISO A3 codes for all country names found in text."""
     if not text or not isinstance(text, str):
         return []
 
@@ -1230,12 +1212,7 @@ def find_all_countries_in_text(text: str) -> List[str]:
 
 
 def consolidate_country_data(row, headers: List[str]) -> Optional[str]:
-    """
-    Consolidate country information across multiple data columns.
-    Searches specified columns for country matches.
-    Returns ISO A3 code if found, None otherwise.
-    DEPRECATED: Use extract_all_countries() for comprehensive multi-country detection.
-    """
+    """Return ISO A3 code from first matching country column, or None. Deprecated: use extract_all_countries()."""
     search_columns = ["country", "text", "location", "study_country", "relevant_countries"]
     
     for col in search_columns:
@@ -1262,13 +1239,7 @@ for country_name, iso_code in COUNTRY_TO_ISO.items():
 
 
 def extract_all_countries(row, headers: List[str]) -> List[Tuple[str, str]]:
-    """
-    Extract ALL country information from relevant columns (fast).
-    Returns list of (iso_code, source_column) tuples.
-    Checks priority-ordered columns most likely to contain geographic data.
-    Uses pre-compiled regex patterns for word-boundary matching (one-time cost).
-    Deduplicates on ISO code - keeps first source found.
-    """
+    """Return (iso_code, source_column) tuples for all countries found across priority-ordered columns."""
     found_countries = {}  # {iso_code: source_column} - keeps first source found
     
     # Columns to check, in priority order (most likely to have geographic data first)
@@ -1316,10 +1287,7 @@ def extract_all_countries(row, headers: List[str]) -> List[Tuple[str, str]]:
 
 
 def get_country_name(alias: str) -> Optional[str]:
-    """
-    Get canonical country name for an alias.
-    Returns the canonical name if found, original input otherwise.
-    """
+    """Return canonical country name for an alias, or the original input if not found."""
     if not alias or not isinstance(alias, str):
         return alias
     
@@ -1328,10 +1296,7 @@ def get_country_name(alias: str) -> Optional[str]:
 
 
 def get_iso_code(country_name: str) -> Optional[str]:
-    """
-    Get ISO A3 code for a country name.
-    Returns ISO code if found, None otherwise.
-    """
+    """Return ISO A3 code for a country name, or None if not found."""
     if not country_name or not isinstance(country_name, str):
         return None
     
@@ -1339,10 +1304,7 @@ def get_iso_code(country_name: str) -> Optional[str]:
 
 
 def get_countries_for_iso(iso_code: str) -> List[str]:
-    """
-    Get all country name variants for an ISO A3 code.
-    Returns list of country names, empty list if code not found.
-    """
+    """Return all country name variants for an ISO A3 code."""
     if not iso_code or not isinstance(iso_code, str):
         return []
     

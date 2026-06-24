@@ -126,10 +126,7 @@ def get_default_plant_classes() -> FrozenSet[str]:
 
 # Helper functions for common checks
 def should_skip_token(token: str) -> bool:
-    """
-    Check if a token should be skipped (NA, non-taxon phrase, non-target kingdom).
-    Returns True if token matches any suppress criteria.
-    """
+    """Return True if the token is NA, a non-taxon phrase, or a non-target kingdom."""
     if not token or not isinstance(token, str):
         return True
     
@@ -155,10 +152,7 @@ def should_skip_token(token: str) -> bool:
 
 
 def should_alias_token(token: str) -> Optional[str]:
-    """
-    Check if token has a canonical alias.
-    Returns aliased name if found, None otherwise.
-    """
+    """Return the canonical alias for a token, or None if no alias exists."""
     if not token or not isinstance(token, str):
         return None
     
@@ -168,10 +162,7 @@ def should_alias_token(token: str) -> Optional[str]:
 
 
 def is_protected_higher_taxon(token: str) -> bool:
-    """
-    Check if token is a protected higher taxon (override suppression only).
-    Returns True if token is in keep_higher_taxa list.
-    """
+    """Return True if the token is in the protected higher-taxon list."""
     if not token or not isinstance(token, str):
         return False
     

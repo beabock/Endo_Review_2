@@ -238,12 +238,7 @@ def detect_taxon_kingdom(val, field_name=''):
 
 
 def recover_taxonomy_misplacements(row, headers):
-    """Create a corrected copy when fungal/plant taxon values are clearly swapped.
-
-    The original row is preserved. A second row is emitted only when a value
-    can be confidently moved from the fungal side to the plant side or vice
-    versa based on phylum/class kingdom cues.
-    """
+    """Emit a corrected copy when fungal/plant taxon columns are swapped; original row is always preserved."""
     col_indices = {name: idx for idx, name in enumerate(headers)}
     corrected_row = row[:]
     changed = False
