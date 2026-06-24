@@ -183,7 +183,7 @@ load_plant_reference <- function() {
 	}
 
 	if (is.null(gbif_taxa_min) || is.null(reference_species)) {
-		message("Building GBIF Plantae reference (first run may be slow)...")
+		message("Building GBIF Plantae reference...")
 		gbif_taxa_min <- fast_read_tsv(
 			GBIF_TAXON_FILE,
 			col_select = all_of(c("taxonID", "parentNameUsageID", "phylum", "taxonomicStatus", "kingdom"))
@@ -323,7 +323,7 @@ load_fungi_reference <- function() {
 	}
 
 	if (is.null(fungi_min)) {
-		message("Building GBIF Fungi reference (first run may be slow)...")
+		message("Building GBIF Fungi reference...")
 		fungi_min <- fast_read_tsv(
 			GBIF_TAXON_FILE,
 			col_select = all_of(c("taxonID", "parentNameUsageID", "taxonRank", "taxonomicStatus", "kingdom", "phylum", "family", "genus", "canonicalName"))

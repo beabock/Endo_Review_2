@@ -84,7 +84,7 @@ CONTINENT = {
 }
 
 # Build family->phylum and genus->family,phylum from GBIF backbone
-print("Reading GBIF backbone (this takes a moment)...")
+print("Reading GBIF backbone...")
 gbif = pd.read_csv(
     GBIF_TAXON, sep="\t", usecols=["canonicalName","taxonRank","taxonomicStatus","kingdom","phylum","family","genus"],
     dtype=str, low_memory=False
