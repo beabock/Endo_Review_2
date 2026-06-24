@@ -151,7 +151,7 @@ def heal_and_align():
             row[12] = parts[-1]
             
         # If there are FEWER than 8 parts, the AI skipped columns. 
-        # Just map them left-to-right until we run out.
+        # Map left-to-right until exhausted.
         else:
             middle_short += 1
             for i in range(len(parts)):
