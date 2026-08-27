@@ -102,9 +102,9 @@ for f in "${REQUIRED_FILES[@]}"; do
 done
 
 echo "--- Starting Stage 04 Analyses ---"
-echo "Step 1: Geographic Bias Analysis"
+echo "Step 1: Geographic Bias Analysis (study count vs latitude)"
 if [ "$START_STEP" -le 1 ]; then
-    Rscript scripts/04_analyses/01_country_gdp_latitude_analysis.R
+    Rscript scripts/04_analyses/01_country_latitude_analysis.R
 else
     echo "Skipping Step 1 (START_STEP=${START_STEP})"
 fi

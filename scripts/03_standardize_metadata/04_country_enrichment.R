@@ -1,6 +1,11 @@
-# BMB 2026-06-17
-# Adds country-level metadata (GDP, population, centroid coordinates) to each
-# record. Used for the geographic bias analyses in Stage 04.
+# BMB 2026-06-17 / revised 2026-08-27
+# Adds country-level metadata (centroid coordinates, study counts) to each record.
+# Used for the geographic bias analyses in Stage 04.
+#
+# GDP enrichment is OFF by default (GDP / "Prediction 4" was cut for the
+# NPH-MS-2026-57711 resubmission). Pass --with-gdp to fetch World Bank GDP and add
+# gdp_year / gdp_current_usd columns (needed only by the archived
+# scripts/archive/01_country_gdp_latitude_analysis.R).
 
 library(dplyr)
 library(rnaturalearth)
@@ -10,9 +15,11 @@ library(stringr)
 
 source("scripts/utils/disputed_territory_parent_iso.R")
 
+WITH_GDP <- "--with-gdp" %in% commandArgs(trailingOnly = TRUE)
+
 # Optional JSON parser for World Bank API responses
-if (!requireNamespace("jsonlite", quietly = TRUE)) {
-  stop("Package 'jsonlite' is required for World Bank GDP lookup. Install it before running this script.")
+if (WITH_GDP && !requireNamespace("jsonlite", quietly = TRUE)) {
+  stop("Package 'jsonlite' is required for the --with-gdp World Bank lookup. Install it before running this script.")
 }
 
 # Input/output paths
@@ -122,15 +129,20 @@ country_centroids <- world %>%
   ) %>%
   select(iso_a3, country_name = name, centroid_lon, centroid_lat)
 
-# Pull current GDP from the World Bank and keep the latest available year per country
-country_gdp <- fetch_world_bank_gdp()
-
 # Combine everything into one country-level enrichment table.
 # Keep all countries/territories from the world map and assign zero studies where absent.
 country_enriched <- country_centroids %>%
   left_join(country_counts, by = "iso_a3") %>%
-  left_join(country_gdp, by = "iso_a3") %>%
-  mutate(study_count = tidyr::replace_na(study_count, 0L)) %>%
+  mutate(study_count = tidyr::replace_na(study_count, 0L))
+
+if (WITH_GDP) {
+  # Pull current GDP from the World Bank and keep the latest available year per country
+  country_gdp <- fetch_world_bank_gdp()
+  country_enriched <- country_enriched %>%
+    left_join(country_gdp, by = "iso_a3")
+}
+
+country_enriched <- country_enriched %>%
   arrange(desc(study_count), country_name)
 
 # Ensure output directory exists
@@ -146,4 +158,5 @@ cat("  Input rows: ", nrow(standardized_country_data), "\n", sep = "")
 cat("  Countries with studies: ", nrow(country_counts), "\n", sep = "")
 cat("  Countries enriched: ", nrow(country_enriched), "\n", sep = "")
 cat("  Countries with zero studies: ", sum(country_enriched$study_count == 0), "\n", sep = "")
+cat("  GDP columns included: ", WITH_GDP, "\n", sep = "")
 cat("  Saved to: ", OUTPUT_FILE, "\n", sep = "")
