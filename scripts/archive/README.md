@@ -14,4 +14,10 @@ of per-country study count vs `log10(GDP)` and vs latitude.
 - The **GDP** analysis is preserved here only. To run it, first regenerate the enriched
   country table with GDP columns (the default pipeline omits them):
   `Rscript scripts/03_standardize_metadata/04_country_enrichment.R --with-gdp`
-- Related archived outputs: `results/archive/gdp_prediction4/`.
+## `03b_geographic_bias_mapping_eu_grouped.R` and `biome_plots_eu_grouped.R`
+Archived 2026-08-27. These collapsed the 27 EU member states into one "European Union"
+unit - a political grouping Referee 3 flagged (`NPH_resubmission_checklist.md` item D).
+Replaced by a biogeographic-realm grouping (Olson et al. 2001 / WWF):
+- `scripts/04_analyses/03c_biogeographic_bias_mapping.R`
+- `scripts/05_plotting/biome_plots_by_realm.R`
+- `scripts/utils/biogeographic_mapping.R` + `data/Reference_datasets/country_biogeographic_realm.csv`
