@@ -21,3 +21,11 @@ temp*.R
 .DS_Store
 ZENODO_REVIEW_NOTES.md
 ANALYSIS_SUMMARY.md
+CLAUDE_CODE_HANDOFF.md
+NPH_resubmission_checklist.md
+NPH_extraction_schema_design.md
+NPH_plans_INDEX.md
+NPH_task1_paired_validation_plan.md
+NPH_task2_ground_truth_plan.md
+NPH_task3_gdp_removal_plan.md
+NPH_task4_biogeographic_plan.md
