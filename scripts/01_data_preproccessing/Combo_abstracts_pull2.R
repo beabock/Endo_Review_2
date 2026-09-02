@@ -1,6 +1,23 @@
-# BMB 2024-09-22
+# BMB 2024-09-22, revised 2026-09-02
 # Manual step - combines and deduplicates abstract exports from Web of Science,
 # Scopus, and PubMed. Not run by the automated pipeline.
+#
+# Search: the SAME boolean string was used in all three databases, reformatted for each
+# platform's syntax. The PubMed form is recorded in api_pull_abstracts.R (`base_search`);
+# WoS and Scopus were run through their web interfaces and the exact platform-formatted
+# strings should be pasted into the Methods / SI. Search date: 2025-08-14. Year span
+# 1700-2025. Document types restricted to journal articles (see the doc-type filter below).
+#
+# 2026-09-02 revision (NPH resubmission - tighten + make every stage auditable):
+#   - DOIs normalised (case, doi.org/ prefix, whitespace) BEFORE the DOI-dedup, so
+#     format-variant duplicates actually collapse.
+#   - within a DOI, keep the record with the longest abstract (after WoS>Scopus>PubMed).
+#   - abstract-text dedup now reported split by DOI-bearing vs DOI-less.
+#   - document-type filter matches any "article"-flavoured type (incl. "Article;
+#     Proceedings Paper", "Article in Press") instead of the literal string "Article";
+#     full before/after Document.Type breakdown is printed.
+#   - every stage writes rows-in / rows-out / removed to results/outputs/dedup_stage_counts.csv,
+#     and the records removed at the abstract and title stages are saved for eyeballing.
 
 library(readr)
 library(dplyr)
@@ -228,78 +245,163 @@ wos$Year <- as.numeric(wos$Year)
 scopus$Year <- as.numeric(scopus$Year)
 pubmed$Year <- as.numeric(pubmed$Year)
 
-# Combine all datasets (prioritize WoS > Scopus > PubMed when deduplicating)
-ds <- bind_rows(wos, scopus, pubmed) %>%
-  filter(Abstract != "[No abstract available]", #Can't do anything with missing abstracts
-         !is.na(Abstract),
-         Abstract != "") %>%
-  arrange(factor(Source, levels = c("WoS", "Scopus", "PubMed")))  # Prioritize by metadata richness
+# ============================================================================
+# Combine + deduplicate
+# ============================================================================
 
-cat("Combined dataset rows:", nrow(ds), "\n")
+MISSING_ABSTRACT <- c("[No abstract available]", "No abstract available",
+                      "Abstract not available", "[Abstract not available]", "")
+
+ds <- bind_rows(wos, scopus, pubmed) %>%
+  mutate(Abstract = str_squish(Abstract)) %>%
+  filter(!is.na(Abstract), !(Abstract %in% MISSING_ABSTRACT))
+
+combined_n <- nrow(ds)
+cat("Combined rows with a usable abstract:", combined_n,
+    "(WoS/Scopus/PubMed:", sum(ds$Source == "WoS"), "/",
+    sum(ds$Source == "Scopus"), "/", sum(ds$Source == "PubMed"), ")\n")
 write.csv(ds, "data/processed/intermediate_after_combined.csv", row.names = FALSE)
 
-# Deduplication Process
-normalize_text <- function(x) {
-  x <- tolower(x)
-  x <- gsub("\\s+", " ", x)          # collapse whitespace
-  x <- gsub("[[:punct:]]", "", x)    # remove punctuation
-  x <- stringr::str_trim(x)          # trim leading/trailing spaces
-  return(x)
+# --- stage-count ledger (writes the Methods table for us) --------------------
+stage_rows <- list()
+log_stage <- function(name, n_in, n_out, note = "") {
+  stage_rows[[length(stage_rows) + 1]] <<- data.frame(
+    stage = name, rows_in = n_in, rows_out = n_out,
+    removed = n_in - n_out, note = note, stringsAsFactors = FALSE)
+  cat(sprintf("  %-32s %7d -> %7d  (-%d)  %s\n", name, n_in, n_out, n_in - n_out, note))
 }
 
-cat("Deduplication: to lowercase, collapse whitespace, remove punctuation, trim spaces\n")
+# --- helpers ---------------------------------------------------------------
+normalize_text <- function(x) {
+  x <- tolower(x)
+  x <- gsub("\\s+", " ", x)
+  x <- gsub("[[:punct:]]", "", x)
+  stringr::str_trim(x)
+}
+normalize_doi <- function(x) {
+  x <- tolower(trimws(as.character(x)))
+  x <- sub("^https?://(dx\\.)?doi\\.org/", "", x)
+  x <- sub("^doi:\\s*", "", x)
+  x <- sub("[.,;]+$", "", x)             # trailing punctuation from some exports
+  x[x %in% c("", "na", "null")] <- NA_character_
+  trimws(x)
+}
 
-# Step 1: Deduplicate by DOI (preserving NA DOIs)
-ds_no_na <- ds %>% filter(!is.na(DOI) & DOI != "")
-cat("Rows with non-missing DOIs:", nrow(ds_no_na), "\n")
-ds_na <- ds %>% filter(is.na(DOI) | DOI == "")
-cat("Rows with missing DOIs:", nrow(ds_na), "\n")
-deduplicated <- ds_no_na %>% distinct(DOI, .keep_all = TRUE)
-cat("After DOI deduplication (non-missing DOIs):", nrow(deduplicated), "\n")
-deduplicated <- bind_rows(deduplicated, ds_na)
-cat("After DOI deduplication:", nrow(deduplicated), "\n")
-write.csv(deduplicated, "data/processed/intermediate_after_doi_dedup.csv", row.names = FALSE)
+dir.create("data/processed", showWarnings = FALSE, recursive = TRUE)
+dir.create("results/outputs", showWarnings = FALSE, recursive = TRUE)
 
-# Step 2: Create normalized text columns for further deduplication
-deduplicated <- deduplicated %>%
+cat("\nDeduplication (normalise: lowercase, collapse whitespace, strip punctuation):\n")
+
+# --- Stage 1: DOI -----------------------------------------------------------
+# normalise first so 10.1/ABC, 10.1/abc and https://doi.org/10.1/abc collapse.
+# Within one DOI keep the source-priority record, tie-broken by the longest
+# abstract (the most complete copy). src_rank/abs_len are helper columns, dropped
+# before the final write.
+ds <- ds %>%
+  mutate(DOI_norm  = normalize_doi(DOI),
+         src_rank  = match(Source, c("WoS", "Scopus", "PubMed")),
+         abs_len   = nchar(Abstract)) %>%
+  arrange(src_rank, desc(abs_len))        # global priority order, used by every stage
+
+ds_doi   <- ds %>% filter(!is.na(DOI_norm))
+ds_nodoi <- ds %>% filter(is.na(DOI_norm))
+
+dedup <- ds_doi %>%
+  distinct(DOI_norm, .keep_all = TRUE) %>%
+  bind_rows(ds_nodoi)                     # DOI-less rows carried through untouched here
+log_stage("DOI dedup", combined_n, nrow(dedup),
+          sprintf("%d had a DOI, %d did not", nrow(ds_doi), nrow(ds_nodoi)))
+write.csv(dedup, "data/processed/intermediate_after_doi_dedup.csv", row.names = FALSE)
+
+# --- Stage 2: normalized abstract --------------------------------------------
+n_before <- nrow(dedup)
+dedup <- dedup %>%
+  arrange(src_rank, desc(abs_len)) %>%    # re-assert order after the bind_rows
   mutate(Abstract_norm = normalize_text(Abstract),
-         Title_norm = normalize_text(Title),
-         Authors_norm = normalize_text(Authors))
-cat("Normalized text columns (abstract, title, authors) created.\n")
+         Title_norm     = normalize_text(Title),
+         Authors_norm   = normalize_text(Authors))
 
-# Step 3: Deduplicate by abstract
-deduplicated <- deduplicated %>%
-  distinct(Abstract_norm, .keep_all = TRUE)
-cat("After abstract deduplication:", nrow(deduplicated), "\n")
-write.csv(deduplicated, "data/processed/intermediate_after_abstract_dedup.csv", row.names = FALSE)
+# records that will be dropped (2nd+ copy of each normalized abstract)
+abs_removed <- dedup %>%
+  group_by(Abstract_norm) %>% filter(n() > 1) %>% slice(-1) %>% ungroup()
+write.csv(abs_removed %>% select(Source, DOI, DOI_norm, Title, Year, Source.title),
+          "data/processed/dedup_removed_by_abstract.csv", row.names = FALSE)
 
-# Step 4: Filter to articles only
-deduplicated <- deduplicated %>%
-  filter(Document.Type %in% c("Article", NA))
-cat("After filtering to articles:", nrow(deduplicated), "\n")
-write.csv(deduplicated, "data/processed/intermediate_after_articles_filter.csv", row.names = FALSE)
+dedup <- dedup %>% distinct(Abstract_norm, .keep_all = TRUE)
+log_stage("Abstract-text dedup", n_before, nrow(dedup),
+          sprintf("%d of the removed had a DOI, %d did not",
+                  sum(!is.na(abs_removed$DOI_norm)), sum(is.na(abs_removed$DOI_norm))))
+write.csv(dedup, "data/processed/intermediate_after_abstract_dedup.csv", row.names = FALSE)
 
-# Step 5: Final deduplication by title
-deduplicated <- deduplicated %>%
+# --- Stage 3: document-type filter -------------------------------------
+# Keep anything whose type contains "article" (covers "Article",
+# "Article; Proceedings Paper", "Article; Early Access", "Article in Press") plus
+# NA (PubMed rows - already limited to Journal Article at search time). This DROPS
+# Review, Editorial, Meeting Abstract, Letter, Note, Correction, Book Chapter, etc.
+# -- reviews carry no primary occurrence records, consistent with a research-effort study.
+cat("\n  Document.Type BEFORE the filter:\n")
+print(sort(table(dedup$Document.Type, useNA = "ifany"), decreasing = TRUE))
+
+n_before <- nrow(dedup)
+is_article <- grepl("article", tolower(dedup$Document.Type)) | is.na(dedup$Document.Type)
+dropped_types <- dedup %>% filter(!is_article)
+write.csv(dropped_types %>% select(Source, DOI, Title, Year, Document.Type),
+          "data/processed/dedup_removed_by_doctype.csv", row.names = FALSE)
+dedup <- dedup %>% filter(is_article)
+log_stage("Document-type filter", n_before, nrow(dedup),
+          "kept *article* + NA; dropped review/editorial/etc.")
+cat("  Document.Type AFTER the filter:\n")
+print(sort(table(dedup$Document.Type, useNA = "ifany"), decreasing = TRUE))
+write.csv(dedup, "data/processed/intermediate_after_articles_filter.csv", row.names = FALSE)
+
+# --- Stage 4: normalized title ---------------------------------------------
+# Titles < 15 normalized chars are left alone (generic short titles like "new
+# species" would collide spuriously).
+n_before <- nrow(dedup)
+dedup <- dedup %>% arrange(src_rank, desc(abs_len))
+
+title_removed <- dedup %>%
+  filter(nchar(Title_norm) >= 15) %>%
+  group_by(Title_norm) %>% filter(n() > 1) %>% slice(-1) %>% ungroup()
+write.csv(title_removed %>% select(Source, DOI, DOI_norm, Title, Year, Source.title),
+          "data/processed/dedup_removed_by_title.csv", row.names = FALSE)
+
+dedup_short <- dedup %>% filter(nchar(Title_norm) < 15)
+dedup_long  <- dedup %>% filter(nchar(Title_norm) >= 15) %>%
   distinct(Title_norm, .keep_all = TRUE)
-cat("After title deduplication:", nrow(deduplicated), "\n")
-write.csv(deduplicated, "data/processed/intermediate_after_title_dedup.csv", row.names = FALSE)
+dedup <- bind_rows(dedup_long, dedup_short)
+log_stage("Title dedup", n_before, nrow(dedup),
+          sprintf("normalized-title match on titles >= 15 chars; %d short titles kept as-is",
+                  nrow(dedup_short)))
+write.csv(dedup, "data/processed/intermediate_after_title_dedup.csv", row.names = FALSE)
 
-
-# Final cleanup and output
-final_data <- deduplicated %>%
-  select(-Abstract_norm, -Title_norm, -Authors_norm) %>%
+# ============================================================================
+# Output
+# ============================================================================
+final_data <- dedup %>%
+  select(-Abstract_norm, -Title_norm, -Authors_norm,
+         -DOI_norm, -src_rank, -abs_len) %>%
   relocate(Title, Authors, Year, Source.title, Abstract, DOI)
 
-cat("Final dataset rows:", nrow(final_data), "\n")
-cat("Missing DOIs:", sum(is.na(final_data$DOI)), "\n")
-cat("Missing Authors:", sum(is.na(final_data$Authors)), "\n")
-cat("Missing Titles:", sum(is.na(final_data$Title)), "\n")
-cat("Missing Abstracts:", sum(is.na(final_data$Abstract)), "\n")
+stage_counts <- do.call(rbind, stage_rows)
+stage_counts <- rbind(
+  data.frame(stage = "Combined (usable abstract)", rows_in = NA, rows_out = combined_n,
+             removed = NA, note = "WoS + Scopus + PubMed", stringsAsFactors = FALSE),
+  stage_counts)
+write.csv(stage_counts, "results/outputs/dedup_stage_counts.csv", row.names = FALSE)
 
+cat("\n==== FINAL ====\n")
+cat("Final dataset rows:", nrow(final_data), "\n")
+cat("  with DOI:", sum(!is.na(normalize_doi(final_data$DOI))), "\n")
+cat("  no DOI  :", sum(is.na(normalize_doi(final_data$DOI))), "\n")
+cat("  missing Title:", sum(is.na(final_data$Title)),
+    "| missing Abstract:", sum(is.na(final_data$Abstract)), "\n")
+cat("  year range:", suppressWarnings(min(as.numeric(final_data$Year), na.rm = TRUE)),
+    "-", suppressWarnings(max(as.numeric(final_data$Year), na.rm = TRUE)), "\n")
 
 write.csv(final_data, "data/processed/All_abstracts_deduped.csv", row.names = FALSE)
-cat("Data written to: data/processed/All_abstracts_deduped.csv\n")
+cat("\nWritten: data/processed/All_abstracts_deduped.csv\n")
+cat("Stage table: results/outputs/dedup_stage_counts.csv\n")
+cat("Removed-record audits: data/processed/dedup_removed_by_{abstract,doctype,title}.csv\n")
 
-# Close the output redirection
 sink()
