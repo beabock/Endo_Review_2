@@ -54,6 +54,14 @@ Referee 2 (precision/recall against a curated set, English-only question, strain
 variation, author-assigned vs demonstrated function); Referee 1 (commensalism as a
 first-class category).
 
+**Corpus denominator (2026-09-02).** The full-text coverage check and the re-extraction
+are seeded from `data/Abstracts/All_abstracts_deduped.csv` — the **deduplicated original
+search export**, before any LLM touched it (20,228 records with a DOI + 1,630 without).
+Not from the old pipeline's cleaned/filtered output, which would inherit the old model's
+relevance and guild-classification decisions — the exact thing the re-extraction exists
+to redo. Relevance + guild filtering is re-applied afterwards with the new schema and
+validated against the Task 2 ground truth.
+
 **Still to do.**
 - Decide the pre-registered agreement threshold (proposed: interaction F1 ≥ 0.75, taxon
   counts not systematically lower for abstracts, country/biome κ ≥ 0.6).
