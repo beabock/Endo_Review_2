@@ -2,8 +2,9 @@ Number of WoS files read: 15
 Total rows after binding: 14855 
 Number of Scopus files read: 4 
 Total rows after binding: 15426 
+PubMed source: data/Abstracts/All_abstracts_8-14-25/pubmed_pull_phase2.csv 
 Number of PubMed files read: 6 
-Total rows after binding: 10873 
+Total rows after binding: 9141 
 WoS columns: 71 
 Scopus columns: 46 
 PubMed columns: 6 
@@ -12,34 +13,34 @@ Wos earliest year: 4
 Scopus earliest year: 1930 
 PubMed earliest year: 1946 
 Common columns: 7 
-Combined rows with a usable abstract: 40776 (WoS/Scopus/PubMed: 14634 / 15339 / 10803 )
+Combined rows with a usable abstract: 39114 (WoS/Scopus/PubMed: 14634 / 15339 / 9141 )
 
 Deduplication (normalise: lowercase, collapse whitespace, strip punctuation):
-  DOI dedup                          40776 ->   23100  (-17676)  38373 had a DOI, 2403 did not
-  Abstract-text dedup                23100 ->   22830  (-270)  62 of the removed had a DOI, 208 did not
+  DOI dedup                          39114 ->   22212  (-16902)  36772 had a DOI, 2342 did not
+  Abstract-text dedup                22212 ->   21982  (-230)  62 of the removed had a DOI, 168 did not
 
   Document.Type BEFORE the filter:
 
                        Article                           <NA> 
-                         18864                           3546 
+                         18864                           2698 
          Article; Book Chapter     Article; Proceedings Paper 
                            156                            132 
          Article; Early Access            Article; Data Paper 
                            120                              7 
 Article; Retracted Publication 
                              5 
-  Document-type filter               22830 ->   22830  (-0)  kept *article* + NA; dropped review/editorial/etc.
+  Document-type filter               21982 ->   21982  (-0)  kept *article* + NA; dropped review/editorial/etc.
   Document.Type AFTER the filter:
 
                        Article                           <NA> 
-                         18864                           3546 
+                         18864                           2698 
          Article; Book Chapter     Article; Proceedings Paper 
                            156                            132 
          Article; Early Access            Article; Data Paper 
                            120                              7 
 Article; Retracted Publication 
                              5 
-  Title dedup                        22830 ->   22268  (-562)  normalized-title match on titles >= 15 chars; 8 short titles kept as-is
+  Title dedup                        21982 ->   21414  (-568)  normalized-title match on titles >= 15 chars; 7 short titles kept as-is
 
 Implausible publication years set to NA: 3 
 # A tibble: 3 × 3
@@ -50,14 +51,14 @@ Implausible publication years set to NA: 3
 3 "Dark septate endophytes colonizing the roots of \"non-mycorrhiza…     4 <NA> 
 
 ==== FINAL ====
-Final dataset rows: 22268 
-  with DOI: 20411 
-  no DOI  : 1857 
+Final dataset rows: 21414 
+  with DOI: 19586 
+  no DOI  : 1828 
   missing Title: 0 | missing Abstract: 0 
   year range: 1926 - 2025 
 
 Written:
-  data/Abstracts/All_abstracts_deduped.csv  ( 22268 rows )
+  data/Abstracts/All_abstracts_deduped.csv  ( 21414 rows )
   data/Abstracts/Abstracts_for_Monsoon.csv  (slim projection)
   results/outputs/dedup_stage_counts.csv    (Methods table)
   data/processed/dedup_removed_by_{abstract,doctype,title}.csv  (audit)

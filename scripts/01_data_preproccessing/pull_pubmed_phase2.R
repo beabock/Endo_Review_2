@@ -1,15 +1,18 @@
 # BMB 2026-09-02
-# Standalone PubMed re-pull with the AUTHORITATIVE Phase 2 search string
-# (docs/SEARCH_STRATEGY.md), to replace pubmed_pull_8-14-25.csv - that file was
-# produced with an earlier DRAFT string ("endophyte*" + "latent/systemic fung*"
-# wildcards) that pulled ~1,500 clinical-mycology and non-endophyte papers the
-# documented strategy excludes. See METHODS_CHANGELOG.md 2026-09-02.
+# PubMed pull with the AUTHORITATIVE Phase 2 search string (docs/SEARCH_STRATEGY.md).
+#
+# CURRENT STATE: the 2025-08-14 Phase 2 PubMed result already exists as
+# abstract-endophyteA-set.txt and is parsed by parse_pubmed_textfile.py ->
+# pubmed_pull_phase2.csv. Use that for the resubmission (it keeps the search date
+# fixed). This script is for LATER - when the search is extended to the current year
+# before final submission. Before trusting its output, re-run it with an end year of
+# 2025 and confirm the count is close to the 9,141 the website export gave; adjust
+# field tags if not.
 #
 # rentrez needs no API key - just a contact email (NCBI etiquette). Run:
 #   Rscript scripts/01_data_preproccessing/pull_pubmed_phase2.R your@email
 # Output: data/Abstracts/All_abstracts_8-14-25/pubmed_pull_phase2.csv
-#         (6 columns: title, authors, doi, year, journal, abstract - the format
-#          combine_dedupe_abstracts.R expects)
+#         (6 columns: title, authors, doi, year, journal, abstract)
 
 suppressPackageStartupMessages({
   library(rentrez); library(dplyr); library(tibble); library(purrr); library(xml2)
@@ -25,14 +28,13 @@ endophyte_terms <- paste(
   '"latent fungus" OR "latent fungi" OR "systemic fungus" OR "systemic fungi" OR',
   '"internal fungi" OR "resident fungi" OR "seed-borne fungi" OR "seed-transmitted fungi" OR',
   '"dark septate endophyte" OR "dark septate fungi" OR "DSE fungi"')
+# NOTE: no field tags - the 2025 website search used "All Fields" for the host block.
 host_terms <- paste(
-  "plant*[tiab] OR moss*[tiab] OR bryophyte*[tiab] OR liverwort*[tiab] OR hornwort*[tiab] OR",
-  "fern*[tiab] OR lycophyte*[tiab] OR pteridophyte*[tiab] OR tree*[tiab] OR shrub*[tiab] OR",
-  "grass*[tiab] OR graminoid*[tiab] OR herb*[tiab] OR crop*[tiab] OR seedling*[tiab] OR",
-  "sapling*[tiab] OR seed*[tiab] OR root*[tiab] OR leaf*[tiab] OR foliage[tiab] OR",
-  "shoot*[tiab] OR stem*[tiab] OR twig*[tiab] OR rhizome*[tiab] OR thallus[tiab] OR",
-  "frond*[tiab] OR algae[tiab] OR macroalga*[tiab] OR cyanobacteria[tiab] OR",
-  "cyanobiont*[tiab] OR photobiont*[tiab] OR lichen*[tiab]")
+  "plant* OR moss* OR bryophyte* OR liverwort* OR hornwort* OR fern* OR lycophyte* OR",
+  "pteridophyte* OR tree* OR shrub* OR grass* OR graminoid* OR herb* OR crop* OR",
+  "seedling* OR sapling* OR seed* OR root* OR leaf* OR foliage OR shoot* OR stem* OR",
+  "twig* OR rhizome* OR thallus OR frond* OR algae OR macroalga* OR cyanobacteria OR",
+  "cyanobiont* OR photobiont* OR lichen*")
 base_search <- sprintf("(%s) AND (%s) AND \"Journal Article\"[Publication Type]",
                        endophyte_terms, host_terms)
 

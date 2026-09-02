@@ -55,10 +55,11 @@ prophylaxis…"), plant-pathology papers ("Powdery mildew caused by an *Oidium* 
 matched by `"latent fungi"` / `"systemic fungi"` co-occurring with generic host words
 (`stem*`, `seed*`, `root*`). The draft PubMed pull is contaminated with clinical mycology.
 
-**Fix:** `scripts/01_data_preproccessing/pull_pubmed_phase2.R` re-pulls PubMed with the
-Phase 2 string (rentrez, no API key). Then set `PUBMED_CSV` in
-`combine_dedupe_abstracts.R` to `pubmed_pull_phase2.csv` and re-run. ~55 lichen/photobiont
-PubMed-only papers the draft missed will come in (many are already in via WoS/Scopus).
+**Fix applied (2026-09-02):** `abstract-endophyteA-set.txt` (9,222 records) IS the Phase 2
+PubMed website export from 2025-08-14. `scripts/01_data_preproccessing/parse_pubmed_textfile.py`
+parses it into `pubmed_pull_phase2.csv` (9,141 records with an abstract; correction /
+erratum / retraction notices dropped). `combine_dedupe_abstracts.R` picks that file up
+automatically. `pull_pubmed_phase2.R` (rentrez) is kept for the future date extension only.
 
 ---
 
@@ -77,23 +78,24 @@ abstract):
 Per-stage counts are written to `results/outputs/dedup_stage_counts.csv` (the Methods
 table); the records removed at stages 2–4 are saved under `data/processed/` for audit.
 
-### Current corpus (2026-09-02 re-run)
+### Current corpus (2026-09-02 re-run, Phase 2 PubMed)
 
 | stage | in | out | removed |
 |---|---:|---:|---:|
-| combined, usable abstract | — | 40,776 | — |
-| DOI dedup | 40,776 | 23,100 | 17,676 |
-| abstract-text dedup | 23,100 | 22,830 | 270 |
-| document-type filter | 22,830 | 22,830 | 0 |
-| title dedup | 22,830 | **22,268** | 562 |
+| combined, usable abstract | — | 39,114 | — |
+| DOI dedup | 39,114 | 22,212 | 16,902 |
+| abstract-text dedup | 22,212 | 21,982 | 230 |
+| document-type filter | 21,982 | 21,982 | 0 |
+| title dedup | 21,982 | **21,414** | 568 |
 
-**22,268 records** (20,411 with a DOI, 1,857 without). WoS 14,855 / Scopus 15,426 /
-PubMed 10,873 before combining. Publication years 1926–2025 (3 rows had a volume number in
-the year field → set to missing).
+**21,414 records** (19,586 with a DOI, 1,828 without). Before combining: WoS 14,855 /
+Scopus 15,426 / PubMed **9,141** (Phase 2). Contribution to the final corpus after dedup:
+WoS 14,624 / Scopus 4,229 / PubMed 2,561. Publication years 1926–2025.
 
-*(The pre-resubmission pipeline produced 21,891; the +377 is mostly `Article; Proceedings
-Paper` / `Book Chapter` / `Early Access` types the old exact-`"Article"` filter dropped,
-plus a few extra DOI-variant duplicates now collapsed.)*
+*(The pre-resubmission pipeline produced 21,891, using a draft-string PubMed pull of
+10,873. The corrected corpus is slightly smaller mainly because ~1,500 clinical-mycology /
+plant-pathology papers the draft string caught are now excluded; partly offset by the
+looser `Article` filter keeping proceedings/book-chapter/early-access articles.)*
 
 Outputs (both gitignored — too large for the repo):
 - `data/Abstracts/All_abstracts_deduped.csv` — full bibliographic record

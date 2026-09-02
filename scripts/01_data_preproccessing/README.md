@@ -8,8 +8,10 @@ picks up later, from `02_ollama_cleanup.R`.
 
 | script | what it does | where it runs |
 |---|---|---|
-| `api_pull_abstracts.R` | Pulls abstracts from PubMed (API) with the boolean search string. WoS and Scopus were run through their web interfaces with the same string reformatted per platform; those exports go in `data/raw/`. | local, needs API keys |
-| `combine_dedupe_abstracts.R` | Combines the three source exports, normalises DOIs, deduplicates (DOI → normalized abstract → document-type filter → normalized title), and writes `data/Abstracts/All_abstracts_deduped.csv` + the slim `Abstracts_for_Monsoon.csv`. Emits a stage-count table (`results/outputs/dedup_stage_counts.csv`) and per-stage removed-record audits. | local |
+| `api_pull_abstracts.R` | Pulls abstracts from PubMed/Scopus/WoS APIs with the Phase 2 boolean string (`docs/SEARCH_STRATEGY.md`). WoS + Scopus were actually run via their web interfaces; those exports live in `data/Abstracts/All_abstracts_8-14-25/`. | local, needs API keys |
+| `parse_pubmed_textfile.py` | Parses a PubMed "Abstract (text)" export (`abstract-endophyteA-set.txt` — the Phase 2 PubMed result) into the 6-column CSV the dedup expects. | local |
+| `pull_pubmed_phase2.R` | `rentrez` PubMed re-pull with the Phase 2 string — for the eventual search-date extension only. | local |
+| `combine_dedupe_abstracts.R` | Combines the three source exports, normalises DOIs, deduplicates (DOI → normalized abstract → document-type filter → normalized title), writes `data/Abstracts/All_abstracts_deduped.csv` + the slim `Abstracts_for_Monsoon.csv`, a stage-count table (`results/outputs/dedup_stage_counts.csv`), and per-stage removed-record audits. `PUBMED_CSV` selects the PubMed source. | local |
 
 ## LLM extraction (Task 1 rebuild — branch `nph-task1-fulltext-revalidation`)
 

@@ -63,10 +63,18 @@ string.
   clinical antifungal + plant-pathology papers matched via `"latent/systemic fungi"` +
   generic host words. The draft PubMed component is contaminated with clinical mycology.
 
-**Fix (code ready, Bea runs it):** `scripts/01_data_preproccessing/pull_pubmed_phase2.R`
-re-pulls PubMed with the Phase 2 string (rentrez, no API key). `combine_dedupe_abstracts.R`
-now takes `PUBMED_CSV` — point it at `pubmed_pull_phase2.csv` and re-run; it warns loudly
-if it falls back to the draft file.
+**Fixed (2026-09-02).** `abstract-endophyteA-set.txt` (9,222 recs) IS the Phase 2 PubMed
+website export from 2025-08-14. `parse_pubmed_textfile.py` (new) parses it →
+`pubmed_pull_phase2.csv` (9,141 recs with an abstract; correction/erratum/retraction
+notices dropped). `combine_dedupe_abstracts.R` picks it up automatically.
+
+**Corpus re-run with Phase 2 PubMed:** 39,114 combined → DOI 22,212 → abstract 21,982 →
+doc-type 21,982 → title **21,414** (19,586 with DOI). Contribution after dedup: WoS 14,624
+/ Scopus 4,229 / PubMed 2,561. vs the pre-resubmission 21,891 — smaller mainly because
+~1,500 clinical-mycology / plant-pathology papers the draft string caught are gone.
+
+`pull_pubmed_phase2.R` (rentrez) kept for the eventual date-extension only (it needs its
+count validated against the 9,141 first).
 
 Also reconcile the search date: SEARCH_STRATEGY.md / METHODS.md say 2025-07-31; folder +
 manuscript say 2025-08-14 (searches run late July, exports downloaded mid-Aug?).
