@@ -43,22 +43,37 @@ DRY_RUN="${DRY_RUN:-0}"
 SLEEP="${SLEEP:-0.3}"
 SHARD="${SLURM_ARRAY_TASK_ID:-0}"
 
-# Python env
-if [ -x ".venv/bin/python" ]; then
-    PYTHON_BIN=".venv/bin/python"
-else
-    if ! type module >/dev/null 2>&1 && [ -f /etc/profile.d/modules.sh ]; then
-        source /etc/profile.d/modules.sh
-    fi
-    module purge || true
-    module load python/3.11
-    python -m venv .venv
-    PYTHON_BIN=".venv/bin/python"
+# Python env. This job needs no GPU and no Ollama - just a Python with requests +
+# pandas (+ pymupdf for the real-download PDF validation). We use whatever `python`
+# is on PATH (the conda env you submit from is inherited by the job) and layer the
+# few extra packages into a lightweight venv that also sees the conda site-packages,
+# so pandas/numpy come for free. No `module load` - Monsoon has no `python/3.11`.
+BASE_PY="$(command -v python3 || command -v python)"
+if [ -z "$BASE_PY" ]; then
+    echo "ERROR: no python on PATH. Submit this job from your (base) conda env."
+    exit 1
 fi
-"$PYTHON_BIN" -m pip install --upgrade pip >/dev/null
-# dry-run needs only requests+pandas; real download also needs pymupdf for validation
-"$PYTHON_BIN" -m pip install requests pandas pymupdf >/dev/null
+echo "base python: $BASE_PY ($("$BASE_PY" --version 2>&1))"
+
+# one venv per array task - no cross-task races
+VENV="$PROJECT_ROOT/.venv_fetch_${SHARD}"
+if [ ! -x "$VENV/bin/python" ]; then
+    "$BASE_PY" -m venv --system-site-packages "$VENV" \
+        || { echo "venv creation failed - falling back to base python"; VENV=""; }
+fi
+if [ -n "$VENV" ] && [ -x "$VENV/bin/python" ]; then
+    PYTHON_BIN="$VENV/bin/python"
+else
+    PYTHON_BIN="$BASE_PY"
+fi
+"$PYTHON_BIN" -m pip install --quiet --upgrade pip requests pandas pymupdf || true
 export PYTHONUNBUFFERED=1
+
+# hard check - fail loudly now, not 4700 DOIs in
+"$PYTHON_BIN" - <<'PY' || { echo "ERROR: missing Python deps (need requests, pandas)"; exit 1; }
+import requests, pandas  # noqa
+print("deps ok: requests", requests.__version__, "| pandas", pandas.__version__)
+PY
 
 DRY_FLAG=""
 [ "$DRY_RUN" = "1" ] && DRY_FLAG="--dry-run"
