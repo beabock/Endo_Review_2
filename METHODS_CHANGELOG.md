@@ -10,6 +10,46 @@ Scope decisions live in `NPH_resubmission_checklist.md`; per-task plans in `NPH_
 
 ---
 
+## 2026-09-02 — Corpus dedup: DOI normalisation + auditable stages
+`combine_dedupe_abstracts.R` (renamed from `Combo_abstracts_pull2.R` — it combines and
+deduplicates, it does not pull).
+
+**Why.** Reviewing the dedup for the resubmission (the Methods needs the exact search
+string, databases, dedup sequence, and a stage-count table — flagged in `manuscript.md`).
+
+**Changed.**
+- DOIs are normalised (case, `doi.org/` prefix, trailing punctuation) **before** the
+  DOI-dedup, so `10.x/ABC` / `10.x/abc` / `https://doi.org/10.x/abc` collapse to one
+  record instead of three.
+- Within a DOI (and every later stage) the WoS > Scopus > PubMed record is kept,
+  tie-broken by the longest abstract (most complete copy).
+- Document-type filter matches any *article*-flavoured type (`Article`,
+  `Article; Proceedings Paper`, `Article in Press`) + NA, not the literal string
+  `"Article"`; the full `Document.Type` breakdown is printed before and after.
+- Every stage writes rows-in / rows-out / removed to
+  `results/outputs/dedup_stage_counts.csv` (the Methods table), and the records removed
+  at the abstract / doc-type / title stages are saved to `data/processed/` for review.
+- Both canonical outputs (`All_abstracts_deduped.csv` + the slim `Abstracts_for_Monsoon.csv`)
+  are now written by the script to `data/Abstracts/` — the slim file used to appear with
+  no script that made it.
+
+**Search string (for the Methods).** The same boolean string was used in all three
+databases, reformatted per platform. PubMed form is in `api_pull_abstracts.R`
+(`base_search`). WoS + Scopus were run via their web interfaces on 2025-08-14; the exact
+platform-formatted strings must be pasted into the SI (recover from Bea's search history).
+Year span 1700–2025.
+
+**Still to do.**
+- Bea re-runs `combine_dedupe_abstracts.R` against the raw exports (only on her machine)
+  → fresh `All_abstracts_deduped.csv`, then copy to Monsoon for the coverage dry-run.
+- Add the search string + `dedup_stage_counts.csv` table to Methods / SI.
+- Add an explicit corpus-scope paragraph (self-identified endophyte research; fungi
+  published under mycorrhizal / pathology / microbiome frames are out of scope by design).
+- Before final submission only: extend the search to the current year (mechanical,
+  reshuffles every number — do it last).
+
+---
+
 ## 2026-09-02 — Task 1 Phase 0: full-text retrieval + extraction rewrite (code only)
 Branch `nph-task1-fulltext-revalidation`. Nothing run at scale yet.
 

@@ -399,9 +399,20 @@ cat("  missing Title:", sum(is.na(final_data$Title)),
 cat("  year range:", suppressWarnings(min(as.numeric(final_data$Year), na.rm = TRUE)),
     "-", suppressWarnings(max(as.numeric(final_data$Year), na.rm = TRUE)), "\n")
 
-write.csv(final_data, "data/processed/All_abstracts_deduped.csv", row.names = FALSE)
-cat("\nWritten: data/processed/All_abstracts_deduped.csv\n")
-cat("Stage table: results/outputs/dedup_stage_counts.csv\n")
-cat("Removed-record audits: data/processed/dedup_removed_by_{abstract,doctype,title}.csv\n")
+# canonical outputs live in data/Abstracts/ (gitignored - too big for the repo):
+#   All_abstracts_deduped.csv  - full record, all bibliographic columns
+#   Abstracts_for_Monsoon.csv  - 6-column slim projection fed to the LLM / retrieval
+dir.create("data/Abstracts", showWarnings = FALSE, recursive = TRUE)
+write.csv(final_data, "data/Abstracts/All_abstracts_deduped.csv", row.names = FALSE)
+
+monsoon_slim <- final_data %>%
+  select(Title, Authors, Year, Source.title, Abstract, DOI)
+write.csv(monsoon_slim, "data/Abstracts/Abstracts_for_Monsoon.csv", row.names = FALSE)
+
+cat("\nWritten:\n")
+cat("  data/Abstracts/All_abstracts_deduped.csv  (", nrow(final_data), "rows )\n")
+cat("  data/Abstracts/Abstracts_for_Monsoon.csv  (slim projection)\n")
+cat("  results/outputs/dedup_stage_counts.csv    (Methods table)\n")
+cat("  data/processed/dedup_removed_by_{abstract,doctype,title}.csv  (audit)\n")
 
 sink()

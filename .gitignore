@@ -1,6 +1,8 @@
 /data/Abstracts
 /data/Reference_datasets
 /data/Training_labeled_abs_6.csv
+/data/raw/
+/data/processed/
 results/logs/taxa_synonym_resolution_taxonomy_index.pkl
 results/logs/*.out
 results/logs/*.err
