@@ -218,13 +218,29 @@ def try_download(sess: Session, url: str, dest: Path) -> tuple[bool, str]:
 
 # ---------------------------------------------------------------- main
 
+# search-export column -> manifest column. Carried through so the coverage report can
+# group by the database's own publisher/journal/OA fields (a cross-check on Unpaywall,
+# and the only signal for DOIs Unpaywall 404s on).
+_META_COLS = {
+    "Publisher": "db_publisher", "Source.title": "db_journal", "ISSN": "db_issn",
+    "Open.Access": "db_open_access", "Document.Type": "db_doctype", "Year": "year",
+    "Web.of.Science.Categories": "wos_categories",
+}
+
+
 def load_dois(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path, low_memory=False)
     col = next((c for c in ("DOI", "doi", "paper_id") if c in df.columns), None)
     if col is None:
         raise SystemExit(f"no DOI column in {path} (looked for DOI/doi/paper_id)")
-    df["_doi"] = df[col].map(norm_doi)
-    df = df[df["_doi"].str.len() > 0].drop_duplicates("_doi").reset_index(drop=True)
+    df["doi_norm"] = df[col].map(norm_doi)
+    keep = ["doi_norm"] + [c for c in _META_COLS if c in df.columns]
+    df = (df[keep].rename(columns=_META_COLS)
+          [df["doi_norm"].str.len() > 0].drop_duplicates("doi_norm").reset_index(drop=True))
+    n_nodoi = pd.read_csv(path, low_memory=False, usecols=[col])[col].map(norm_doi).eq("").sum()
+    if n_nodoi:
+        print(f"note: {n_nodoi} records have no DOI and are skipped "
+              f"(counted in the search total, not fetchable by DOI)")
     return df
 
 
@@ -263,8 +279,11 @@ def main() -> int:
         done = {r["doi"]: r for _, r in prev.iterrows()}
 
     sess = Session(args.email)
+    meta_cols = [c for c in df.columns if c != "doi_norm"]
     rows, t0 = [], time.time()
-    for i, doi in enumerate(df["_doi"]):
+    for i, rec in enumerate(df.itertuples(index=False)):
+        doi = rec.doi_norm
+        db_meta = {c: getattr(rec, c, None) for c in meta_cols}
         fn = doi_to_filename(doi)
         dest = args.out_dir / fn
 
@@ -290,7 +309,8 @@ def main() -> int:
                "resolver_url": pdf_url, "tried": ";".join(tried),
                "journal": meta.get("journal"), "publisher": meta.get("publisher"),
                "is_oa": meta.get("is_oa"), "oa_status": meta.get("oa_status"),
-               "genre": meta.get("genre"), "status": None, "note": None, "n_pages": None}
+               "genre": meta.get("genre"), "status": None, "note": None, "n_pages": None,
+               **db_meta}
 
         if args.dry_run:
             row["status"] = "resolvable" if pdf_url else "no_oa_pdf"

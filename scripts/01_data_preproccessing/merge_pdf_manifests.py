@@ -34,6 +34,11 @@ def main() -> int:
     got = man["status"].isin(["resolvable", "downloaded"])
     print(f"\nfull-text obtainable: {got.mean():.1%}  ({got.sum()} / {len(man)})")
 
+    # coalesce Unpaywall publisher/journal with the search-export's own fields
+    for a, b in (("publisher", "db_publisher"), ("journal", "db_journal")):
+        if b in man.columns:
+            man[a] = man[a].fillna(man[b]) if a in man.columns else man[b]
+
     miss = man[~got]
     if len(miss):
         by_pub = (miss.groupby(["publisher", "journal"], dropna=False)

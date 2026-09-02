@@ -33,9 +33,13 @@ fi
 cd "$PROJECT_ROOT"
 mkdir -p results/logs
 
-# default: the deduplicated analysis paper set (tracked in the repo, has a `doi` column).
-# Override with INPUT=data/Abstracts/Abstracts_for_Monsoon.csv to use the raw abstract list.
-INPUT="${INPUT:-data/Ollama_cleaned_synresolved_standardized_year.csv}"
+# default: the deduplicated ORIGINAL search export (pre-LLM), so full-text coverage is
+# measured for every record the search returned - not just the ~18.7k that survived the
+# old LLM relevance/guild filtering (which we are about to redo). This file is gitignored
+# (~164 MB); copy it onto Monsoon:
+#   scp data/Abstracts/All_abstracts_deduped.csv <monsoon>:.../data/Abstracts/
+# It carries Publisher / Source.title / Open.Access / Document.Type, used in the report.
+INPUT="${INPUT:-data/Abstracts/All_abstracts_deduped.csv}"
 OUT_DIR="${OUT_DIR:-/scratch/bmb646/full_corpus}"
 EMAIL="${EMAIL:-bmb646@nau.edu}"
 NSHARDS="${NSHARDS:-1}"
