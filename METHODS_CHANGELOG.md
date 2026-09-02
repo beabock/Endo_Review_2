@@ -55,14 +55,21 @@ databases on 2025-07-31. `base_search` in `api_pull_abstracts.R` was an earlier 
 — it is now renamed `base_search_DRAFT` (provenance only) and the script uses the Phase-2
 string.
 
-**Still open:** `pubmed_pull_8-14-25.csv` may have been produced with the draft string —
-only 48 % of its rows carry an exact endophyte phrase in title+abstract (MeSH indexing can
-explain the rest, so not conclusive). **Recommended:** re-pull PubMed with the Phase-2
-string (one database, cheap) so all three are provably consistent. `abstract-endophyteA-set.txt`
-(a MEDLINE-format export in the raw folder) is **not** read by the dedup script — check
-whether it should be.
-Also reconcile the search date: SEARCH_STRATEGY.md says 2025-07-31; folder + manuscript
-say 2025-08-14 (searches run late July, exports downloaded mid-Aug?).
+**RESOLVED — the PubMed pull used the draft string; it needs a re-pull.** Forensics:
+- `pubmed_pull_8-14-25.csv` (10,631 PMIDs) = `rentrez` API pull, **draft** string. Used by the dedup.
+- `abstract-endophyteA-set.txt` (9,222 recs, website export, 2025-08-14) = **Phase 2**
+  string (has lichen/photobiont/DSE). Never used.
+- ~1,487 records are only in the draft CSV; **~723 have no "endophyte" term at all** —
+  clinical antifungal + plant-pathology papers matched via `"latent/systemic fungi"` +
+  generic host words. The draft PubMed component is contaminated with clinical mycology.
+
+**Fix (code ready, Bea runs it):** `scripts/01_data_preproccessing/pull_pubmed_phase2.R`
+re-pulls PubMed with the Phase 2 string (rentrez, no API key). `combine_dedupe_abstracts.R`
+now takes `PUBMED_CSV` — point it at `pubmed_pull_phase2.csv` and re-run; it warns loudly
+if it falls back to the draft file.
+
+Also reconcile the search date: SEARCH_STRATEGY.md / METHODS.md say 2025-07-31; folder +
+manuscript say 2025-08-14 (searches run late July, exports downloaded mid-Aug?).
 
 **Dedup re-run (2026-09-02), improved script, real data:**
 40,776 combined → DOI 23,100 → abstract 22,830 → doc-type 22,830 → title **22,268**

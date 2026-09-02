@@ -39,15 +39,26 @@ AND
   (folder `All_abstracts_8-14-25/`). *(reconcile which single date to cite in Methods.)*
 - **Searcher:** B. Bock, via each platform's Advanced Search.
 
-### ⚠️ open item — PubMed string verification
-`api_pull_abstracts.R` originally carried a **different, earlier** string
-(`base_search_DRAFT`: bare `endophyte*`, `symptomless/asymptomatic/quiescent fung*`, no
-lichen/photobiont terms). It is unclear from the data alone whether
-`pubmed_pull_8-14-25.csv` was produced with the Phase 2 string or that draft (only 48 % of
-PubMed rows contain an exact endophyte phrase in title+abstract, though MeSH indexing can
-explain the rest). **Action:** re-pull PubMed with the Phase 2 string (cheap, one database)
-so all three sources are provably consistent, or recover the exact PubMed query used. The
-script now defaults to the Phase 2 string (`pubmed_search`).
+### ⚠️ RESOLVED — PubMed was pulled with the wrong (draft) string; needs a re-pull
+
+Forensics (2026-09-02): two PubMed result sets exist in the raw folder —
+- **`pubmed_pull_8-14-25.csv`** (10,631 unique PMIDs) — the `rentrez` API pull via the old
+  `api_pull_abstracts.R`, which used the **draft** string (`endophyte*` + `"latent/systemic
+  fung*"` wildcards). **This is the file the dedup used.**
+- **`abstract-endophyteA-set.txt`** (9,222 records, PubMed website export, 2025-08-14) —
+  contains lichen / photobiont / DSE content ⇒ the **Phase 2** string. **Never wired into
+  the dedup.**
+
+9,167 PMIDs are in both. ~1,487 are only in the draft CSV; of those, **~723 contain no
+"endophyte" term at all** — clinical antifungal papers ("Fluconazole vs itraconazole
+prophylaxis…"), plant-pathology papers ("Powdery mildew caused by an *Oidium* sp.") etc.
+matched by `"latent fungi"` / `"systemic fungi"` co-occurring with generic host words
+(`stem*`, `seed*`, `root*`). The draft PubMed pull is contaminated with clinical mycology.
+
+**Fix:** `scripts/01_data_preproccessing/pull_pubmed_phase2.R` re-pulls PubMed with the
+Phase 2 string (rentrez, no API key). Then set `PUBMED_CSV` in
+`combine_dedupe_abstracts.R` to `pubmed_pull_phase2.csv` and re-run. ~55 lichen/photobiont
+PubMed-only papers the draft missed will come in (many are already in via WoS/Scopus).
 
 ---
 

@@ -31,9 +31,20 @@ setwd(here())
 # Raw search exports (gitignored - large). Structure:
 #   <RAW_DIR>/WoS/*.txt                    tab-separated WoS "savedrecs" exports
 #   <RAW_DIR>/Scopus/*.csv                 Scopus CSV exports
-#   <RAW_DIR>/pubmed_pull_8-14-25.csv      PubMed pull (from api_pull_abstracts.R)
 #   <RAW_DIR>/search_string.txt            the exact WoS/Scopus boolean string (for the SI)
 RAW_DIR <- "data/Abstracts/All_abstracts_8-14-25"
+
+# PubMed source. pubmed_pull_8-14-25.csv was pulled with a DRAFT string (see
+# METHODS_CHANGELOG.md) - it carries ~1,500 clinical-mycology / non-endophyte papers.
+# Re-pull with scripts/01_data_preproccessing/pull_pubmed_phase2.R, then point this at
+# pubmed_pull_phase2.csv. Falls back to the old file with a loud warning.
+PUBMED_CSV <- file.path(RAW_DIR, "pubmed_pull_phase2.csv")
+if (!file.exists(PUBMED_CSV)) {
+  PUBMED_CSV <- file.path(RAW_DIR, "pubmed_pull_8-14-25.csv")
+  warning("Using the DRAFT-string PubMed pull (", PUBMED_CSV, "). Re-pull with ",
+          "pull_pubmed_phase2.R for a corpus that matches docs/SEARCH_STRATEGY.md.",
+          immediate. = TRUE)
+}
 
 dir.create("results/outputs", showWarnings = FALSE, recursive = TRUE)
 dir.create("data/processed", showWarnings = FALSE, recursive = TRUE)
@@ -81,7 +92,8 @@ cat("Total rows after binding:", nrow(scopus), "\n")
 write.csv(scopus, "data/processed/scopus_combined.csv", row.names = FALSE)
 
 
-pubmed <- read_csv(file.path(RAW_DIR, "pubmed_pull_8-14-25.csv"), show_col_types = FALSE)
+pubmed <- read_csv(PUBMED_CSV, show_col_types = FALSE)
+cat("PubMed source:", PUBMED_CSV, "\n")
 cat("Number of PubMed files read:", length(pubmed), "\n")
 cat("Total rows after binding:", nrow(pubmed), "\n")
 
