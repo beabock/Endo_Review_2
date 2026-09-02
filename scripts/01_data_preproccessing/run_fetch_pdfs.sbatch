@@ -33,7 +33,9 @@ fi
 cd "$PROJECT_ROOT"
 mkdir -p results/logs
 
-INPUT="${INPUT:-data/Abstracts/Abstracts_for_Monsoon.csv}"
+# default: the deduplicated analysis paper set (tracked in the repo, has a `doi` column).
+# Override with INPUT=data/Abstracts/Abstracts_for_Monsoon.csv to use the raw abstract list.
+INPUT="${INPUT:-data/Ollama_cleaned_synresolved_standardized_year.csv}"
 OUT_DIR="${OUT_DIR:-/scratch/bmb646/full_corpus}"
 EMAIL="${EMAIL:-bmb646@nau.edu}"
 NSHARDS="${NSHARDS:-1}"
