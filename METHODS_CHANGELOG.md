@@ -46,11 +46,23 @@ PubMed string):
 | `angiosperm* / gymnosperm* / monocot* / dicot*` | yes | (relies on `plant*`) |
 
 Plant-side differences mostly wash out (`plant*` covers the taxon words); the
-endophyte-side and lichen/photobiont differences are substantive. **Options:** (A) disclose
-+ justify in the SI; (B) re-harmonise + re-pull WoS + Scopus only; (C) re-pull all three.
-Awaiting Bea: which string produced the PubMed CSV, and is `search_string.txt` final?
-`abstract-endophyteA-set.txt` (MEDLINE-format export in the raw folder) is **not** read by
-the dedup script — check whether it should be.
+endophyte-side and lichen/photobiont differences are substantive.
+
+**Resolved by `docs/SEARCH_STRATEGY.md`** (found in the old project repo, now copied into
+`Endo_Review_2/docs/`): the **authoritative** string is the Phase-2 / `search_string.txt`
+one (exact endophyte phrases × host terms incl. lichen/photobiont), run across all three
+databases on 2025-07-31. `base_search` in `api_pull_abstracts.R` was an earlier **draft**
+— it is now renamed `base_search_DRAFT` (provenance only) and the script uses the Phase-2
+string.
+
+**Still open:** `pubmed_pull_8-14-25.csv` may have been produced with the draft string —
+only 48 % of its rows carry an exact endophyte phrase in title+abstract (MeSH indexing can
+explain the rest, so not conclusive). **Recommended:** re-pull PubMed with the Phase-2
+string (one database, cheap) so all three are provably consistent. `abstract-endophyteA-set.txt`
+(a MEDLINE-format export in the raw folder) is **not** read by the dedup script — check
+whether it should be.
+Also reconcile the search date: SEARCH_STRATEGY.md says 2025-07-31; folder + manuscript
+say 2025-08-14 (searches run late July, exports downloaded mid-Aug?).
 
 **Dedup re-run (2026-09-02), improved script, real data:**
 40,776 combined → DOI 23,100 → abstract 22,830 → doc-type 22,830 → title **22,268**
