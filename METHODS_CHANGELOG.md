@@ -33,16 +33,36 @@ string, databases, dedup sequence, and a stage-count table — flagged in `manus
   are now written by the script to `data/Abstracts/` — the slim file used to appear with
   no script that made it.
 
-**Search string (for the Methods).** The same boolean string was used in all three
-databases, reformatted per platform. PubMed form is in `api_pull_abstracts.R`
-(`base_search`). WoS + Scopus were run via their web interfaces on 2025-08-14; the exact
-platform-formatted strings must be pasted into the SI (recover from Bea's search history).
-Year span 1700–2025.
+**Search string — DISCREPANCY FOUND (needs a decision).** `search_string.txt` (the
+WoS/Scopus string) is **not** equivalent to `base_search` in `api_pull_abstracts.R` (the
+PubMed string):
+
+| term | PubMed (`base_search`) | WoS/Scopus (`search_string.txt`) |
+|---|---|---|
+| bare `endophyte*` + fungal word | yes | no (exact phrases only) |
+| `symptomless / asymptomatic / quiescent fung*` | yes | no |
+| `DSE fungi` | no | yes |
+| `lichen* / cyanobacteria / photobiont* / cyanobiont*` | no | yes |
+| `angiosperm* / gymnosperm* / monocot* / dicot*` | yes | (relies on `plant*`) |
+
+Plant-side differences mostly wash out (`plant*` covers the taxon words); the
+endophyte-side and lichen/photobiont differences are substantive. **Options:** (A) disclose
++ justify in the SI; (B) re-harmonise + re-pull WoS + Scopus only; (C) re-pull all three.
+Awaiting Bea: which string produced the PubMed CSV, and is `search_string.txt` final?
+`abstract-endophyteA-set.txt` (MEDLINE-format export in the raw folder) is **not** read by
+the dedup script — check whether it should be.
+
+**Dedup re-run (2026-09-02), improved script, real data:**
+40,776 combined → DOI 23,100 → abstract 22,830 → doc-type 22,830 → title **22,268**
+(20,411 with a DOI, 1,857 without). Old pipeline was 21,891; the +377 is mostly
+`Article; Proceedings Paper` / `Book Chapter` / `Early Access` the old exact-`"Article"`
+filter dropped. 3 rows had a volume number in the year field → set to NA. Year span
+1926–2025. Table: `results/outputs/dedup_stage_counts.csv`.
 
 **Still to do.**
-- Bea re-runs `combine_dedupe_abstracts.R` against the raw exports (only on her machine)
-  → fresh `All_abstracts_deduped.csv`, then copy to Monsoon for the coverage dry-run.
-- Add the search string + `dedup_stage_counts.csv` table to Methods / SI.
+- Resolve the search-string discrepancy (above).
+- Copy the fresh `All_abstracts_deduped.csv` (22,268 rows) to Monsoon for the dry-run.
+- Add the search string(s) + `dedup_stage_counts.csv` table to Methods / SI.
 - Add an explicit corpus-scope paragraph (self-identified endophyte research; fungi
   published under mycorrhizal / pathology / microbiome frames are out of scope by design).
 - Before final submission only: extend the search to the current year (mechanical,
