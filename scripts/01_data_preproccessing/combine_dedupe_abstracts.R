@@ -27,11 +27,20 @@ library(digest)
 
 library(here)
 setwd(here())
+
+# Raw search exports (gitignored - large). Structure:
+#   <RAW_DIR>/WoS/*.txt                    tab-separated WoS "savedrecs" exports
+#   <RAW_DIR>/Scopus/*.csv                 Scopus CSV exports
+#   <RAW_DIR>/pubmed_pull_8-14-25.csv      PubMed pull (from api_pull_abstracts.R)
+#   <RAW_DIR>/search_string.txt            the exact WoS/Scopus boolean string (for the SI)
+RAW_DIR <- "data/Abstracts/All_abstracts_8-14-25"
+
+dir.create("results/outputs", showWarnings = FALSE, recursive = TRUE)
+dir.create("data/processed", showWarnings = FALSE, recursive = TRUE)
 # Redirect output to txt file
 sink("results/outputs/abstracts_pull_summary.txt")
 
-
-wos_folder <- "data/raw/All_abstracts_8-14-25/WoS"
+wos_folder <- file.path(RAW_DIR, "WoS")
 
 # List all .txt files in the folder (adjust pattern if needed)
 wos_files <- list.files(path = wos_folder, pattern = "\\.txt$", full.names = TRUE)
@@ -52,7 +61,7 @@ write.csv(wos, "data/processed/wos_combined.csv", row.names = FALSE)
 
 # Read and bind all Scopus files in the specified folder
 
-scopus_folder <- "data/raw/All_abstracts_8-14-25/Scopus"
+scopus_folder <- file.path(RAW_DIR, "Scopus")
 
 # List all .csv files in the folder (adjust pattern if needed)
 scopus_files <- list.files(path = scopus_folder, pattern = "\\.csv$", full.names = TRUE)
@@ -72,7 +81,7 @@ cat("Total rows after binding:", nrow(scopus), "\n")
 write.csv(scopus, "data/processed/scopus_combined.csv", row.names = FALSE)
 
 
-pubmed <- read_csv("data/raw/All_abstracts_8-14-25/pubmed_pull_8-14-25.csv", show_col_types = FALSE)
+pubmed <- read_csv(file.path(RAW_DIR, "pubmed_pull_8-14-25.csv"), show_col_types = FALSE)
 cat("Number of PubMed files read:", length(pubmed), "\n")
 cat("Total rows after binding:", nrow(pubmed), "\n")
 
@@ -378,6 +387,16 @@ write.csv(dedup, "data/processed/intermediate_after_title_dedup.csv", row.names 
 # ============================================================================
 # Output
 # ============================================================================
+
+# Publication-year sanity: a handful of source rows carry the volume number or a
+# stray value in the year field (e.g. "13", "109", "4"). Null those (keep the row).
+this_year <- as.integer(format(Sys.Date(), "%Y"))
+yr <- suppressWarnings(as.numeric(dedup$Year))
+bad_year <- !is.na(yr) & (yr < 1850 | yr > this_year + 1)
+cat("\nImplausible publication years set to NA:", sum(bad_year), "\n")
+if (any(bad_year)) print(dedup[bad_year, c("Title", "Year", "DOI")])
+dedup$Year[bad_year] <- NA
+
 final_data <- dedup %>%
   select(-Abstract_norm, -Title_norm, -Authors_norm,
          -DOI_norm, -src_rank, -abs_len) %>%
