@@ -211,7 +211,7 @@ def try_download(sess: Session, url: str, dest: Path) -> tuple[bool, str]:
         if not ok:
             dest.unlink(missing_ok=True)
             return False, note
-        return True, f"ok ({n}p)"
+        return True, ("ok (size/magic only)" if n == -1 else f"ok ({n}p)")
     except Exception as e:                        # noqa: BLE001
         return False, f"exc {e}"
 
@@ -283,8 +283,7 @@ def main() -> int:
             tried.append(name if url else f"{name}:none")
             if url and not pdf_url:
                 pdf_url, hit_resolver = url, name
-                if args.dry_run:
-                    break
+                break            # first hit wins; the download-failure path re-queries
             time.sleep(args.sleep)
 
         row = {"doi": doi, "filename": fn, "resolver": hit_resolver,
