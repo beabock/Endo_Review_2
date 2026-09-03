@@ -10,22 +10,66 @@ comparison — COL is the current authoritative standard, we cite it and move on
 
 ---
 
+## 0. Download record (for the Methods / SI)
+
+**Taxonomy reference used:** Catalogue of Life **(2026-08-26 XR)** — the Extended Release,
+which GBIF now uses as its occurrence backbone.
+- ChecklistBank dataset key **316165**, DOI **`10.48580/dgyy9`**
+- Citation: Bánki, O., Roskov, Y., Döring, M., *et al.* (2026). *Catalogue of Life
+  (2026-08-26 XR).* Catalogue of Life Foundation, Amsterdam. https://doi.org/10.48580/dgyy9
+- Downloaded 2026-09-03 by B. Bock, two kingdom-scoped DwC-A exports from ChecklistBank:
+
+| kingdom | job key | zip | `Taxon.tsv` rows |
+|---|---|---|---|
+| Fungi | `a7847b0a-a6ab-4a00-862b-d04eee6da3ba` | 37.0 MB | 955,107 |
+| Plantae | `c80a81c3-5f3e-4707-a806-70e821c54193` | 122.4 MB | 1,927,747 |
+
+- Export parameters (both): `format=dwca, extended=true, classification=true,
+  synonyms=true, bareNames=false, tabFormat=tsv, taxGroups=true`, minimum rank = species.
+- Archive contents: `Taxon.tsv` (core, 34 DwC-prefixed columns) + `Distribution.tsv`,
+  `SpeciesProfile.tsv`, `VernacularName.tsv`, `MeasurementOrFact.tsv`, `Multimedia.tsv`
+  extensions + `eml.xml`, `meta.xml`.
+- Local: `data/col26_8_XR_fungi/`, `data/cols26_8_XR_plantae/` (gitignored).
+
 ## 1. What COL is, and which download to get
 
-- **Current release: COL26.8** (2026-08-20), ChecklistBank dataset key `316115`, DOI
-  `10.48580/dgywk`. A new base release each month; the **Extended Release (XR)** adds
-  ~62k programmatically-integrated sources on top and is what GBIF.org now uses as its
-  occurrence backbone.
-- Pin one edition (whatever's current when we run — e.g. **COL26.8 XR**) and cite it in
-  Methods with its DOI. Just as frozen as "GBIF Backbone 2023", but current.
-- **Download the DwC-A format, not ColDP.** COL's native format (ColDP) splits names and
-  usages across several files; the DwC-A export flattens everything into one `Taxon.tsv`
-  core + extension files, which is what the loader expects. On ChecklistBank:
-  Datasets → COL Releases → the XR edition → Download → **Darwin Core Archive**. Partial
-  downloads by taxon are allowed — grab `Fungi` and `Plantae` separately (smaller), then
-  concatenate the two `Taxon.tsv` files keeping one header.
+- A new COL **base** release each month; the **Extended Release (XR)** adds ~62k
+  programmatically-integrated sources on top. Pin the edition (done: 2026-08-26 XR) and
+  cite the DOI — just as frozen as "GBIF Backbone 2023", but current.
+- **DwC-A format, not ColDP.** DwC-A flattens everything into one `Taxon.tsv` core +
+  extension files, which is what the loader expects. Partial downloads by taxon are
+  allowed — Fungi and Plantae separately, then concatenate the `Taxon.tsv` files keeping
+  one header.
 
-## 2. Column names — what the loader assumes vs what COL emits
+## 2. Column names — VERIFIED against COL26.8 XR (2026-09-03)
+
+The real `Taxon.tsv` header (from `meta.xml`) is 34 columns, **all prefixed**
+(`dwc:` / `col:` / `dcterms:` / `clb:`):
+
+```
+dwc:taxonID  dwc:parentNameUsageID  dwc:acceptedNameUsageID  dwc:originalNameUsageID
+dwc:scientificNameID  dwc:datasetID  dwc:taxonomicStatus  dwc:taxonRank
+dwc:scientificName  dwc:scientificNameAuthorship  col:notho  dwc:genericName
+dwc:infragenericEpithet  dwc:specificEpithet  dwc:infraspecificEpithet  dwc:cultivarEpithet
+dwc:nameAccordingTo  dwc:namePublishedIn  dwc:nomenclaturalCode  dwc:nomenclaturalStatus
+dwc:kingdom  dwc:phylum  dwc:class  dwc:order  dwc:superfamily  dwc:family  dwc:subfamily
+dwc:tribe  dwc:subtribe  dwc:genus  dwc:subgenus  dwc:taxonRemarks  dcterms:references
+clb:merged
+```
+
+Loader status (`_fields_col_dwca`, reconciled + tested on the full Fungi file):
+- reads all the `dwc:`-prefixed names ✓
+- `dwc:scientificName` carries authorship → canonical is rebuilt from
+  `genericName`+`specificEpithet`(+`infraspecificEpithet`) for species ranks, else
+  authorship is stripped ✓
+- **no year column** — `described_year` is parsed from `dwc:namePublishedIn`
+  (`"... Mycologia 106(6): 1091 (2014)."`) with an authorship-string fallback ✓
+- higher-classification columns (`kingdom`…`genus`) are **often blank on species rows**
+  (only kingdom + genus reliably filled); the parent-chain backfill covers the gap ✓
+- `taxonomicStatus` seen: `accepted`, `provisionally accepted`, `synonym`,
+  `ambiguous synonym` (and `misapplied`, which is excluded) ✓
+
+## 2b. Original column-name notes (superseded by §2)
 
 COL fungal/plant names are under the **botanical code (ICN)** — the API record for
 *Colletotrichum* shows `code: "botanical"` on every classification level.
@@ -73,6 +117,48 @@ input string that is itself a `nom. nud.` would need the synonym map to carry it
 not built, low value.)
 
 ## 4. What Bea needs to do
+
+### Step 0 — DONE (2026-09-03): downloaded COL26.8 XR Fungi + Plantae (see §0).
+
+### Step 1 — concatenate the two Taxon.tsv files
+
+```bash
+cd "C:/Users/beabo/NAU/Endo-Review/Endo_Review_Ollama"
+mkdir -p data/Reference_datasets/col_xr
+cp data/col26_8_XR_fungi/meta.xml data/Reference_datasets/col_xr/meta.xml
+cat data/col26_8_XR_fungi/Taxon.tsv                > data/Reference_datasets/col_xr/Taxon.tsv
+tail -n +2 data/cols26_8_XR_plantae/Taxon.tsv     >> data/Reference_datasets/col_xr/Taxon.tsv
+grep -c "" data/Reference_datasets/col_xr/Taxon.tsv   # expect ~2,882,853
+# also keep the Distribution extensions for the possible geographic check:
+cat data/col26_8_XR_fungi/Distribution.tsv            > data/Reference_datasets/col_xr/Distribution.tsv
+tail -n +2 data/cols26_8_XR_plantae/Distribution.tsv >> data/Reference_datasets/col_xr/Distribution.tsv
+```
+
+### Step 2 — smoke test
+
+The combined index is ~2.9M rows. Building it takes a couple of minutes and a few GB of
+RAM the first time (then it's cached). **Better to run this on Monsoon than your laptop.**
+
+```bash
+python scripts/02_taxa_resolution/taxa_synonym_resolution.py \
+  --input-csv data/Ollama_cleaned.csv \
+  --taxon-tsv data/Reference_datasets/col_xr/Taxon.tsv \
+  --taxonomy-cache results/logs/col_xr_index.pkl \
+  --max-rows 500
+head -3 data/Ollama_cleaned_synresolved.csv | tr ',' '\n' | grep -n year   # columns exist?
+grep -c "" results/manual_validation/taxa_unresolved_review.csv            # unresolved count
+```
+Check: prints `taxonomy source: col_dwca`; `fungal_taxon_described_year` populated for
+resolved fungi; unresolved count roughly in line with the old GBIF-backbone run
+(~13.5k over the full corpus, so ~200–400 in a 500-row sample).
+
+### Step 3 — full run
+
+Folds into the big post-Task-1 Monsoon pipeline regeneration. The sbatch
+(`run_taxa_synonym_resolution.sbatch`) already defaults `TAXON_TSV` to
+`data/Reference_datasets/col_xr/Taxon.tsv` and `TAXONOMY_SOURCE=auto`.
+
+### (old, more detailed download walkthrough kept below for reference)
 
 ### Step 1 — download the COL Extended Release DwC-A
 
