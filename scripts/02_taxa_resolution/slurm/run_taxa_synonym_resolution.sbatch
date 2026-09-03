@@ -16,16 +16,24 @@ set -euo pipefail
 cd "${SLURM_SUBMIT_DIR:-$(pwd)}"
 mkdir -p results/logs results/manual_validation
 
-module purge
-module load python/3.11
+if command -v module >/dev/null 2>&1; then module purge || true; fi
+# use the conda env you submit from (Monsoon has no python/3.11 module)
+PY="$(command -v python3 || command -v python)"
 
-# Optional: activate your Monsoon env if needed
-# source ~/miniconda3/etc/profile.d/conda.sh
-# conda activate endo-review
+# Taxonomy source. Default: Catalogue of Life Extended Release DwC-A (COL26.x XR)
+# from ChecklistBank - download the Fungi + Plantae subsets, unzip, and point
+# TAXON_TSV at the Taxon.tsv. Override with the legacy GBIF backbone if needed:
+#   sbatch --export=TAXON_TSV=/path/gbif_backbone/Taxon.tsv,TAXONOMY_SOURCE=gbif_backbone ...
+TAXON_TSV="${TAXON_TSV:-data/Reference_datasets/col_xr/Taxon.tsv}"
+TAXONOMY_SOURCE="${TAXONOMY_SOURCE:-auto}"
+INPUT_CSV="${INPUT_CSV:-data/Ollama_cleaned.csv}"
 
-python scripts/02_taxa_resolution/taxa_synonym_resolution.py \
-  --input-csv data/Ollama_cleaned.csv \
-  --taxon-tsv /scratch/bmb646/Endo-Review/data/Reference_datasets/gbif_backbone/Taxon.tsv \
+echo "taxonomy: $TAXON_TSV (source=$TAXONOMY_SOURCE)"
+
+"$PY" scripts/02_taxa_resolution/taxa_synonym_resolution.py \
+  --input-csv "$INPUT_CSV" \
+  --taxon-tsv "$TAXON_TSV" \
+  --taxonomy-source "$TAXONOMY_SOURCE" \
   --output-csv data/Ollama_cleaned_synresolved.csv \
   --log-interval 100 \
   --checkpoint-interval 500
