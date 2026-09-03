@@ -107,7 +107,7 @@ def load_taxonomy_index_cache(cache_path: str, source_path: str):
 
     if not isinstance(payload, dict):
         return None
-    if payload.get("cache_version") != 2:
+    if payload.get("cache_version") != 3:
         return None
 
     try:
@@ -136,7 +136,7 @@ def write_taxonomy_index_cache(cache_path: str, source_path: str, data) -> None:
     with open(cache_path, "wb") as handle:
         pickle.dump(
             {
-                "cache_version": 2,
+                "cache_version": 3,
                 "source_mtime_ns": source_stat.st_mtime_ns,
                 "source_size": source_stat.st_size,
                 "data": data,
@@ -287,16 +287,6 @@ def _strip_authorship(scientific_name: str, authorship: str) -> str:
     return name.strip()
 
 
-def _col_canonical(row: Dict[str, str], rank: str) -> str:
-    genus = normalize_text(row.get("genericName") or row.get("genus", ""))
-    sp = normalize_text(row.get("specificEpithet", ""))
-    infra = normalize_text(row.get("infraspecificEpithet", ""))
-    if rank in _SPECIES_RANKS and genus and sp:
-        return " ".join(p for p in (genus, sp, infra) if p)
-    return _strip_authorship(row.get("scientificName", ""),
-                             row.get("scientificNameAuthorship", ""))
-
-
 def _fields_gbif_backbone(row: Dict[str, str]) -> Dict[str, str]:
     return {
         "id": normalize_text(row.get("taxonID", "")),
@@ -305,6 +295,7 @@ def _fields_gbif_backbone(row: Dict[str, str]) -> Dict[str, str]:
         "status": normalize_text(row.get("taxonomicStatus", "")).lower(),
         "parent_id": normalize_text(row.get("parentNameUsageID", "")),
         "accepted_id": normalize_text(row.get("acceptedNameUsageID", "")),
+        "original_id": normalize_text(row.get("originalNameUsageID", "")),
         "kingdom": normalize_text(row.get("kingdom", "")),
         "phylum": normalize_text(row.get("phylum", "")),
         "class": normalize_text(row.get("class", "")),
@@ -312,30 +303,54 @@ def _fields_gbif_backbone(row: Dict[str, str]) -> Dict[str, str]:
         "family": normalize_text(row.get("family", "")),
         "genus": normalize_text(row.get("genus", "")),
         "described_year": _extract_year(row.get("namePublishedInYear")
+                                       or row.get("namePublishedIn", "")
                                        or row.get("scientificNameAuthorship", "")),
         "nom_status": normalize_text(row.get("nomenclaturalStatus", "")),
+        "nom_code": normalize_text(row.get("nomenclaturalCode", "")),
     }
 
 
+# COL DwC-A columns are prefixed (dwc: / col: / dcterms:); confirmed against
+# COL26.8 XR meta.xml, 2026-09-03.
+def _cg(row: Dict[str, str], *keys: str) -> str:
+    for k in keys:
+        v = row.get(k)
+        if v not in (None, ""):
+            return v
+    return ""
+
+
 def _fields_col_dwca(row: Dict[str, str]) -> Dict[str, str]:
-    rank = normalize_text(row.get("taxonRank", "")).upper()
-    tid = normalize_text(row.get("taxonID") or row.get("col:ID") or row.get("dwc:taxonID", ""))
+    rank = normalize_text(_cg(row, "dwc:taxonRank", "taxonRank")).upper()
+    sci = _cg(row, "dwc:scientificName", "scientificName")
+    auth = _cg(row, "dwc:scientificNameAuthorship", "scientificNameAuthorship")
+    genus = normalize_text(_cg(row, "dwc:genericName", "genericName"))
+    sp = normalize_text(_cg(row, "dwc:specificEpithet", "specificEpithet"))
+    infra = normalize_text(_cg(row, "dwc:infraspecificEpithet", "infraspecificEpithet"))
+    if rank in _SPECIES_RANKS and genus and sp:
+        canonical = " ".join(p for p in (genus, sp, infra) if p)
+    else:
+        canonical = _strip_authorship(sci, auth)
     return {
-        "id": tid,
-        "canonical": _col_canonical(row, rank),
+        "id": normalize_text(_cg(row, "dwc:taxonID", "taxonID")),
+        "canonical": canonical,
         "rank": rank,
-        "status": normalize_text(row.get("taxonomicStatus", "")).lower(),
-        "parent_id": normalize_text(row.get("parentNameUsageID", "")),
-        "accepted_id": normalize_text(row.get("acceptedNameUsageID", "")),
-        "kingdom": normalize_text(row.get("kingdom", "")),
-        "phylum": normalize_text(row.get("phylum", "")),
-        "class": normalize_text(row.get("class", "")),
-        "order": normalize_text(row.get("order", "")),
-        "family": normalize_text(row.get("family", "")),
-        "genus": normalize_text(row.get("genus") or row.get("genericName", "")),
-        "described_year": _extract_year(row.get("namePublishedInYear")
-                                       or row.get("scientificNameAuthorship", "")),
-        "nom_status": normalize_text(row.get("nomenclaturalStatus", "")),
+        "status": normalize_text(_cg(row, "dwc:taxonomicStatus", "taxonomicStatus")).lower(),
+        "parent_id": normalize_text(_cg(row, "dwc:parentNameUsageID", "parentNameUsageID")),
+        "accepted_id": normalize_text(_cg(row, "dwc:acceptedNameUsageID", "acceptedNameUsageID")),
+        "original_id": normalize_text(_cg(row, "dwc:originalNameUsageID", "originalNameUsageID")),
+        "kingdom": normalize_text(_cg(row, "dwc:kingdom", "kingdom")),
+        "phylum": normalize_text(_cg(row, "dwc:phylum", "phylum")),
+        "class": normalize_text(_cg(row, "dwc:class", "class")),
+        "order": normalize_text(_cg(row, "dwc:order", "order")),
+        "family": normalize_text(_cg(row, "dwc:family", "family")),
+        "genus": normalize_text(_cg(row, "dwc:genus", "genus") or genus),
+        # COL has no parsed year column; extract it from the namePublishedIn citation
+        # ("... Mycologia 106(6): 1091 (2014).") or the authorship string.
+        "described_year": _extract_year(_cg(row, "dwc:namePublishedIn", "namePublishedIn")
+                                        or auth),
+        "nom_status": normalize_text(_cg(row, "dwc:nomenclaturalStatus", "nomenclaturalStatus")),
+        "nom_code": normalize_text(_cg(row, "dwc:nomenclaturalCode", "nomenclaturalCode")),
     }
 
 
@@ -347,6 +362,8 @@ TAXONOMY_PROFILES = {
 
 def detect_taxonomy_profile(fieldnames: Sequence[str]) -> str:
     cols = {c.strip() for c in (fieldnames or [])}
+    if "dwc:scientificName" in cols or "dwc:taxonID" in cols:
+        return "col_dwca"
     if "canonicalName" in cols:
         return "gbif_backbone"
     if "scientificName" in cols and ("genericName" in cols or "specificEpithet" in cols):
@@ -381,8 +398,10 @@ def load_taxonomy_index(
     parent_by_taxon_id: Dict[str, str] = {}
     rank_by_taxon_id: Dict[str, str] = {}
     lineage_by_taxon_id: Dict[str, Dict[str, str]] = {}
-    # which host kingdoms to keep - Fungi always; land plants + green/other algae for hosts
-    keep_kingdoms = {"Fungi", "Plantae", "Viridiplantae", "Chromista", "Chlorophyta"}
+    year_by_id: Dict[str, str] = {}          # every row's described_year (for basionym lookup)
+    original_by_id: Dict[str, str] = {}      # accepted taxon_id -> basionym id
+    # keep Fungi + land plants / algae; blank kingdom (higher taxa, incertae sedis) is kept
+    keep_kingdoms = {"Fungi", "Plantae", "Viridiplantae", "Chromista", "Chlorophyta", ""}
 
     with open(taxon_tsv, "r", encoding="utf-8", newline="") as handle:
         reader = csv.DictReader(handle, delimiter="\t")
@@ -393,7 +412,7 @@ def load_taxonomy_index(
 
         for raw in reader:
             row = to_fields(raw)
-            kingdom = row["kingdom"] or "Fungi"        # COL fungal rows sometimes blank
+            kingdom = row["kingdom"]
             if kingdom not in keep_kingdoms:
                 continue
 
@@ -410,6 +429,9 @@ def load_taxonomy_index(
             if not taxon_id or "misapplied" in status:
                 continue
 
+            if row.get("described_year"):
+                year_by_id[taxon_id] = row["described_year"]
+
             is_accepted = status in ACCEPTED_STATUSES or (
                 not status and canonical)          # COL: blank status on core taxa
 
@@ -420,11 +442,13 @@ def load_taxonomy_index(
                     "phylum": row["phylum"], "class": row["class"],
                     "order": row["order"], "family": row["family"],
                 }
+                if row.get("original_id"):
+                    original_by_id[taxon_id] = row["original_id"]
                 record = TaxonRecord(
                     taxon_id=taxon_id,
                     canonical_name=canonical,
                     taxon_rank=rank,
-                    kingdom="Fungi" if kingdom == "Fungi" else "Plantae",
+                    kingdom="Fungi" if kingdom == "Fungi" else ("Plantae" if kingdom else ""),
                     phylum=row["phylum"],
                     class_name=row["class"],
                     order=row["order"],
@@ -443,6 +467,13 @@ def load_taxonomy_index(
             elif "synonym" in status:
                 if row["accepted_id"]:
                     synonym_to_accepted_id.setdefault(canonical, row["accepted_id"])
+
+    # Prefer the basionym's (earlier) publication year as the taxon's description year.
+    for tid, orig in original_by_id.items():
+        by = year_by_id.get(orig, "")
+        rec = accepted_by_id.get(tid)
+        if by and rec and (not rec.described_year or by < rec.described_year):
+            rec.described_year = by
 
     def rank_from_lineage(start_id: str, want: str, max_steps: int = 60) -> str:
         """Walk parents to fill a missing phylum/class/order/family."""
