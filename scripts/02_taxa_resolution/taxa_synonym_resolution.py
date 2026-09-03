@@ -95,7 +95,7 @@ def load_taxonomy_index_cache(cache_path: str, source_path: str):
 
     if not isinstance(payload, dict):
         return None
-    if payload.get("cache_version") != 1:
+    if payload.get("cache_version") != 2:
         return None
 
     try:
@@ -124,7 +124,7 @@ def write_taxonomy_index_cache(cache_path: str, source_path: str, data) -> None:
     with open(cache_path, "wb") as handle:
         pickle.dump(
             {
-                "cache_version": 1,
+                "cache_version": 2,
                 "source_mtime_ns": source_stat.st_mtime_ns,
                 "source_size": source_stat.st_size,
                 "data": data,
@@ -244,9 +244,106 @@ def build_interaction_id(row: Dict[str, str], row_index: int) -> str:
     return f"int_{digest}"
 
 
+# --------------------------------------------------------------------------------
+# Taxonomy source profiles
+#
+# The resolver reads a Darwin Core Taxon table. Two upstreams are supported:
+#   gbif_backbone : the legacy GBIF Backbone Taxonomy DwC-A (final build, 2023).
+#                   columns: taxonID, canonicalName, taxonRank, taxonomicStatus,
+#                   parentNameUsageID, acceptedNameUsageID, kingdom..genus
+#   col_dwca      : a Catalogue of Life Extended Release DwC-A (COL26.x XR),
+#                   downloaded from ChecklistBank (partial: Fungi + Plantae).
+#                   No canonicalName column - the canonical is rebuilt from
+#                   genericName/specificEpithet/infraspecificEpithet (binomials) or
+#                   taken from scientificName minus authorship (uninomials).
+#                   Richer taxonomicStatus vocab (homotypic/heterotypic/ambiguous
+#                   synonym, misapplied, provisionally accepted).
+# `auto` picks the profile from the header row.
+# --------------------------------------------------------------------------------
+
+ACCEPTED_STATUSES = {"accepted", "provisionally accepted", "valid"}
+_SPECIES_RANKS = {"SPECIES", "SUBSPECIES", "VARIETY", "FORM"}
+
+
+def _strip_authorship(scientific_name: str, authorship: str) -> str:
+    name = normalize_text(scientific_name)
+    auth = normalize_text(authorship)
+    if auth and name.endswith(auth):
+        name = name[: -len(auth)].strip()
+    # drop a trailing "(Someone) Someone, 1999" / "L." style author string
+    name = re.sub(r"\s+\(?[A-Z][A-Za-z.'-]+.*$", "", name) if " " in name else name
+    return name.strip()
+
+
+def _col_canonical(row: Dict[str, str], rank: str) -> str:
+    genus = normalize_text(row.get("genericName") or row.get("genus", ""))
+    sp = normalize_text(row.get("specificEpithet", ""))
+    infra = normalize_text(row.get("infraspecificEpithet", ""))
+    if rank in _SPECIES_RANKS and genus and sp:
+        return " ".join(p for p in (genus, sp, infra) if p)
+    return _strip_authorship(row.get("scientificName", ""),
+                             row.get("scientificNameAuthorship", ""))
+
+
+def _fields_gbif_backbone(row: Dict[str, str]) -> Dict[str, str]:
+    return {
+        "id": normalize_text(row.get("taxonID", "")),
+        "canonical": row.get("canonicalName", ""),
+        "rank": normalize_text(row.get("taxonRank", "")).upper(),
+        "status": normalize_text(row.get("taxonomicStatus", "")).lower(),
+        "parent_id": normalize_text(row.get("parentNameUsageID", "")),
+        "accepted_id": normalize_text(row.get("acceptedNameUsageID", "")),
+        "kingdom": normalize_text(row.get("kingdom", "")),
+        "phylum": normalize_text(row.get("phylum", "")),
+        "class": normalize_text(row.get("class", "")),
+        "order": normalize_text(row.get("order", "")),
+        "family": normalize_text(row.get("family", "")),
+        "genus": normalize_text(row.get("genus", "")),
+    }
+
+
+def _fields_col_dwca(row: Dict[str, str]) -> Dict[str, str]:
+    rank = normalize_text(row.get("taxonRank", "")).upper()
+    tid = normalize_text(row.get("taxonID") or row.get("col:ID") or row.get("dwc:taxonID", ""))
+    return {
+        "id": tid,
+        "canonical": _col_canonical(row, rank),
+        "rank": rank,
+        "status": normalize_text(row.get("taxonomicStatus", "")).lower(),
+        "parent_id": normalize_text(row.get("parentNameUsageID", "")),
+        "accepted_id": normalize_text(row.get("acceptedNameUsageID", "")),
+        "kingdom": normalize_text(row.get("kingdom", "")),
+        "phylum": normalize_text(row.get("phylum", "")),
+        "class": normalize_text(row.get("class", "")),
+        "order": normalize_text(row.get("order", "")),
+        "family": normalize_text(row.get("family", "")),
+        "genus": normalize_text(row.get("genus") or row.get("genericName", "")),
+    }
+
+
+TAXONOMY_PROFILES = {
+    "gbif_backbone": _fields_gbif_backbone,
+    "col_dwca": _fields_col_dwca,
+}
+
+
+def detect_taxonomy_profile(fieldnames: Sequence[str]) -> str:
+    cols = {c.strip() for c in (fieldnames or [])}
+    if "canonicalName" in cols:
+        return "gbif_backbone"
+    if "scientificName" in cols and ("genericName" in cols or "specificEpithet" in cols):
+        return "col_dwca"
+    if "canonicalName" not in cols and "scientificName" in cols:
+        return "col_dwca"
+    raise ValueError(
+        f"Cannot identify the taxonomy source from columns {sorted(cols)[:12]}... "
+        "pass --taxonomy-source gbif_backbone|col_dwca explicitly.")
+
+
 def load_taxonomy_index(
     taxon_tsv: str,
     cache_path: Optional[str] = None,
+    taxonomy_source: str = "auto",
 ) -> Tuple[
     Dict[str, TaxonRecord],
     Dict[str, str],
@@ -264,75 +361,94 @@ def load_taxonomy_index(
     genus_by_letter: Dict[str, List[str]] = defaultdict(list)
     genus_name_to_taxon_id: Dict[str, str] = {}
     parent_by_taxon_id: Dict[str, str] = {}
-    phylum_by_taxon_id: Dict[str, str] = {}
+    rank_by_taxon_id: Dict[str, str] = {}
+    lineage_by_taxon_id: Dict[str, Dict[str, str]] = {}
+    # which host kingdoms to keep - Fungi always; land plants + green/other algae for hosts
+    keep_kingdoms = {"Fungi", "Plantae", "Viridiplantae", "Chromista", "Chlorophyta"}
 
     with open(taxon_tsv, "r", encoding="utf-8", newline="") as handle:
         reader = csv.DictReader(handle, delimiter="\t")
-        for row in reader:
-            kingdom = normalize_text(row.get("kingdom", ""))
-            if kingdom not in {"Fungi", "Plantae"}:
+        if taxonomy_source == "auto":
+            taxonomy_source = detect_taxonomy_profile(reader.fieldnames or [])
+        to_fields = TAXONOMY_PROFILES[taxonomy_source]
+        print(f"  taxonomy source: {taxonomy_source}")
+
+        for raw in reader:
+            row = to_fields(raw)
+            kingdom = row["kingdom"] or "Fungi"        # COL fungal rows sometimes blank
+            if kingdom not in keep_kingdoms:
                 continue
 
-            rank = normalize_text(row.get("taxonRank", "")).upper()
+            rank = row["rank"]
             if rank not in ALLOWED_TAXON_RANKS:
                 continue
 
-            canonical = normalize_key(row.get("canonicalName", ""))
+            canonical = normalize_key(row["canonical"])
             if not canonical:
                 continue
 
-            status = normalize_text(row.get("taxonomicStatus", "")).lower()
-            taxon_id = normalize_text(row.get("taxonID", ""))
-            if not taxon_id:
+            status = row["status"]
+            taxon_id = row["id"]
+            if not taxon_id or "misapplied" in status:
                 continue
 
-            if status == "accepted":
-                parent_by_taxon_id[taxon_id] = normalize_text(row.get("parentNameUsageID", ""))
-                phylum_by_taxon_id[taxon_id] = normalize_text(row.get("phylum", ""))
+            is_accepted = status in ACCEPTED_STATUSES or (
+                not status and canonical)          # COL: blank status on core taxa
 
-            if status == "accepted":
+            if is_accepted:
+                parent_by_taxon_id[taxon_id] = row["parent_id"]
+                rank_by_taxon_id[taxon_id] = rank
+                lineage_by_taxon_id[taxon_id] = {
+                    "phylum": row["phylum"], "class": row["class"],
+                    "order": row["order"], "family": row["family"],
+                }
                 record = TaxonRecord(
                     taxon_id=taxon_id,
                     canonical_name=canonical,
                     taxon_rank=rank,
-                    kingdom=kingdom,
-                    phylum=normalize_text(row.get("phylum", "")),
-                    class_name=normalize_text(row.get("class", "")),
-                    order=normalize_text(row.get("order", "")),
-                    family=normalize_text(row.get("family", "")),
-                    genus=normalize_text(row.get("genus", "")),
+                    kingdom="Fungi" if kingdom == "Fungi" else "Plantae",
+                    phylum=row["phylum"],
+                    class_name=row["class"],
+                    order=row["order"],
+                    family=row["family"],
+                    genus=row["genus"],
                 )
                 accepted_by_id[taxon_id] = record
-                accepted_by_canonical[canonical] = record
+                accepted_by_canonical.setdefault(canonical, record)
 
                 if rank == "GENUS":
                     genus_name_to_taxon_id[canonical] = taxon_id
-                    if canonical:
-                        genus_by_letter[canonical[0]].append(canonical)
+                    genus_by_letter[canonical[0]].append(canonical)
 
             elif "synonym" in status:
-                accepted_id = normalize_text(row.get("acceptedNameUsageID", ""))
-                if accepted_id:
-                    synonym_to_accepted_id[canonical] = accepted_id
+                if row["accepted_id"]:
+                    synonym_to_accepted_id.setdefault(canonical, row["accepted_id"])
 
-    def resolve_phylum_from_lineage(start_taxon_id: str, max_steps: int = 40) -> str:
-        current = start_taxon_id
-        steps = 0
+    def rank_from_lineage(start_id: str, want: str, max_steps: int = 60) -> str:
+        """Walk parents to fill a missing phylum/class/order/family."""
+        current, steps = start_id, 0
         while current and steps < max_steps:
-            phylum = phylum_by_taxon_id.get(current, "")
-            if phylum:
-                return phylum
+            val = lineage_by_taxon_id.get(current, {}).get(want, "")
+            if val:
+                return val
+            # a parent whose own rank == the wanted level also supplies the value
+            rec = accepted_by_id.get(current)
+            if rec and rank_by_taxon_id.get(current, "").lower() == want:
+                return rec.canonical_name
             parent = parent_by_taxon_id.get(current, "")
             if not parent or parent == current:
                 break
-            current = parent
-            steps += 1
+            current, steps = parent, steps + 1
         return ""
 
-    # Backfill missing phylum values from accepted GBIF lineage.
+    # Backfill missing lineage ranks from the accepted parent chain.
     for record in accepted_by_id.values():
-        if not record.phylum:
-            record.phylum = resolve_phylum_from_lineage(record.taxon_id)
+        for attr, want in (("phylum", "phylum"), ("class_name", "class"),
+                           ("order", "order"), ("family", "family")):
+            if not getattr(record, attr):
+                filled = rank_from_lineage(record.taxon_id, want)
+                if filled:
+                    setattr(record, attr, filled)
 
     for key in list(genus_by_letter.keys()):
         genus_by_letter[key] = sorted(set(genus_by_letter[key]))
@@ -577,7 +693,7 @@ def run_resolution(args: argparse.Namespace) -> None:
         genus_by_letter,
         _genus_name_to_taxon_id,
         accepted_by_id,
-    ) = load_taxonomy_index(args.taxon_tsv, args.taxonomy_cache)
+    ) = load_taxonomy_index(args.taxon_tsv, args.taxonomy_cache, args.taxonomy_source)
 
     input_fieldnames = get_input_fieldnames(args.input_csv)
     rows = read_input_rows(args.input_csv)
@@ -781,7 +897,15 @@ def run_resolution(args: argparse.Namespace) -> None:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Resolve fungal_taxon and plant_host synonyms against GBIF backbone."
+        description="Resolve fungal_taxon and plant_host names against a Darwin Core "
+        "taxonomy (GBIF Backbone Taxonomy, or Catalogue of Life Extended Release)."
+    )
+    parser.add_argument(
+        "--taxonomy-source",
+        choices=["auto", "gbif_backbone", "col_dwca"],
+        default="auto",
+        help="Which taxonomy the --taxon-tsv is from (default: auto-detect from headers). "
+             "col_dwca = a Catalogue of Life Extended Release DwC-A from ChecklistBank.",
     )
     parser.add_argument(
         "--input-csv",
