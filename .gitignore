@@ -1,6 +1,12 @@
 /data/Abstracts
 /data/Reference_datasets
 /data/Training_labeled_abs_6.csv
+# raw Catalogue of Life / GBIF taxonomy downloads (large)
+/data/col26_8_XR_fungi/
+/data/cols26_8_XR_plantae/
+/data/col*_XR_*/
+/data/dataset/
+/data/gbif_backbone/
 results/logs/taxa_synonym_resolution_taxonomy_index.pkl
 results/logs/*.out
 results/logs/*.err
