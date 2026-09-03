@@ -8,7 +8,7 @@
 # genus-looking binomial or a country) -> drop References / Acknowledgements / Funding
 # boilerplate -> chunk what's left into context-sized windows with a [DOI | section]
 # header on each. Image-only / scanned PDFs are OCR'd with ocrmypdf (Tesseract) and
-# cached, not skipped - older and non-English scans are exactly the papers the study
+# cached, not skipped - older scanned papers are still part of the corpus and the study
 # is about. No LLM here; monsoon_extract.py calls this.
 
 from __future__ import annotations
@@ -71,13 +71,15 @@ def _norm_heading(line: str) -> str:
     return re.sub(r"[^a-z ]", "", line.lower()).strip()
 
 
-def ocr_pdf(src: str | Path, dst: str | Path, lang: str = "eng+fra+spa+deu+por") -> bool:
+def ocr_pdf(src: str | Path, dst: str | Path, lang: str = "eng") -> bool:
     """
     Add a text layer to an image-only PDF with ocrmypdf (Tesseract). Returns True on
-    success. Older / non-English scans are exactly the papers the study is about, so we
-    OCR rather than skip them (Bea, 2026-09-02). Needs `ocrmypdf` + the tesseract
-    language packs installed on the box; if absent, returns False and the caller logs
-    the PDF as skipped.
+    success. Scanned papers (mostly pre-digitisation) are still the papers the study
+    is about, so we OCR rather than skip them (Bea, 2026-09-02). The corpus is
+    English-language by search design, so `eng` is the default; pass e.g.
+    "eng+fra+spa" if you install those tesseract data packs. Needs `ocrmypdf` +
+    tesseract on the box; if absent (or a language pack is missing) returns False and
+    the caller logs the PDF as skipped.
     """
     try:
         import ocrmypdf  # noqa: PLC0415
@@ -87,7 +89,15 @@ def ocr_pdf(src: str | Path, dst: str | Path, lang: str = "eng+fra+spa+deu+por")
         ocrmypdf.ocr(str(src), str(dst), language=lang, skip_text=True,
                      progress_bar=False, optimize=0, jobs=1)
         return Path(dst).exists()
-    except Exception:                            # noqa: BLE001
+    except Exception:
+        # retry with plain English if a multi-language request failed on a missing pack
+        if lang != "eng":
+            try:
+                ocrmypdf.ocr(str(src), str(dst), language="eng", skip_text=True,
+                             progress_bar=False, optimize=0, jobs=1)
+                return Path(dst).exists()
+            except Exception:
+                return False
         return False
 
 
