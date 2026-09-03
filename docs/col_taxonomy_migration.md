@@ -61,33 +61,72 @@ the parent chain), but knowing which saves a debugging round.
 | `group` (coarse tag, e.g. "ascomycetes") | redundant with phylum/class. |
 | `VernacularName`, `Multimedia`, `TypeMaterial` | not relevant. |
 
-**Proposed loader change:** carry `namePublishedInYear` (and `nomenclaturalStatus`) through
-to `Ollama_cleaned_synresolved.csv` as `fungal_taxon_described_year` /
-`plant_host_described_year` (+ a `*_nom_status` flag). Zero cost to the resolution logic;
-enables the discovery-driver analysis. GBIF-backbone runs just leave these blank.
+**DONE (branch `nph-col-taxonomy`):** the loader now carries the accepted name's
+`namePublishedInYear` (with a fallback to the year inside `scientificNameAuthorship`)
+and `nomenclaturalStatus` through to `Ollama_cleaned_synresolved.csv` as
+`fungal_taxon_described_year` / `fungal_taxon_nom_status` /
+`plant_host_described_year` / `plant_host_nom_status`. Zero cost to the resolution
+logic; blank for GBIF-backbone runs. Tested on a synthetic *Xylona heveae*
+(Xylonomycetes, 2012) record — resolves and carries the year.
+(`nom_status` currently reflects the *accepted* name's status only; flagging a raw
+input string that is itself a `nom. nud.` would need the synonym map to carry it —
+not built, low value.)
 
-## 4. Verification + run plan
+## 4. What Bea needs to do
 
-1. **Bea downloads** the COL26.x XR DwC-A (Fungi + Plantae partials) to
-   `data/Reference_datasets/col_xr/Taxon.tsv`.
-2. **Check the real header** and paste it here:
+### Step 1 — download the COL Extended Release DwC-A
+
+1. Go to <https://www.checklistbank.org> and **sign in with your GBIF account** (top right).
+2. Left menu → **Datasets**. In the search box type `COL` and open the entry titled
+   **"Catalogue of Life"** (the project, key `3`). On its page, open the **Releases** tab.
+3. Find the newest **Extended Release** — the alias looks like `COL26.8 XR` (the plain
+   `COL26.8` without "XR" is the smaller Base Release; we want **XR**). Click it.
+   **Write down the exact version + DOI** shown on that page — that's what goes in Methods.
+4. On the release page → **Download** (or the ⋯ menu) → choose **Darwin Core Archive**
+   as the format. If it offers a taxon filter, enter **Fungi**, download, then repeat for
+   **Plantae**. (If there's no filter, download the whole XR DwC-A — bigger but fine.)
+   These come as `.zip` files, each containing `Taxon.tsv`, `meta.xml`, and extension
+   `.tsv` files.
+5. Put the unzipped result at `data/Reference_datasets/col_xr/`. If you downloaded Fungi
+   and Plantae separately:
    ```bash
-   head -1 data/Reference_datasets/col_xr/Taxon.tsv | tr '\t' '\n' | nl
-   wc -l data/Reference_datasets/col_xr/Taxon.tsv
+   mkdir -p data/Reference_datasets/col_xr
+   # unzip both zips into two temp folders, then:
+   cat fungi/Taxon.tsv > data/Reference_datasets/col_xr/Taxon.tsv
+   tail -n +2 plantae/Taxon.tsv >> data/Reference_datasets/col_xr/Taxon.tsv   # skip the 2nd header
+   cp fungi/meta.xml data/Reference_datasets/col_xr/meta.xml
    ```
-   I reconcile `_fields_col_dwca` against the actual column names (adjust any that differ
-   — DwC-A exports sometimes prefix with `dwc:` or use `col:` for the ID).
-3. **Smoke test** (200 rows) locally or on Monsoon:
-   ```bash
-   python scripts/02_taxa_resolution/taxa_synonym_resolution.py \
-     --taxon-tsv data/Reference_datasets/col_xr/Taxon.tsv --max-rows 200
-   ```
-   Confirm: "taxonomy source: col_dwca" prints, resolved names look right, the
-   unresolved list isn't suddenly huge.
-4. If I add the `namePublishedInYear` passthrough, re-smoke-test.
-5. **Full run on Monsoon** — folds into the big post-Task-1 pipeline regeneration.
-6. **Methods text**: "...resolved against the Catalogue of Life Extended Release
-   (COL26.x, DOI ...), the taxonomic reference now used by GBIF."
+
+### Step 2 — send me the real column names
+
+```bash
+head -1 data/Reference_datasets/col_xr/Taxon.tsv | tr '\t' '\n' | nl
+grep -c "" data/Reference_datasets/col_xr/Taxon.tsv
+cat data/Reference_datasets/col_xr/meta.xml
+```
+Paste all three outputs. I reconcile `_fields_col_dwca` against the actual headers
+(DwC-A exports sometimes prefix columns with `dwc:` / `col:`, or split the archive
+differently — the `meta.xml` is the authoritative field map).
+
+### Step 3 — smoke test (I'll confirm the exact command after step 2)
+
+```bash
+python scripts/02_taxa_resolution/taxa_synonym_resolution.py \
+  --taxon-tsv data/Reference_datasets/col_xr/Taxon.tsv --max-rows 300
+head -3 data/Ollama_cleaned_synresolved.csv
+```
+Check: prints `taxonomy source: col_dwca`; `*_described_year` columns are populated for
+resolved fungi; the unresolved count isn't wildly higher than before.
+
+### Step 4 — full run
+
+Folds into the big post-Task-1 Monsoon pipeline regeneration (with `--taxonomy-source`
+defaulting to `auto`, or explicit `col_dwca`).
+
+### Methods text
+"...names were resolved against the Catalogue of Life Extended Release (COL26.x,
+DOI 10.xxxxx/xxxxx), the taxonomic reference now used by GBIF for organising occurrence
+records."
 
 ## Sources
 - COL release COL26.8: https://api.checklistbank.org/dataset/316115 (DOI 10.48580/dgywk)

@@ -66,6 +66,8 @@ class ResolveResult:
     taxon_rank: str
     accepted_taxon_id: str
     kingdom: str
+    described_year: str = ""     # namePublishedInYear of the accepted name (COL)
+    nom_status: str = ""         # nomenclaturalStatus, e.g. "nom. nud." (COL)
 
 
 @dataclass
@@ -79,6 +81,16 @@ class TaxonRecord:
     order: str
     family: str
     genus: str
+    described_year: str = ""
+    nom_status: str = ""
+
+
+_YEAR_RE = re.compile(r"\b(1[5-9]\d\d|20\d\d)\b")
+
+
+def _extract_year(value: str) -> str:
+    m = _YEAR_RE.search(value or "")
+    return m.group(1) if m else ""
 
 
 def load_taxonomy_index_cache(cache_path: str, source_path: str):
@@ -299,6 +311,9 @@ def _fields_gbif_backbone(row: Dict[str, str]) -> Dict[str, str]:
         "order": normalize_text(row.get("order", "")),
         "family": normalize_text(row.get("family", "")),
         "genus": normalize_text(row.get("genus", "")),
+        "described_year": _extract_year(row.get("namePublishedInYear")
+                                       or row.get("scientificNameAuthorship", "")),
+        "nom_status": normalize_text(row.get("nomenclaturalStatus", "")),
     }
 
 
@@ -318,6 +333,9 @@ def _fields_col_dwca(row: Dict[str, str]) -> Dict[str, str]:
         "order": normalize_text(row.get("order", "")),
         "family": normalize_text(row.get("family", "")),
         "genus": normalize_text(row.get("genus") or row.get("genericName", "")),
+        "described_year": _extract_year(row.get("namePublishedInYear")
+                                       or row.get("scientificNameAuthorship", "")),
+        "nom_status": normalize_text(row.get("nomenclaturalStatus", "")),
     }
 
 
@@ -412,6 +430,8 @@ def load_taxonomy_index(
                     order=row["order"],
                     family=row["family"],
                     genus=row["genus"],
+                    described_year=row.get("described_year", ""),
+                    nom_status=row.get("nom_status", ""),
                 )
                 accepted_by_id[taxon_id] = record
                 accepted_by_canonical.setdefault(canonical, record)
@@ -522,6 +542,8 @@ def resolve_token(
             taxon_rank=accepted.taxon_rank,
             accepted_taxon_id=accepted.taxon_id,
             kingdom=accepted.kingdom,
+            described_year=accepted.described_year,
+            nom_status=accepted.nom_status,
         )
 
     syn_id = synonym_to_accepted_id.get(normalized)
@@ -539,6 +561,8 @@ def resolve_token(
             taxon_rank=accepted.taxon_rank,
             accepted_taxon_id=accepted.taxon_id,
             kingdom=accepted.kingdom,
+            described_year=accepted.described_year,
+            nom_status=accepted.nom_status,
         )
 
     abbr = detect_abbreviation(cleaned)
@@ -575,6 +599,8 @@ def resolve_token(
                 taxon_rank=chosen.taxon_rank,
                 accepted_taxon_id=chosen.taxon_id,
                 kingdom=chosen.kingdom,
+                described_year=chosen.described_year,
+                nom_status=chosen.nom_status,
             )
 
     # Genus-level fallback.
@@ -593,6 +619,8 @@ def resolve_token(
             taxon_rank=genus_hit.taxon_rank,
             accepted_taxon_id=genus_hit.taxon_id,
             kingdom=genus_hit.kingdom,
+            described_year=genus_hit.described_year,
+            nom_status=genus_hit.nom_status,
         )
 
     return ResolveResult(
@@ -610,9 +638,9 @@ def resolve_token(
     )
 
 
-def aggregate_results(results: Sequence[ResolveResult]) -> Tuple[str, str, str, str, str]:
+def aggregate_results(results: Sequence[ResolveResult]) -> Tuple[str, str, str, str, str, str, str]:
     if not results:
-        return "", "Unresolved", "none", "0.00", ""
+        return "", "Unresolved", "none", "0.00", "", "", ""
 
     resolved = sorted(set([r.resolved_name for r in results if r.resolved_name]))
     methods = sorted(set([r.resolution_method for r in results if r.resolution_method]))
@@ -628,6 +656,8 @@ def aggregate_results(results: Sequence[ResolveResult]) -> Tuple[str, str, str, 
     avg_conf = sum(r.confidence for r in results) / float(len(results))
 
     accepted_ids = sorted(set([r.accepted_taxon_id for r in results if r.accepted_taxon_id]))
+    years = sorted(set([r.described_year for r in results if r.described_year]))
+    nom = sorted(set([r.nom_status for r in results if r.nom_status]))
 
     return (
         "; ".join(resolved),
@@ -635,6 +665,8 @@ def aggregate_results(results: Sequence[ResolveResult]) -> Tuple[str, str, str, 
         "; ".join(methods),
         f"{avg_conf:.2f}",
         "; ".join(accepted_ids),
+        "; ".join(years),           # namePublishedInYear (COL); blank for GBIF backbone
+        "; ".join(nom),             # nomenclaturalStatus (COL)
     )
 
 
@@ -737,12 +769,16 @@ def run_resolution(args: argparse.Namespace) -> None:
         "fungal_taxon_resolution_method",
         "fungal_taxon_confidence",
         "fungal_taxon_accepted_ids",
+        "fungal_taxon_described_year",
+        "fungal_taxon_nom_status",
         "plant_host_raw",
         "plant_host_resolved",
         "plant_host_status",
         "plant_host_resolution_method",
         "plant_host_confidence",
         "plant_host_accepted_ids",
+        "plant_host_described_year",
+        "plant_host_nom_status",
     ]
 
     unresolved_fields = [
@@ -846,12 +882,16 @@ def run_resolution(args: argparse.Namespace) -> None:
                     "fungal_taxon_resolution_method": fungal_agg[2],
                     "fungal_taxon_confidence": fungal_agg[3],
                     "fungal_taxon_accepted_ids": fungal_agg[4],
+                    "fungal_taxon_described_year": fungal_agg[5],
+                    "fungal_taxon_nom_status": fungal_agg[6],
                     "plant_host_raw": row.get("plant_host", ""),
                     "plant_host_resolved": plant_agg[0],
                     "plant_host_status": plant_agg[1],
                     "plant_host_resolution_method": plant_agg[2],
                     "plant_host_confidence": plant_agg[3],
                     "plant_host_accepted_ids": plant_agg[4],
+                    "plant_host_described_year": plant_agg[5],
+                    "plant_host_nom_status": plant_agg[6],
                 }
             )
             output_buffer.append(out_row)
