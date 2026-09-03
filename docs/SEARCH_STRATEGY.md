@@ -35,8 +35,10 @@ AND
   carry no primary occurrence records.
 - **Language:** English (acknowledged as a bias in the manuscript).
 - **Date span:** all years to the search date.
-- **Search date:** searches run 2025-07-31; full-record exports downloaded 2025-08-14
-  (folder `All_abstracts_8-14-25/`). *(reconcile which single date to cite in Methods.)*
+- **Search date:** **2025-08-14** — all WoS / Scopus / PubMed exports are timestamped
+  09:16–10:01 that morning (folder `All_abstracts_8-14-25/`; `old_manuscript.md` also says
+  Aug 14). Earlier drafts of this doc and `docs/METHODS.md` said 2025-07-31 — that was the
+  planning date, superseded.
 - **Searcher:** B. Bock, via each platform's Advanced Search.
 
 ### ⚠️ RESOLVED — PubMed was pulled with the wrong (draft) string; needs a re-pull
@@ -108,7 +110,7 @@ Outputs (both gitignored — too large for the repo):
 | phase | date | string | use |
 |---|---|---|---|
 | 1 — exploratory | 2024-11-18 | `("fungal endophyte" OR … "endophytic fungus") AND plant` (WoS, Scopus) | scope check + model training data |
-| 2 — comprehensive | 2025-07-31 | the string above (WoS, Scopus, PubMed) | **all current analyses** |
+| 2 — comprehensive | 2025-08-14 | the string above (WoS, Scopus, PubMed) | **all current analyses** |
 
 ---
 
@@ -124,8 +126,8 @@ Outputs (both gitignored — too large for the repo):
 
 ## To finalise for submission
 
-- [ ] Resolve the PubMed-string question (re-pull, or document the exact query used).
-- [ ] Reconcile the search date (2025-07-31 vs 2025-08-14) to one value in Methods.
+- [x] PubMed string — resolved (parse the Phase 2 website export; see above).
+- [x] Search date — **2025-08-14** (see above). Fix `docs/METHODS.md` to match.
 - [ ] Paste the exact WoS- and Scopus-formatted strings into the SI.
 - [ ] Add the dedup stage table (above) to Methods / SI.
 - [ ] Decide whether to extend the search to the current year before final submission

@@ -76,8 +76,10 @@ doc-type 21,982 → title **21,414** (19,586 with DOI). Contribution after dedup
 `pull_pubmed_phase2.R` (rentrez) kept for the eventual date-extension only (it needs its
 count validated against the 9,141 first).
 
-Also reconcile the search date: SEARCH_STRATEGY.md / METHODS.md say 2025-07-31; folder +
-manuscript say 2025-08-14 (searches run late July, exports downloaded mid-Aug?).
+**Search date = 2025-08-14** (resolved). Every WoS/Scopus/PubMed export file is timestamped
+09:16–10:01 on 2025-08-14; `old_manuscript.md` agrees. The 2025-07-31 in the old
+SEARCH_STRATEGY.md / `docs/METHODS.md` was the planning date. `docs/METHODS.md` (old repo)
+still needs the fix.
 
 **Dedup re-run (2026-09-02), improved script, real data:**
 40,776 combined → DOI 23,100 → abstract 22,830 → doc-type 22,830 → title **22,268**
