@@ -1,6 +1,10 @@
 #!/usr/bin/env Rscript
 # BMB 2026-06-05
 # Figures for the abstract vs full-text comparison.
+#
+# NOTE 2026-08-27: paired with compare_abs_fulltexts.R, which is being replaced by a
+# genuine record-by-record paired comparison (see NPH_task1_paired_validation_plan.md).
+# Any GDP rows in the comparison table are inert - GDP / Prediction 4 was cut.
 
 library(dplyr)
 library(readr)

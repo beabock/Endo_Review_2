@@ -2,6 +2,11 @@
 # BMB 2026-06-05
 # Compares analysis results between abstract-only and full-text extraction runs
 # across all core metrics.
+#
+# NOTE 2026-08-27: this is the two-population comparison Referee 3 flagged. It is being
+# replaced by a genuine paired (record-by-record) comparison,
+# scripts/04_analyses/compare_abs_fulltext_paired.R (see NPH_task1_paired_validation_plan.md).
+# The GDP columns here are inert - GDP / Prediction 4 was cut from the manuscript.
 
 suppressPackageStartupMessages({
 	library(dplyr)
@@ -365,7 +370,10 @@ load_fungi_reference <- function() {
 	)
 }
 
-country_base <- read_csv(COUNTRY_ENRICHED, show_col_types = FALSE) %>%
+country_base <- read_csv(COUNTRY_ENRICHED, show_col_types = FALSE)
+# GDP columns are optional (dropped from the main pipeline); keep the code paths working.
+if (!"gdp_current_usd" %in% names(country_base)) country_base$gdp_current_usd <- NA_real_
+country_base <- country_base %>%
 	mutate(
 		study_count = as.numeric(study_count),
 		centroid_lat = as.numeric(centroid_lat),

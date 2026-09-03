@@ -17,7 +17,7 @@ source("scripts/05_plotting/theme_utils.R")
 
 OUTPUT_DIR <- "results/biodiversity_priority_overlap"
 INPUT_SENSITIVITY <- "results/biodiversity_priority_overlap/sensitivity_analysis.csv"
-INPUT_COUNTRY_SUMMARY <- "results/country_analysis/country_gdp_latitude_summary.csv"
+INPUT_COUNTRY_SUMMARY <- "results/country_analysis/country_study_summary.csv"
 INPUT_COUNTRY_AREA <- "results/biodiversity_priority_overlap/country_land_area_summary.csv"
 INPUT_PRIORITY_COUNTRIES <- "data/biodiversity/biodiversity_priority_countries.csv"
 if (!file.exists(INPUT_PRIORITY_COUNTRIES)) {
@@ -38,7 +38,6 @@ OUTPUT_Unevenness_DETAILED <- file.path(OUTPUT_DIR, "priority_overlap_unevenness
 OUTPUT_Unevenness_TOTAL <- file.path(OUTPUT_DIR, "priority_overlap_unevenness_total.png")
 OUTPUT_Unevenness_ENDEMIC <- file.path(OUTPUT_DIR, "priority_overlap_unevenness_endemic.png")
 OUTPUT_Unevenness_THREATENED <- file.path(OUTPUT_DIR, "priority_overlap_unevenness_threatened.png")
-OUTPUT_GDP_CORR_PLOT <- file.path(OUTPUT_DIR, "gdp_biodiversity_correlation.png")
 OUTPUT_UNDERSTUDIED_DIST_PLOT <- file.path(OUTPUT_DIR, "understudied_biodiversity_distribution.png")
 OUTPUT_MODELING_PLOT <- file.path(OUTPUT_DIR, "modeling_results.png")
 # Load data
@@ -80,7 +79,7 @@ plot_metric_map <- c(
 )
 
 plot_data <- country_summary %>%
-  select(iso_a3, country_name, study_count, country_area_km2, study_density_per_1000_km2, gdp_log10) %>%
+  select(iso_a3, country_name, study_count, country_area_km2, study_density_per_1000_km2) %>%
   mutate(
     study_count = as.numeric(study_count),
     study_count_log = log10(study_count + 1),
@@ -642,41 +641,8 @@ if (!is.null(uneven_total)) cat("Standalone unevenness plot saved to:", OUTPUT_U
 if (!is.null(uneven_endemic)) cat("Standalone unevenness plot saved to:", OUTPUT_Unevenness_ENDEMIC, "\n")
 if (!is.null(uneven_threatened)) cat("Standalone unevenness plot saved to:", OUTPUT_Unevenness_THREATENED, "\n")
 
-# PLOT 5: GDP vs Biodiversity and Study Count
-
-gdp_corr_data <- plot_data %>%
-  select(metric_label, gdp_log10, study_count_log, metric_value, metric_density_per_1000_km2) %>%
-  pivot_longer(
-    cols = c(study_count_log, metric_value, metric_density_per_1000_km2),
-    names_to = "measure",
-    values_to = "value"
-  ) %>%
-  mutate(
-    measure = factor(measure, levels = c("study_count_log", "metric_value", "metric_density_per_1000_km2"),
-                     labels = c("log10(Study Count + 1)", "Raw Biodiversity Metric", "Biodiversity Density (per 1000 km²)"))
-  ) %>%
-  filter(!(measure == "Biodiversity Density (per 1000 km²)" & metric_label == "Threatened species probability"))
-
-gdp_corr_plot <- ggplot(gdp_corr_data, aes(x = gdp_log10, y = value)) +
-  geom_point(alpha = 0.5) +
-  geom_smooth(method = "loess", se = FALSE) +
-  facet_grid(measure ~ metric_label, scales = "free_y") +
-  labs(
-    title = "GDP, Biodiversity, and Research Effort",
-    subtitle = "Relationships between log10(GDP), biodiversity metrics, and study counts",
-    x = "log10(GDP)",
-    y = ""
-  ) +
-  theme_endo_bw(base_size = 11) +
-  theme(
-    plot.title = element_text(face = "bold"),
-    plot.subtitle = element_text(color = "gray40"),
-    axis.title = element_text(face = "bold"),
-    strip.text = element_text(face = "bold")
-  )
-
-ggsave(OUTPUT_GDP_CORR_PLOT, gdp_corr_plot, width = 6.5, height = 5, dpi = 300, bg = "white")
-cat("GDP correlation plot saved to:", OUTPUT_GDP_CORR_PLOT, "\n")
+# (PLOT 5 "GDP vs Biodiversity and Study Count" removed - Prediction 4 / GDP was cut
+#  for the NPH-MS-2026-57711 resubmission.)
 
 # PLOT 6: Biodiversity Distribution of Studied vs. Understudied Countries
 
@@ -724,7 +690,6 @@ modeling_plot_data <- modeling_results %>%
   filter(variable != "Intercept", model == "raw") %>%
   mutate(
     variable = recode(variable,
-                      "gdp_log10" = "log10(GDP)",
                       "metric_value" = "Biodiversity Metric (Raw)"
     )
   )
@@ -756,10 +721,9 @@ cat("Modeling results plot saved to:", OUTPUT_MODELING_PLOT, "\n")
 # PLOT 8: Correlation Heatmap
 
 corr_data <- plot_data %>%
-  select(study_count_log, gdp_log10, metric_value, metric_density_per_1000_km2, metric_label) %>%
+  select(study_count_log, metric_value, metric_density_per_1000_km2, metric_label) %>%
   rename(
     `log10(Study Count)` = study_count_log,
-    `log10(GDP)` = gdp_log10,
     `Biodiversity (Raw)` = metric_value,
     `Biodiversity (Density)` = metric_density_per_1000_km2
   )

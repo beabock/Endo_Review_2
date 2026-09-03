@@ -10,11 +10,23 @@ library(stringr)
 library(ggplot2)
 library(scales)
 
-INPUT_ENDOPHYTE_COUNTRIES <- "results/country_analysis/country_gdp_latitude_summary.csv"
+INPUT_ENDOPHYTE_COUNTRIES <- "results/country_analysis/country_study_summary.csv"
 INPUT_UNSTUDIED_COUNTRIES <- "results/understudied_analysis/unstudied_countries.csv"
 INPUT_ENDOPHYTE_DATA <- "data/Ollama_cleaned_synresolved_standardized_final.csv"
-INPUT_PRIORITY_COUNTRIES <- "data/biodiversity_priority_countries.csv"
-INPUT_PRIORITY_BIOMES <- "data/biodiversity_priority_biomes.csv"
+
+first_existing <- function(...) {
+  candidates <- c(...)
+  hit <- candidates[file.exists(candidates)]
+  if (length(hit) > 0) hit[[1]] else candidates[[1]]
+}
+INPUT_PRIORITY_COUNTRIES <- first_existing(
+  "data/biodiversity/biodiversity_priority_countries.csv",
+  "data/biodiversity_priority_countries.csv"
+)
+INPUT_PRIORITY_BIOMES <- first_existing(
+  "data/biodiversity/biodiversity_priority_biomes.csv",
+  "data/biodiversity_priority_biomes.csv"
+)
 OUTPUT_DIR <- "results/biodiversity_priority_overlap"
 
 dir.create(OUTPUT_DIR, recursive = TRUE, showWarnings = FALSE)

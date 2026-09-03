@@ -1075,6 +1075,45 @@ def get_continent(iso):
     return CONTINENT_MAP.get(iso, 'Other')
 
 
+# Biogeographic realm mapping (Olson et al. 2001 / WWF terrestrial realms).
+# Replaces the political EU / Global North-South groupings for the
+# NPH-MS-2026-57711 resubmission. Source of truth:
+# data/Reference_datasets/country_biogeographic_realm.csv
+# (built by scripts/utils/build_biogeographic_realm_table.py).
+import csv as _csv
+from pathlib import Path as _Path
+from functools import lru_cache as _lru_cache
+
+
+@_lru_cache(maxsize=1)
+def _load_realm_table():
+    for candidate in (
+        _Path(__file__).resolve().parent / 'country_biogeographic_realm.csv',
+        _Path('scripts/utils/country_biogeographic_realm.csv'),
+    ):
+        if candidate.exists():
+            primary, secondary = {}, {}
+            with candidate.open(encoding='utf-8', newline='') as f:
+                for row in _csv.DictReader(f):
+                    primary[row['iso_a3']] = row['realm']
+                    if row.get('realm_secondary'):
+                        secondary[row['iso_a3']] = row['realm_secondary']
+            return primary, secondary
+    return {}, {}
+
+
+def get_realm(iso, use_secondary=False):
+    """Map an ISO3 country code to its biogeographic realm.
+
+    use_secondary=True returns the secondary realm for trans-realm countries
+    (falling back to the primary realm), for sensitivity analyses.
+    """
+    primary, secondary = _load_realm_table()
+    if use_secondary:
+        return secondary.get(iso) or primary.get(iso, 'Unknown')
+    return primary.get(iso, 'Unknown')
+
+
 # Tissue, guild, and biome extraction functions for multi-column field recovery
 def extract_tissue_values(row, headers: List[str]) -> List[Tuple[str, str]]:
     """Return (tissue_value, source_column) tuples found across relevant columns."""

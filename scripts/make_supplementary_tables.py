@@ -132,7 +132,6 @@ genera   = pd.read_csv(f"{RESULTS}/understudied_analysis/unstudied_plant_genera.
 # countries: filter to n < 5, add continent, drop study count
 countries = metrics[metrics["study_count"] < 5].copy()
 countries["continent"] = countries["iso_a3"].map(CONTINENT).fillna("Other")
-countries["gdp_current_usd"] = pd.to_numeric(countries["gdp_current_usd"], errors="coerce")
 countries = countries.sort_values(["continent", "country_name"])
 
 # families: add phylum, sort by phylum then family
@@ -184,13 +183,12 @@ note_lines = [
     ("Definition: 'Understudied' is defined as fewer than 5 publications in the endophyte literature dataset (n < 5).", False, 10),
     ("", False, 10),
     ("Sheet descriptions:", True, 10),
-    ("  S1. Understudied Countries - Countries with fewer than 5 endophyte studies, with continent and GDP (current USD, World Bank).", False, 10),
+    ("  S1. Understudied Countries - Countries with fewer than 5 endophyte studies, with continent.", False, 10),
     ("  S2. Understudied Plant Families - Plant families with no endophyte studies identified in the dataset, with associated phylum.", False, 10),
     ("  S3. Understudied Plant Genera - Plant genera with no endophyte studies identified in the dataset, with associated family and phylum.", False, 10),
     ("", False, 10),
     ("Note: The species-level list (>390,000 species) is available in the accompanying Zenodo data repository.", False, 10),
     ("", False, 10),
-    ("GDP data source: World Bank, accessed 2024.", False, 10),
     ("Taxonomic backbone: GBIF Backbone Taxonomy.", False, 10),
 ]
 
@@ -203,22 +201,19 @@ notes_ws.row_dimensions[1].height = 22
 
 # S1: Countries
 c_ws = wb.create_sheet("S1. Understudied Countries")
-headers = ["Country", "ISO A3", "Continent", "GDP (current USD)"]
+headers = ["Country", "ISO A3", "Continent"]
 c_ws.append(headers)
 style_header(c_ws, 1, len(headers))
 c_ws.row_dimensions[1].height = 28
 
 for _, row in countries.iterrows():
-    gdp = row["gdp_current_usd"] if pd.notna(row["gdp_current_usd"]) else ""
-    c_ws.append([row["country_name"], row["iso_a3"], row["continent"], gdp])
+    c_ws.append([row["country_name"], row["iso_a3"], row["continent"]])
 
 n = len(countries)
 style_body(c_ws, 2, n + 1, len(headers))
-for r in range(2, n + 2):
-    c_ws.cell(row=r, column=4).number_format = '#,##0'
-set_widths(c_ws, [26, 10, 18, 22])
+set_widths(c_ws, [26, 10, 18])
 c_ws.freeze_panes = "A2"
-c_ws.auto_filter.ref = f"A1:D{n + 1}"
+c_ws.auto_filter.ref = f"A1:C{n + 1}"
 
 # S2: Families
 f_ws = wb.create_sheet("S2. Understudied Plant Families")

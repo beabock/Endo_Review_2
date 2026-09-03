@@ -25,13 +25,12 @@ ROOT = Path('.').resolve()
 INPUT_OVERLAP = ROOT / 'results' / 'biodiversity_priority_overlap' / 'overlap_by_country.csv'
 INPUT_UNSTUDIED = ROOT / 'results' / 'understudied_analysis' / 'unstudied_countries.csv'
 INPUT_PRIORITY = ROOT / 'data' / 'biodiversity' / 'biodiversity_priority_countries.csv'
-INPUT_COUNTRY_SUMMARY = ROOT / 'results' / 'country_analysis' / 'country_gdp_latitude_summary.csv'
+INPUT_COUNTRY_SUMMARY = ROOT / 'results' / 'country_analysis' / 'country_study_summary.csv'
 INPUT_FAOSTAT_LAND = ROOT / 'data' / 'biodiversity' / 'FAOSTAT_Land' / 'FAOSTAT_data_en_5-5-2026.csv'
 OUTPUT_DIR = ROOT / 'results' / 'biodiversity_priority_overlap'
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_COUNTRY_AREA = OUTPUT_DIR / 'country_land_area_summary.csv'
 OUTPUT_AREA_NORMALIZED = OUTPUT_DIR / 'area_normalized_summary.csv'
-OUTPUT_GDP_CORRELATION = OUTPUT_DIR / 'gdp_biodiversity_correlation.csv'
 OUTPUT_MODELING_RESULTS = OUTPUT_DIR / 'modeling_results.csv'
 
 print("Robustness and statistical tests for biodiversity priority overlap")
@@ -129,7 +128,7 @@ def make_metric_frame(source_name):
     metric['priority_score'] = pd.to_numeric(metric['priority_score'], errors='coerce')
     metric = metric[['iso_a3', 'priority_score']].dropna(subset=['iso_a3', 'priority_score'])
     metric = metric.drop_duplicates(subset=['iso_a3'])
-    frame = country_summary[['iso_a3', 'country_name', 'study_count', 'understudied', 'continent', 'country_area_km2', 'gdp_log10']].drop_duplicates(subset=['iso_a3']).merge(metric, on='iso_a3', how='inner')
+    frame = country_summary[['iso_a3', 'country_name', 'study_count', 'understudied', 'continent', 'country_area_km2']].drop_duplicates(subset=['iso_a3']).merge(metric, on='iso_a3', how='inner')
     frame = frame.rename(columns={'priority_score': 'metric_value'})
     frame['study_density_per_1000_km2'] = np.where(
         frame['country_area_km2'] > 0,
@@ -341,47 +340,24 @@ if area_normalized_rows:
     pd.DataFrame(area_normalized_rows).to_csv(OUTPUT_AREA_NORMALIZED, index=False)
     report.append(f"Area-normalized summary saved to: {OUTPUT_AREA_NORMALIZED}")
 
-gdp_correlation_rows = []
-report.append("\n" + "=" * 80)
-report.append("GDP AND BIODIVERSITY CORRELATION ANALYSIS")
-report.append("=" * 80)
-for source_name, metric_label in metric_sources:
-    metric_df = make_metric_frame(source_name).dropna(subset=['gdp_log10', 'metric_value'])
-    if metric_df.empty:
-        continue
-
-    rho_gdp_raw, p_gdp_raw = spearmanr(metric_df['gdp_log10'], metric_df['metric_value'])
-    report.append(f"\n{metric_label} vs GDP:")
-    report.append(f"  Spearman r (raw metric): {rho_gdp_raw:.4f}, p: {p_gdp_raw:.4e}")
-
-    rho_gdp_density, p_gdp_density = np.nan, np.nan
-    if 'metric_density_per_1000_km2' in metric_df.columns:
-        metric_df_density = metric_df.dropna(subset=['metric_density_per_1000_km2'])
-        if not metric_df_density.empty:
-            rho_gdp_density, p_gdp_density = spearmanr(metric_df_density['gdp_log10'], metric_df_density['metric_density_per_1000_km2'])
-            report.append(f"  Spearman r (density): {rho_gdp_density:.4f}, p: {p_gdp_density:.4e}")
-
-    gdp_correlation_rows.append({'metric_source': source_name, 'metric_label': metric_label, 'spearman_r_gdp_vs_raw': rho_gdp_raw, 'p_value_gdp_vs_raw': p_gdp_raw, 'spearman_r_gdp_vs_density': rho_gdp_density, 'p_value_gdp_vs_density': p_gdp_density})
-if gdp_correlation_rows:
-    pd.DataFrame(gdp_correlation_rows).to_csv(OUTPUT_GDP_CORRELATION, index=False)
-
+modeling_results = []
 try:
     import statsmodels.formula.api as smf
 
-    modeling_results = []
     report.append("\n" + "=" * 80)
     report.append("STATISTICAL MODELING OF STUDY COUNT")
     report.append("=" * 80)
 
     for source_name, metric_label in metric_sources:
-        model_df = make_metric_frame(source_name).dropna(subset=['gdp_log10', 'metric_value', 'study_count'])
+        model_df = make_metric_frame(source_name).dropna(subset=['metric_value', 'study_count'])
         model_df['study_count_log'] = np.log10(model_df['study_count'] + 1)
 
-        # Model for raw study count
-        model_raw = smf.ols('study_count_log ~ gdp_log10 + metric_value', data=model_df).fit()
+        # Study count vs biodiversity metric (GDP predictor removed for the
+        # NPH-MS-2026-57711 resubmission - Prediction 4 was cut).
+        model_raw = smf.ols('study_count_log ~ metric_value', data=model_df).fit()
         report.append(f"\nModel for {metric_label} (raw counts):")
         report.append(str(model_raw.summary()))
-        
+
         for var, params in model_raw.params.items():
             modeling_results.append({'metric': metric_label, 'model': 'raw', 'variable': var, 'coefficient': params, 'p_value': model_raw.pvalues[var]})
 
@@ -410,8 +386,6 @@ print(f"Regional subsampling saved to: {OUTPUT_DIR / 'regional_subsampling.csv'}
 print(f"Country area summary saved to: {OUTPUT_COUNTRY_AREA}")
 if area_normalized_rows:
     print(f"Area-normalized summary saved to: {OUTPUT_AREA_NORMALIZED}")
-if gdp_correlation_rows:
-    print(f"GDP-biodiversity correlation saved to: {OUTPUT_GDP_CORRELATION}")
 if modeling_results:
     print(f"Modeling results saved to: {OUTPUT_MODELING_RESULTS}")
 print("\nRobustness tests complete")

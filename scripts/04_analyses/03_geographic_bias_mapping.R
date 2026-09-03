@@ -33,10 +33,7 @@ country_data <- read_csv(INPUT_FILE, show_col_types = FALSE) %>%
   mutate(
     study_count = as.numeric(study_count),
     centroid_lat = as.numeric(centroid_lat),
-    centroid_lon = as.numeric(centroid_lon),
-    gdp_current_usd = as.numeric(gdp_current_usd),
-    gdp_log10 = ifelse(!is.na(gdp_current_usd) & gdp_current_usd > 0, 
-                       log10(gdp_current_usd), NA_real_)
+    centroid_lon = as.numeric(centroid_lon)
   )
 
 # Load world map with continent information
@@ -46,7 +43,7 @@ world <- ne_countries(scale = 50, returnclass = "sf")
 # Join study data with world map
 world_data <- world %>%
   left_join(
-    country_data %>% select(iso_a3, country_name, study_count, gdp_current_usd, gdp_log10),
+    country_data %>% select(iso_a3, country_name, study_count),
     by = c("iso_a3" = "iso_a3")
   ) %>%
   mutate(
@@ -63,12 +60,7 @@ total_studies <- sum(country_data$study_count, na.rm = TRUE)
 countries_with_studies <- nrow(country_data %>% filter(study_count > 0))
 total_countries <- nrow(country_data)
 
-# Percentiles for bias classification
-p75 <- quantile(country_data$study_count, 0.75, na.rm = TRUE)
-p90 <- quantile(country_data$study_count, 0.90, na.rm = TRUE)
-p25 <- quantile(country_data$study_count, 0.25, na.rm = TRUE)
-
-# Classify countries as over/under-studied relative to GDP (if available)
+# Classify countries by study concentration (percentile-based)
 bias_metrics <- country_data %>%
   mutate(
     # Global percentile ranking
@@ -81,20 +73,9 @@ bias_metrics <- country_data %>%
       study_count_percentile >= 0.50 ~ "Moderate coverage (top 50%)",
       study_count_percentile >= 0.25 ~ "Under-studied (bottom 50%)",
       TRUE ~ "Rare/minimal coverage"
-    ),
-    # GDP bias: if high GDP but low studies, it's a bias
-    gdp_studies_ratio = ifelse(!is.na(gdp_log10), study_count / (10^(gdp_log10 / 10)), NA_real_),
-    gdp_bias_class = case_when(
-      is.na(gdp_log10) ~ "GDP unknown",
-      gdp_log10 < 20 & study_count > p90 ~ "Developing + high studies (research focus)",
-      gdp_log10 < 20 & study_count < 5 ~ "Developing + low studies (biased)",
-      gdp_log10 >= 24 & study_count < p25 ~ "Developed + low studies (biased)",
-      gdp_log10 >= 24 & study_count >= p90 ~ "Developed + high studies (natural)",
-      TRUE ~ "Balanced"
     )
   ) %>%
-  select(iso_a3, country_name, study_count, study_count_percentile, bias_class, 
-         gdp_current_usd, gdp_log10, gdp_bias_class) %>%
+  select(iso_a3, country_name, study_count, study_count_percentile, bias_class) %>%
   arrange(desc(study_count))
 
 write_csv(bias_metrics, BIAS_METRICS_FILE)
@@ -169,9 +150,6 @@ interactive_map <- leaflet(map_data) %>%
       "<strong>", country_name, "</strong><br>",
       "ISO: ", iso_a3, "<br>",
       "Studies: ", study_count, "<br>",
-      ifelse(!is.na(gdp_current_usd), 
-             paste("GDP (USD): ", format(gdp_current_usd, big.mark = ","), "<br>"), 
-             ""),
       "Continent: ", country_name_world, "<br>"
     ),
     color = ~color_func(study_count_log),

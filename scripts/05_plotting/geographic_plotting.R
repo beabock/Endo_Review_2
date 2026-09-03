@@ -222,42 +222,21 @@ if (file.exists(TIME_SERIES_INPUT_FILE)) {
 }
 
 
-# Scatter plots: GDP and latitude
+# Scatter plot: study count vs latitude
+# (the GDP scatter / "Prediction 4" was cut for the NPH-MS-2026-57711 resubmission)
 
 # Load analysis data for scatter plots
 analysis_data <- country_papers %>%
   filter(!is.na(study_count), !is.na(centroid_lat)) %>%
   mutate(
-    centroid_lat = as.numeric(centroid_lat),
-    gdp_current_usd = as.numeric(gdp_current_usd),
-    gdp_log10 = ifelse(!is.na(gdp_current_usd) & gdp_current_usd > 0, log10(gdp_current_usd), NA_real_)
+    centroid_lat = as.numeric(centroid_lat)
   )
 
 # Load correlation statistics from analysis output
-corr_stats <- read.csv("results/country_analysis/country_gdp_latitude_correlations.csv")
-
-# Prepare data for GDP plot
-gdp_data <- analysis_data %>% 
-  filter(!is.na(gdp_log10), !is.na(study_count)) %>%
-  mutate(
-    x_value = gdp_log10,
-    y_value = log10(study_count + 1)
-  ) %>%
-  select(x_value, y_value, study_count, country_name, iso_a3)
-
-gdp_stats <- corr_stats %>%
-  filter(analysis == "study_count_vs_log10_gdp") %>%
-  mutate(
-    label = paste0(
-      "Pearson r = ", round(pearson_r, 3), " (p ", 
-      if_else(pearson_p < 0.001, "< 0.001", paste0("= ", round(pearson_p, 3))), ")\n",
-      "Spearman ρ = ", round(spearman_rho, 3), " (p ",
-      if_else(spearman_p < 0.001, "< 0.001", paste0("= ", round(spearman_p, 3))), ")"
-    )
-  )
+corr_stats <- read.csv("results/country_analysis/country_latitude_correlations.csv")
 
 # Prepare data for latitude plot
-lat_data <- analysis_data %>% 
+lat_data <- analysis_data %>%
   filter(!is.na(centroid_lat), !is.na(study_count)) %>%
   mutate(
     x_value = centroid_lat,
@@ -274,45 +253,6 @@ lat_stats <- corr_stats %>%
       "Spearman ρ = ", round(spearman_rho, 3), " (p ",
       if_else(spearman_p < 0.001, "< 0.001", paste0("= ", round(spearman_p, 3))), ")"
     )
-  )
-
-# Get top 10 countries for labeling
-top_countries_gdp <- gdp_data %>%
-  arrange(desc(study_count)) %>%
-  slice_head(n = 10)
-
-# GDP scatter plot
-scatter_plot_gdp <- ggplot(gdp_data, aes(x = x_value, y = y_value)) +
-  geom_point(alpha = 0.5, size = 2.3, color = "#2b8cbe") +
-  geom_smooth(method = "lm", se = TRUE, color = "#d7301f", linewidth = 0.8, alpha = 0.2) +
-  ggrepel::geom_text_repel(
-    data = top_countries_gdp,
-    mapping = aes(x = x_value, y = y_value, label = iso_a3),
-    size = 3,
-    color = "#000000",
-    max.overlaps = 15,
-    inherit.aes = FALSE
-  ) +
-  geom_text(
-    data = data.frame(
-      x = min(gdp_data$x_value, na.rm = TRUE) + 0.05 * (max(gdp_data$x_value, na.rm = TRUE) - min(gdp_data$x_value, na.rm = TRUE)),
-      y = max(gdp_data$y_value, na.rm = TRUE) - 0.05 * (max(gdp_data$y_value, na.rm = TRUE) - min(gdp_data$y_value, na.rm = TRUE)),
-      label = gdp_stats$label
-    ),
-    aes(x = x, y = y, label = label),
-    hjust = 0, vjust = 1,
-    size = 3, color = "#000000",
-    inherit.aes = FALSE
-  ) +
-  theme_endo_bw(base_size = 12) +
-  theme(
-    plot.title = element_text(size = 14, hjust = 0.5, face = "bold"),
-    axis.title = element_text(face = "bold")
-  ) +
-  labs(
-    title = "Study Count vs log10(GDP)",
-    x = "log10(Current GDP, USD)",
-    y = "log10(Study count + 1)"
   )
 
 # Get top 10 countries for labeling
@@ -354,14 +294,12 @@ scatter_plot_lat <- ggplot(lat_data, aes(x = x_value, y = y_value)) +
     y = "log10(Study count + 1)"
   )
 
-ggsave("results/country_analysis/country_study_count_vs_gdp.png", scatter_plot_gdp, width = 4.5, height = 4.5, dpi = 300)
 ggsave("results/country_analysis/country_study_count_vs_latitude.png", scatter_plot_lat, width = 6.5, height = 5.5, dpi = 300)
 
 cat("\nGeographic plots saved to:\n")
 cat("  - results/study_count_by_country_robinson.png (continuous scale)\n")
 cat("  - results/study_count_by_country_robinson_binned.png (binned scale)\n")
 cat("  - results/top_countries_ranked.png (ranked bar chart)\n")
-cat("  - results/country_analysis/country_study_count_vs_gdp.png (scatter + labels)\n")
 cat("  - results/country_analysis/country_study_count_vs_latitude.png (scatter + labels)\n")
 
 
