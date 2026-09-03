@@ -151,11 +151,25 @@ relevance and guild-classification decisions — the exact thing the re-extracti
 to redo. Relevance + guild filtering is re-applied afterwards with the new schema and
 validated against the Task 2 ground truth.
 
+**Phase 0a coverage dry-run — DONE 2026-09-03** (Monsoon, `run_fetch_pdfs.sbatch`, 4 shards,
+input = the 21,414-record corpus). Of the **19,586 DOI-bearing** papers, **11,979 (61.2%)
+have an open-access PDF resolvable** through the six-resolver chain — vs ~3,000 full texts
+in the pre-resubmission pipeline. Unpaywall OA status: 9,366 closed / 5,949 gold / 1,294
+bronze / 1,197 hybrid / 1,151 green. The ~7,600 misses cluster in (a) mycology society
+journals (Mycologia 200, Fungal Ecology 206, Mycological Research 141, Fungal Biology 117)
+and (b) natural-products / chemistry journals (J Nat Prod 163, J Agric Food Chem 150,
+Phytochemistry 98, Fitoterapia 106) — this is the answer to Referee 2's "are abstract-only
+papers concentrated in particular publishers/journals?" (`coverage_report.csv`).
+Institutional / ILL access for the mycology journals is a parallel manual track (the
+retriever is OA-only). Realistic downloaded yield ≈ 80–90% of 11,979 → ~9.5–10.8k PDFs.
+
 **Still to do.**
 - Decide the pre-registered agreement threshold (proposed: interaction F1 ≥ 0.75, taxon
   counts not systematically lower for abstracts, country/biome κ ≥ 0.6).
-- Run: Phase 0a dry-run → real PDF pull → 25-paper Phase 1 POC (model sanity check) →
-  scaled re-extraction (whole corpus, new schema, bake-off winner).
+- Run: real PDF pull (`--array=0-7`, no DRY_RUN) → 25-paper Phase 1 POC (model sanity
+  check) → scaled re-extraction (whole corpus, new schema, bake-off winner).
+- `ocrmypdf` + tesseract needed on Monsoon for the extraction step (`conda install -c
+  conda-forge ocrmypdf tesseract`); OCR is English-only (corpus is English by search).
 - **Re-run the ubiquity detector** — the snippet + `num_ctx` fix changes the Prediction-1
   "2.7% of the corpus states ubiquity" number. Manuscript figure + text need updating.
 - Working decision (2026-09-02): headline taxonomic/geographic claims will rest on the
