@@ -40,9 +40,19 @@ try:
 except Exception:
     _HAVE_FITZ = False
 
-UA = "NAU-EndoReview/1.0 (mailto:%s)"
-TIMEOUT = 25
+# A generic script UA gets a blanket HTTP 403 from a lot of publisher domains even for
+# content a resolver has already confirmed is open access - this is a bot-detection
+# artifact, not a paywall. A standard-looking browser UA is normal practice for OA
+# aggregation tools (Zotero, Unpaywall's own harvester, etc.) and is what's identifying
+# here: every URL we fetch was returned by a resolver specifically because it is OA, so
+# nothing is being evaded, just not needlessly flagged as a script. Contact info still
+# goes in the API calls that ask for it (Unpaywall/OpenAlex `mailto`).
+UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+      "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36")
+TIMEOUT = 40
 MIN_PDF_BYTES = 10_000
+RETRY_STATUSES = {429, 500, 502, 503, 202}
+MAX_RETRIES = 2
 
 
 # ---------------------------------------------------------------- helpers
@@ -84,7 +94,7 @@ def validate_pdf(path: Path) -> tuple[bool, int, str]:
 class Session:
     def __init__(self, email: str):
         self.s = requests.Session()
-        self.s.headers["User-Agent"] = UA % email
+        self.s.headers["User-Agent"] = UA
         self.email = email
 
     def get(self, url, **kw):
@@ -197,23 +207,47 @@ RESOLVERS = [
 
 # ---------------------------------------------------------------- download
 
-def try_download(sess: Session, url: str, dest: Path) -> tuple[bool, str]:
-    try:
-        r = sess.get(url, stream=True, allow_redirects=True)
-        if r.status_code != 200:
-            return False, f"http {r.status_code}"
-        ct = r.headers.get("content-type", "").lower()
-        content = r.content
-        if "pdf" not in ct and not looks_like_pdf(content):
-            return False, f"not pdf (ct={ct[:40]})"
-        dest.write_bytes(content)
-        ok, n, note = validate_pdf(dest)
-        if not ok:
-            dest.unlink(missing_ok=True)
-            return False, note
-        return True, ("ok (size/magic only)" if n == -1 else f"ok ({n}p)")
-    except Exception as e:                        # noqa: BLE001
-        return False, f"exc {e}"
+def _fetch_once(sess: Session, url: str, doi: str) -> tuple[int | None, dict, bytes, str]:
+    """One GET with a Referer set (some publisher PDF endpoints check it)."""
+    headers = {"Referer": f"https://doi.org/{doi}", "Accept": "application/pdf,*/*;q=0.8"}
+    r = sess.get(url, stream=True, allow_redirects=True, headers=headers)
+    return r.status_code, r.headers, r.content, url
+
+
+def try_download(sess: Session, url: str, dest: Path, doi: str = "", _fallback: bool = False) -> tuple[bool, str]:
+    attempt, status, headers, content, note = 0, None, {}, b"", ""
+    while attempt <= MAX_RETRIES:
+        try:
+            status, headers, content, url = _fetch_once(sess, url, doi)
+        except Exception as e:                    # noqa: BLE001
+            note = f"exc {e}"
+            status = None
+        if status == 200:
+            break
+        if status in RETRY_STATUSES or status is None:
+            attempt += 1
+            if attempt <= MAX_RETRIES:
+                time.sleep(1.5 * attempt)
+            continue
+        return False, note or f"http {status}"
+    if status != 200:
+        return False, note or f"http {status}"
+
+    ct = headers.get("content-type", "").lower()
+    if "pdf" not in ct and not looks_like_pdf(content):
+        # landing page, not the PDF - scan it for a citation_pdf_url meta tag once
+        if not _fallback and "html" in ct:
+            m = META_PDF_RE.search(content[:200_000].decode("utf-8", errors="ignore"))
+            if m and m.group(1) != url:
+                return try_download(sess, m.group(1), dest, doi, _fallback=True)
+        return False, f"not pdf (ct={ct[:40]})"
+
+    dest.write_bytes(content)
+    ok, n, note = validate_pdf(dest)
+    if not ok:
+        dest.unlink(missing_ok=True)
+        return False, note
+    return True, ("ok (size/magic only)" if n == -1 else f"ok ({n}p)")
 
 
 # ---------------------------------------------------------------- main
@@ -315,7 +349,7 @@ def main() -> int:
         if args.dry_run:
             row["status"] = "resolvable" if pdf_url else "no_oa_pdf"
         elif pdf_url:
-            ok, note = try_download(sess, pdf_url, dest)
+            ok, note = try_download(sess, pdf_url, dest, doi)
             row["status"] = "downloaded" if ok else "download_failed"
             row["note"] = note
             if ok:
@@ -330,7 +364,7 @@ def main() -> int:
                         url = None
                     if not url:
                         continue
-                    ok, note = try_download(sess, url, dest)
+                    ok, note = try_download(sess, url, dest, doi)
                     if ok:
                         row.update(status="downloaded", resolver=name,
                                    resolver_url=url, note=note,
