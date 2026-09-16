@@ -10,43 +10,72 @@ Scope decisions live in `NPH_resubmission_checklist.md`; per-task plans in `NPH_
 
 ---
 
-## 2026-09-16 — Task 1 fetcher: per-host throttling + 403 backoff
-`scripts/01_data_preproccessing/fetch_fulltext_pdfs.py`. Diagnosed and fixed while the
-first real pull (job 31692613) was mid-run; not yet re-run with this change.
+## 2026-09-16 — Task 1 fetcher: per-host throttling + 403 backoff (v1 backfired, v2 = circuit breaker)
+`scripts/01_data_preproccessing/fetch_fulltext_pdfs.py`. Diagnosed and fixed twice in one
+day while real pulls (jobs 31692613, then 31692704) were mid-run.
 
-**Why.** The first real pull (`sbatch --array=0-7`) showed a 17.7% download-failure rate
-on top of the resolver hit-rate (66.8% of records got a resolver-found URL, close to the
-dry run's 61.2% "resolvable" estimate, so the resolvers themselves are working as
-expected). Of the failures, 86% were plain `http 403`, concentrated almost entirely in
-MDPI (186) and Wiley (134), publishers known for WAF/bot-detection rather than genuine
-access denial — MDPI in particular is overwhelmingly gold OA, so a resolver correctly
-finding a PDF there and then getting blocked points at request-volume detection, not
-paywalling. `RETRY_STATUSES` didn't include 403 at all, so every one of these failed on
-the first attempt with zero backoff. Eight Slurm array shards run fully independently
-with no shared rate state, so each shard politely pacing itself (`--sleep 0.3`) still
-adds up to a burst against the same publisher domain from the cluster's shared egress.
+**Why (v1).** The first real pull (`sbatch --array=0-7`, job 31692613) showed a 17.7%
+download-failure rate on top of the resolver hit-rate (66.8% of records got a
+resolver-found URL, close to the dry run's 61.2% "resolvable" estimate, so the resolvers
+themselves are working as expected). Of the failures, 86% were plain `http 403`,
+concentrated almost entirely in MDPI (186) and Wiley (134), publishers known for
+WAF/bot-detection rather than genuine access denial — MDPI in particular is
+overwhelmingly gold OA, so a resolver correctly finding a PDF there and then getting
+blocked points at request-volume detection, not paywalling. `RETRY_STATUSES` didn't
+include 403 at all, so every one of these failed on the first attempt with zero backoff.
 
-**Changed.**
-- New `SOFT_BLOCK_STATUSES = {403}`, retried like the existing `RETRY_STATUSES` but
-  backed off per-*host* rather than per-DOI: `_wait_for_host` / `_note_host_result`
-  track, per hostname, a minimum 1s gap between any two requests plus a cooldown that
-  starts at 12s and doubles on each consecutive 403 from that host (capped at 90s).
-  `_fetch_once` wraps every download attempt with these.
-- This is per-process (per-shard) state, not shared across the 8 array tasks — it stops
-  a single shard from re-hammering a host that just blocked it, but doesn't coordinate
-  across shards. If MDPI/Wiley are still dominant after a re-run, the next step would be
-  real cross-shard coordination (a shared lock/counter file) or simply fewer concurrent
-  shards.
-- Resolver lookup calls (the JSON API hits to Unpaywall/OpenAlex/etc. and the
-  `r_publisher_meta` landing-page fetch) are unchanged — the diagnosed problem was
-  specifically the PDF download step, not resolver lookups, which are performing in
-  line with the dry-run estimate.
+**v1 change (backfired).** Added `SOFT_BLOCK_STATUSES = {403}`, retried like
+`RETRY_STATUSES` but backed off per-host: a cooldown starting at 12s and doubling on
+each consecutive 403 from that host, capped at 90s.
 
-**Still to do.** Re-run the real pull (this resumes, not restarts — DOIs already marked
-`downloaded` in the shard manifests are skipped; only `download_failed` DOIs get
-retried) and re-check the status breakdown + the MDPI/Wiley share of failures to see how
-much this recovers. If a meaningful chunk is still 403, worth trying real cross-shard
-throttling next rather than just a longer per-host cooldown.
+**Why v1 was wrong.** Resubmitted as job 31692704. Within an hour, shards were logging
+~0.0–0.4 doi/s (50 records in 58 minutes on one shard, 25 on another) — on pace to hit
+the 8h job time limit having processed maybe 15–20% of each shard's queue. The 90s cap
+assumed the block was a short burst-detection flag that clears quickly; it isn't. MDPI
+and Wiley DOIs are common enough in the corpus that most of a shard's queue was paying
+close to the full 90s cooldown back to back, with no recovery — a growing-but-unbounded
+per-host wait is the wrong model for a sustained block. **Job 31692704 was cancelled**
+(`scancel 31692704`) before burning its allocation.
+
+**v2 change (circuit breaker) — this is what's in the file now.** A host still gets a
+couple of short, cheap retries (8s, then 16s, capped at 20s) in case it genuinely is a
+brief blip, but after `HOST_CIRCUIT_THRESHOLD` (3) consecutive 403s from the same host,
+the circuit "opens": further requests to that host return instantly (no network call, no
+wait) for `HOST_CIRCUIT_COOLDOWN` (300s) seconds, so the shard keeps moving through the
+rest of its queue instead of stalling. `_host_blocked()` / `_host_circuit_until` added;
+`_fetch_once` checks the circuit before doing anything else. DOIs that fail this way are
+still marked `download_failed` with a distinct note (`"host circuit open..."`) and are
+retried automatically on a future run — nothing is a permanent loss, just deferred to
+whenever the real block (whatever its actual duration is) has cleared.
+
+Both versions: per-process (per-shard) state, not shared across the 8 array tasks — this
+stops one shard from re-hammering a host that just blocked it, but doesn't coordinate
+across shards. Resolver lookup calls (Unpaywall/OpenAlex/etc. JSON hits, the
+`r_publisher_meta` landing-page fetch) are unchanged in both versions — the diagnosed
+problem was specifically the PDF download step.
+
+**v3 addition — prefer non-blocked hosts proactively.** Bea asked whether alternate OA
+venues (rather than the publisher's own site) should be tried for the blocked
+publishers. Partly already true: the existing download-failure fallback already loops
+through every other resolver looking for an alternate host. Closed the remaining gap —
+the resolver-selection loop now skips committing to a URL whose host is already
+circuit-blocked (checks `_host_blocked` before taking the "first hit wins" URL) and
+keeps checking the rest of the resolvers for a candidate on a different host first,
+falling back to the blocked one only if nothing else turns up (so it still gets a
+correct `download_failed` rather than an incorrect `no_oa_pdf`). Expected payoff differs
+by publisher: MDPI is gold-OA-at-source with essentially no independent repository
+copies, so this likely won't recover much there — the block is on the only real venue.
+Wiley/Elsevier hybrid-OA articles are more likely to have a green-OA deposit in an
+institutional repository or PMC, where this should help more.
+
+**Still to do.** Re-run the real pull with this version (resumes, not restarts — DOIs
+already `downloaded` are skipped, `download_failed` DOIs retried) and check both the
+overall throughput (should look like the *first* run's pace, not the second) and the
+status/failure breakdown, split by publisher. If MDPI/Wiley are still eating a large
+share after several circuit-breaker cycles, that's a sign the block genuinely lasts
+longer than the polling cadence and real cross-shard coordination (a shared
+lock/counter file) or just running fewer concurrent shards would be the next thing to
+try — not a longer solo cooldown.
 
 ---
 

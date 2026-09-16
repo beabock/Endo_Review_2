@@ -58,23 +58,33 @@ UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
 TIMEOUT = 40
 MIN_PDF_BYTES = 10_000
 RETRY_STATUSES = {429, 500, 502, 503, 202}
-# 403 is handled separately, below: the first real pull's failures were 86% plain
-# "http 403", concentrated almost entirely in MDPI and Wiley - publishers known for
-# WAF/bot-detection rather than genuine access denial. MDPI in particular is
-# overwhelmingly gold OA, so a resolver correctly finding a PDF there and then getting
-# blocked points at request-volume detection, not paywalling. Eight Slurm shards run
-# fully independently with no shared rate state, so each shard politely pacing itself
-# still adds up to a burst against the same publisher domain from the cluster's shared
-# egress. Retry 403 like the other soft-fail statuses, but back off per-HOST (not just
-# per-DOI), with the cooldown growing on repeated 403s from the same host.
+# 403 is handled separately, below. The first real pull's failures were 86% plain
+# "http 403", concentrated almost entirely in MDPI and Wiley.
+#
+# REVISED 2026-09-16 (same day, after the first version of this fix backfired): a
+# growing per-host cooldown alone assumed the block was a short burst-detection flag
+# that would clear within the ~90s cap - it isn't. The second real pull, running with
+# that version, dropped to ~0.0-0.4 doi/s on several shards (most of the queue was
+# MDPI/Wiley DOIs each paying close to the full cooldown, back to back, with no
+# recovery), on pace to blow through the 8h job limit having processed a small fraction
+# of the corpus. Now: a host still gets a couple of short, cheap retries (8s, then 16s,
+# capped at 20s) in case it genuinely is a brief blip, but after HOST_CIRCUIT_THRESHOLD
+# consecutive 403s the circuit "opens" - further requests to that host fail instantly,
+# no network call, no wait, for HOST_CIRCUIT_COOLDOWN seconds, so the shard keeps moving
+# through the rest of its queue instead of stalling on a host that isn't recovering on
+# this timescale. Every DOI that fails this way is still marked `download_failed` and
+# gets retried automatically on a future run - nothing here is a permanent loss.
 SOFT_BLOCK_STATUSES = {403}
 MAX_RETRIES = 2
-HOST_MIN_GAP = 1.0            # minimum seconds between any two requests to the same host
-HOST_403_COOLDOWN = 12.0      # base cooldown added after a host returns 403
-HOST_403_COOLDOWN_CAP = 90.0  # cap so a truly dead host doesn't stall the shard for ages
+HOST_MIN_GAP = 1.0             # minimum seconds between any two requests to the same host
+HOST_403_COOLDOWN = 8.0        # base cooldown for the first couple of 403s from a host
+HOST_403_COOLDOWN_CAP = 20.0   # cap on that short backoff, before the circuit breaker trips
+HOST_CIRCUIT_THRESHOLD = 3     # consecutive 403s from a host before we stop trying it for a while
+HOST_CIRCUIT_COOLDOWN = 300.0  # once tripped, skip this host entirely for 5 minutes
 
 _host_next_ok: dict[str, float] = {}
 _host_403_streak: dict[str, int] = defaultdict(int)
+_host_circuit_until: dict[str, float] = {}
 
 
 def _host_of(url: str) -> str:
@@ -84,11 +94,17 @@ def _host_of(url: str) -> str:
         return ""
 
 
+def _host_blocked(host: str) -> bool:
+    """True if this host's circuit is currently open (sustained 403s) - callers should
+    skip it entirely rather than wait."""
+    return bool(host) and time.time() < _host_circuit_until.get(host, 0.0)
+
+
 def _wait_for_host(host: str) -> None:
-    """Block until it's this host's turn - a plain minimum gap, plus a growing cooldown
-    if the host has been returning 403s. This state is per-process (per shard): it stops
-    a single shard from re-hammering a host that just blocked it, but doesn't coordinate
-    across the other array tasks."""
+    """Block until it's this host's turn - a plain minimum gap, plus a short growing
+    cooldown for the first couple of 403s. Per-process (per shard) state: it doesn't
+    coordinate across the other array tasks, and once the circuit breaker trips (see
+    _note_host_result) callers check _host_blocked() instead of landing here."""
     if not host:
         return
     now = time.time()
@@ -103,9 +119,15 @@ def _note_host_result(host: str, status: int | None) -> None:
     gap = HOST_MIN_GAP
     if status == 403:
         _host_403_streak[host] += 1
-        cooldown = min(HOST_403_COOLDOWN * (2 ** (_host_403_streak[host] - 1)),
-                        HOST_403_COOLDOWN_CAP)
-        gap = max(gap, cooldown)
+        if _host_403_streak[host] >= HOST_CIRCUIT_THRESHOLD:
+            # not a burst - a sustained block. Stop paying per-request cooldowns on this
+            # host; fail fast instead so the shard keeps moving through its queue.
+            _host_circuit_until[host] = time.time() + HOST_CIRCUIT_COOLDOWN
+            gap = 0.0
+        else:
+            cooldown = min(HOST_403_COOLDOWN * (2 ** (_host_403_streak[host] - 1)),
+                            HOST_403_COOLDOWN_CAP)
+            gap = max(gap, cooldown)
     else:
         _host_403_streak[host] = 0
     _host_next_ok[host] = time.time() + gap
@@ -264,8 +286,12 @@ RESOLVERS = [
 # ---------------------------------------------------------------- download
 
 def _fetch_once(sess: Session, url: str, doi: str) -> tuple[int | None, dict, bytes, str]:
-    """One GET with a Referer set (some publisher PDF endpoints check it)."""
+    """One GET with a Referer set (some publisher PDF endpoints check it). Returns a
+    synthetic status of -1, with no network call and no wait, if this host's circuit
+    is currently open (sustained 403s)."""
     host = _host_of(url)
+    if _host_blocked(host):
+        return -1, {}, b"", url
     _wait_for_host(host)
     headers = {"Referer": f"https://doi.org/{doi}", "Accept": "application/pdf,*/*;q=0.8"}
     r = sess.get(url, stream=True, allow_redirects=True, headers=headers)
@@ -283,6 +309,8 @@ def try_download(sess: Session, url: str, dest: Path, doi: str = "", _fallback: 
             status = None
         if status == 200:
             break
+        if status == -1:
+            return False, "host circuit open (repeated 403s) - retried on a future run"
         if status in RETRY_STATUSES or status in SOFT_BLOCK_STATUSES or status is None:
             attempt += 1
             if attempt <= MAX_RETRIES:
@@ -388,18 +416,35 @@ def main() -> int:
             rows.append(done[doi].to_dict())
             continue
 
+        # First non-blocked hit wins. If a resolver's URL is on a host whose circuit is
+        # currently open (sustained 403s this run), don't commit to it - keep checking
+        # the remaining resolvers for a candidate on a different host first (this is
+        # where an OpenAlex/EuropePMC/CORE copy on a repository, rather than the
+        # publisher's own domain, actually helps). If every candidate we find is on a
+        # blocked host, fall back to the first one anyway - try_download's circuit
+        # breaker will fail it fast and correctly, rather than us reporting "no_oa_pdf"
+        # for a DOI that does have OA, just not reachable from here right now.
         tried, pdf_url, hit_resolver, meta = [], None, None, {}
+        blocked_pdf_url, blocked_hit_resolver = None, None
         for name, fn_res in RESOLVERS:
             try:
                 url, m = fn_res(sess, doi)
             except Exception as e:                # noqa: BLE001
                 url, m = None, {"err": str(e)}
             meta.update({k: v for k, v in m.items() if v is not None})
-            tried.append(name if url else f"{name}:none")
-            if url and not pdf_url:
+            if url and _host_blocked(_host_of(url)):
+                tried.append(f"{name}:blocked")
+                if blocked_pdf_url is None:
+                    blocked_pdf_url, blocked_hit_resolver = url, name
+            elif url:
+                tried.append(name)
                 pdf_url, hit_resolver = url, name
-                break            # first hit wins; the download-failure path re-queries
+                break            # first non-blocked hit wins; download-failure path re-queries
+            else:
+                tried.append(f"{name}:none")
             time.sleep(args.sleep)
+        if pdf_url is None and blocked_pdf_url is not None:
+            pdf_url, hit_resolver = blocked_pdf_url, blocked_hit_resolver
 
         row = {"doi": doi, "filename": fn, "resolver": hit_resolver,
                "resolver_url": pdf_url, "tried": ";".join(tried),
