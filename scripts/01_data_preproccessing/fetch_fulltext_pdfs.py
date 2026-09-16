@@ -10,10 +10,13 @@
 #
 # Features: resumable (skips DOIs that already have a valid PDF), shardable
 # (--shard i --nshards n), download validation (magic bytes + PyMuPDF open + page
-# count), a per-DOI manifest, a structured miss log, and a --dry-run mode that only
+# count), a per-DOI manifest, a structured miss log, a --dry-run mode that only
 # does resolver lookups and writes a coverage report broken down by publisher /
 # journal (answers Referee 2: "are abstract-only papers concentrated in particular
-# publishers/journals?").
+# publishers/journals?"), and per-host request throttling with a growing cooldown on
+# 403s (added 2026-09-16 after the first real pull showed 86% of download failures
+# were 403s concentrated in MDPI/Wiley - eight parallel shards independently hitting
+# the same publisher looked like a burst to their bot detection).
 #
 # NOTHING here is run at scale without sign-off. Start with:
 #   python fetch_fulltext_pdfs.py --input Abstracts_for_Monsoon.csv --dry-run
@@ -27,9 +30,12 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import random
 import re
 import time
+from collections import defaultdict
 from pathlib import Path
+from urllib.parse import urlparse
 
 import pandas as pd
 import requests
@@ -52,7 +58,57 @@ UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
 TIMEOUT = 40
 MIN_PDF_BYTES = 10_000
 RETRY_STATUSES = {429, 500, 502, 503, 202}
+# 403 is handled separately, below: the first real pull's failures were 86% plain
+# "http 403", concentrated almost entirely in MDPI and Wiley - publishers known for
+# WAF/bot-detection rather than genuine access denial. MDPI in particular is
+# overwhelmingly gold OA, so a resolver correctly finding a PDF there and then getting
+# blocked points at request-volume detection, not paywalling. Eight Slurm shards run
+# fully independently with no shared rate state, so each shard politely pacing itself
+# still adds up to a burst against the same publisher domain from the cluster's shared
+# egress. Retry 403 like the other soft-fail statuses, but back off per-HOST (not just
+# per-DOI), with the cooldown growing on repeated 403s from the same host.
+SOFT_BLOCK_STATUSES = {403}
 MAX_RETRIES = 2
+HOST_MIN_GAP = 1.0            # minimum seconds between any two requests to the same host
+HOST_403_COOLDOWN = 12.0      # base cooldown added after a host returns 403
+HOST_403_COOLDOWN_CAP = 90.0  # cap so a truly dead host doesn't stall the shard for ages
+
+_host_next_ok: dict[str, float] = {}
+_host_403_streak: dict[str, int] = defaultdict(int)
+
+
+def _host_of(url: str) -> str:
+    try:
+        return urlparse(url).netloc.lower()
+    except Exception:                             # noqa: BLE001
+        return ""
+
+
+def _wait_for_host(host: str) -> None:
+    """Block until it's this host's turn - a plain minimum gap, plus a growing cooldown
+    if the host has been returning 403s. This state is per-process (per shard): it stops
+    a single shard from re-hammering a host that just blocked it, but doesn't coordinate
+    across the other array tasks."""
+    if not host:
+        return
+    now = time.time()
+    ready_at = _host_next_ok.get(host, 0.0)
+    if ready_at > now:
+        time.sleep(ready_at - now + random.uniform(0, 0.5))
+
+
+def _note_host_result(host: str, status: int | None) -> None:
+    if not host:
+        return
+    gap = HOST_MIN_GAP
+    if status == 403:
+        _host_403_streak[host] += 1
+        cooldown = min(HOST_403_COOLDOWN * (2 ** (_host_403_streak[host] - 1)),
+                        HOST_403_COOLDOWN_CAP)
+        gap = max(gap, cooldown)
+    else:
+        _host_403_streak[host] = 0
+    _host_next_ok[host] = time.time() + gap
 
 
 # ---------------------------------------------------------------- helpers
@@ -209,8 +265,11 @@ RESOLVERS = [
 
 def _fetch_once(sess: Session, url: str, doi: str) -> tuple[int | None, dict, bytes, str]:
     """One GET with a Referer set (some publisher PDF endpoints check it)."""
+    host = _host_of(url)
+    _wait_for_host(host)
     headers = {"Referer": f"https://doi.org/{doi}", "Accept": "application/pdf,*/*;q=0.8"}
     r = sess.get(url, stream=True, allow_redirects=True, headers=headers)
+    _note_host_result(host, r.status_code)
     return r.status_code, r.headers, r.content, url
 
 
@@ -224,10 +283,13 @@ def try_download(sess: Session, url: str, dest: Path, doi: str = "", _fallback: 
             status = None
         if status == 200:
             break
-        if status in RETRY_STATUSES or status is None:
+        if status in RETRY_STATUSES or status in SOFT_BLOCK_STATUSES or status is None:
             attempt += 1
             if attempt <= MAX_RETRIES:
-                time.sleep(1.5 * attempt)
+                # 403 already gets its backoff from the per-host cooldown applied inside
+                # _wait_for_host on the next _fetch_once call - don't double up on delay.
+                if status not in SOFT_BLOCK_STATUSES:
+                    time.sleep(1.5 * attempt)
             continue
         return False, note or f"http {status}"
     if status != 200:

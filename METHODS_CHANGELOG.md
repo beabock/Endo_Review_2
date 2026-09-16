@@ -10,6 +10,46 @@ Scope decisions live in `NPH_resubmission_checklist.md`; per-task plans in `NPH_
 
 ---
 
+## 2026-09-16 — Task 1 fetcher: per-host throttling + 403 backoff
+`scripts/01_data_preproccessing/fetch_fulltext_pdfs.py`. Diagnosed and fixed while the
+first real pull (job 31692613) was mid-run; not yet re-run with this change.
+
+**Why.** The first real pull (`sbatch --array=0-7`) showed a 17.7% download-failure rate
+on top of the resolver hit-rate (66.8% of records got a resolver-found URL, close to the
+dry run's 61.2% "resolvable" estimate, so the resolvers themselves are working as
+expected). Of the failures, 86% were plain `http 403`, concentrated almost entirely in
+MDPI (186) and Wiley (134), publishers known for WAF/bot-detection rather than genuine
+access denial — MDPI in particular is overwhelmingly gold OA, so a resolver correctly
+finding a PDF there and then getting blocked points at request-volume detection, not
+paywalling. `RETRY_STATUSES` didn't include 403 at all, so every one of these failed on
+the first attempt with zero backoff. Eight Slurm array shards run fully independently
+with no shared rate state, so each shard politely pacing itself (`--sleep 0.3`) still
+adds up to a burst against the same publisher domain from the cluster's shared egress.
+
+**Changed.**
+- New `SOFT_BLOCK_STATUSES = {403}`, retried like the existing `RETRY_STATUSES` but
+  backed off per-*host* rather than per-DOI: `_wait_for_host` / `_note_host_result`
+  track, per hostname, a minimum 1s gap between any two requests plus a cooldown that
+  starts at 12s and doubles on each consecutive 403 from that host (capped at 90s).
+  `_fetch_once` wraps every download attempt with these.
+- This is per-process (per-shard) state, not shared across the 8 array tasks — it stops
+  a single shard from re-hammering a host that just blocked it, but doesn't coordinate
+  across shards. If MDPI/Wiley are still dominant after a re-run, the next step would be
+  real cross-shard coordination (a shared lock/counter file) or simply fewer concurrent
+  shards.
+- Resolver lookup calls (the JSON API hits to Unpaywall/OpenAlex/etc. and the
+  `r_publisher_meta` landing-page fetch) are unchanged — the diagnosed problem was
+  specifically the PDF download step, not resolver lookups, which are performing in
+  line with the dry-run estimate.
+
+**Still to do.** Re-run the real pull (this resumes, not restarts — DOIs already marked
+`downloaded` in the shard manifests are skipped; only `download_failed` DOIs get
+retried) and re-check the status breakdown + the MDPI/Wiley share of failures to see how
+much this recovers. If a meaningful chunk is still 403, worth trying real cross-shard
+throttling next rather than just a longer per-host cooldown.
+
+---
+
 ## 2026-09-02 — Corpus dedup: DOI normalisation + auditable stages
 `combine_dedupe_abstracts.R` (renamed from `Combo_abstracts_pull2.R` — it combines and
 deduplicates, it does not pull).
@@ -163,11 +203,18 @@ papers concentrated in particular publishers/journals?" (`coverage_report.csv`).
 Institutional / ILL access for the mycology journals is a parallel manual track (the
 retriever is OA-only). Realistic downloaded yield ≈ 80–90% of 11,979 → ~9.5–10.8k PDFs.
 
+**Real pull — started 2026-09-16** (job 31692613, 8 shards). Early numbers (~1,900 of
+19,586 processed): 49.1% downloaded, 33.3% no_oa_pdf, 17.7% download_failed — see the
+2026-09-16 fetcher entry above for the 403/MDPI/Wiley diagnosis and fix. Yield off the
+resolvable set is tracking a bit under the 80–90% estimate (≈74% so far); the 403 fix
+should close some of that gap on a re-run.
+
 **Still to do.**
 - Decide the pre-registered agreement threshold (proposed: interaction F1 ≥ 0.75, taxon
   counts not systematically lower for abstracts, country/biome κ ≥ 0.6).
-- Run: real PDF pull (`--array=0-7`, no DRY_RUN) → 25-paper Phase 1 POC (model sanity
-  check) → scaled re-extraction (whole corpus, new schema, bake-off winner).
+- Re-run the real pull with the 403 fix (see above), confirm the failure-rate
+  improvement, then: 25-paper Phase 1 POC (model sanity check) → scaled re-extraction
+  (whole corpus, new schema, bake-off winner).
 - `ocrmypdf` + tesseract needed on Monsoon for the extraction step (`conda install -c
   conda-forge ocrmypdf tesseract`); OCR is English-only (corpus is English by search).
 - **Re-run the ubiquity detector** — the snippet + `num_ctx` fix changes the Prediction-1
@@ -214,6 +261,11 @@ inter-annotator agreement against a manually curated set — not a model confide
 **Answers.** Referee 2 (extraction validation, strain variation, author-assigned labels);
 Referee 3 (guild circularity, endophytism-method QC, "human in the loop" definition);
 Referee 1 (commensalism).
+
+**Blocked on Task 1's real PDF pull** — the current sample's full-text picks were drawn
+against the old, mostly-gone local corpus (~282 files) and need to be redrawn against the
+real retrieved set before workbooks go out, so Nancy/Kitty/Ian/Jack get one complete,
+non-confusing batch (Bea's call, 2026-09-02).
 
 ---
 
