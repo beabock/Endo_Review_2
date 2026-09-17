@@ -46,6 +46,10 @@ NSHARDS="${NSHARDS:-1}"
 DRY_RUN="${DRY_RUN:-0}"
 SLEEP="${SLEEP:-0.3}"
 SHARD="${SLURM_ARRAY_TASK_ID:-0}"
+# override for one-off/test runs so they don't clobber pdf_manifest_shard${SHARD}.csv
+# from a real pull, e.g.:
+#   sbatch --array=0 --export=NSHARDS=1,MANIFEST=/scratch/.../recovery_test3.csv ...
+MANIFEST="${MANIFEST:-${OUT_DIR}/pdf_manifest_shard${SHARD}.csv}"
 
 # Python env. This job needs no GPU and no Ollama - just a Python with requests +
 # pandas (+ pymupdf for the real-download PDF validation). We use whatever `python`
@@ -83,12 +87,12 @@ DRY_FLAG=""
 [ "$DRY_RUN" = "1" ] && DRY_FLAG="--dry-run"
 
 echo "--- fetch_fulltext_pdfs (shard ${SHARD}/${NSHARDS}, dry_run=${DRY_RUN}) ---"
-echo "input=$INPUT  out_dir=$OUT_DIR"
+echo "input=$INPUT  out_dir=$OUT_DIR  manifest=$MANIFEST"
 
 "$PYTHON_BIN" scripts/01_data_preproccessing/fetch_fulltext_pdfs.py \
     --input "$INPUT" \
     --out-dir "$OUT_DIR" \
-    --manifest "${OUT_DIR}/pdf_manifest_shard${SHARD}.csv" \
+    --manifest "$MANIFEST" \
     --email "$EMAIL" \
     --shard "$SHARD" --nshards "$NSHARDS" \
     --sleep "$SLEEP" \

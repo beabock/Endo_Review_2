@@ -112,6 +112,29 @@ biomedicine (where green-OA deposit mandates are far more common). CORE is still
 having in the chain (it did contribute one of the 2 real successes in the test), just
 shouldn't be expected to be the main lever for closing the coverage gap.
 
+**Re-test after the OpenAIRE fix (job 31702506, same recipe, `--limit 50`):**
+downloaded 2, no_oa_pdf 29, download_failed 19 — vs. downloaded 2, no_oa_pdf 5,
+download_failed 43 before the fix. Confirms the fix did exactly what it should: the 24
+DOIs that used to be misclassified as `download_failed` (OpenAIRE junk URL, landing
+page/dead link) now correctly report `no_oa_pdf` (nothing found), and the real success
+count is unchanged at 2 — OpenAIRE's old fallback never converted to an actual download,
+so removing it cost nothing.
+
+`run_fetch_pdfs.sbatch` gained a `MANIFEST` override (defaults to the old
+`${OUT_DIR}/pdf_manifest_shard${SHARD}.csv` path if unset) after this test run
+overwrote the first test's manifest — the override I'd told Bea to pass didn't exist
+in the script yet.
+
+**Honest read on yield so far:** 2/50 = 4% recovery rate on this blended
+(no_oa_pdf-heavy) sample. Extrapolated to the full ~13,600-DOI candidate pool
+(3,589 failed-bucket + 9,436 no_oa_pdf, excluding ~604 unrecoverable exceptions/hard
+403s), that's roughly +540 papers corpus-wide — 5,957 -> ~6,500 downloaded, 30.4% ->
+~33.2% resolvable. Real, but far more modest than the ~52% ceiling estimated purely
+from the circuit-breaker fix in isolation on 09-17. Not yet broken out by original
+bucket (failed vs. no_oa_pdf) to see whether the failed-bucket-specific rate — the one
+that actually matters for the publisher-skew concern — is meaningfully higher than the
+blended 4%.
+
 CORE's PDF download policy (Bea, pasted from their docs): the plain `downloadUrl` is
 their "preferred method" and what `r_core`/`try_download` already do; their metered
 `GET /v3/outputs/{id}/download` fallback (counts against token allowance, for cases
