@@ -102,12 +102,15 @@ non-openaire URL when there's no literal `.pdf` link) is cut — it was actively
 than nothing, since it also pre-empted `publisher_meta` from getting a shot at those
 same 27 DOIs. `r_openaire` now only returns a literal `.pdf`-suffixed URL.
 
-Also flagged, not yet resolved: `core` fired only once across 50 DOIs. Could be
-genuinely thin CORE coverage for mycology/plant-pathology literature, or the key
-silently failing auth — `Session.json()` swallows every non-200 response as a plain
-`None`, indistinguishable from "no results." Bea is running a direct diagnostic call
-against CORE's API to check the actual status code before we treat "CORE barely
-contributes" as a real finding rather than a masked auth bug.
+Also flagged, then resolved: `core` fired only once across 50 DOIs. Ruled out a masked
+auth failure — Bea ran a direct diagnostic call against CORE's API with the institutional
+key for one of the test DOIs (`10.1016/j.fgb.2004.01.005`) and got `status: 200`,
+`totalHits: 0` (a real search, zero results, not an auth error). So the low CORE hit
+rate in this sample is a genuine coverage finding: CORE indexes repository deposits, and
+mycology/plant-pathology literature is evidently thin there compared to, say,
+biomedicine (where green-OA deposit mandates are far more common). CORE is still worth
+having in the chain (it did contribute one of the 2 real successes in the test), just
+shouldn't be expected to be the main lever for closing the coverage gap.
 
 CORE's PDF download policy (Bea, pasted from their docs): the plain `downloadUrl` is
 their "preferred method" and what `r_core`/`try_download` already do; their metered
