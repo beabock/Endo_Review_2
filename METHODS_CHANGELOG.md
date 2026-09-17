@@ -89,6 +89,26 @@ superseding the "they don't block each other" framing from earlier today.
 the 9,436 no_oa_pdf records either — the fuller but much larger, ~13.6k-DOI fix) and
 `--limit` (to test actual CORE token cost on a small slice before committing to scale).
 
+**50-DOI test result (job 31701092, single shard, `--include-no-oa-pdf --limit 50`):**
+2 downloaded, 5 no_oa_pdf, 43 download_failed. The useful signal isn't the raw count —
+it's that only 5/50 came back `no_oa_pdf` this time, vs. the ~36/50 that would have been
+`no_oa_pdf` before (this sample skews toward that bucket), meaning some resolver now
+finds *a* candidate URL for most of them. But of the 27 DOIs `openaire` "won" the
+resolver race for, **zero** turned into a successful download (24 landing pages, the
+rest dead links/timeouts to bare domain roots like `http://www.kau.in/` — an institution
+homepage field, not an article link). The 2 real successes came from `semanticscholar`
+and `core` (1 each). Fixed same-day: `r_openaire`'s fallback (accept any non-doi.org/
+non-openaire URL when there's no literal `.pdf` link) is cut — it was actively worse
+than nothing, since it also pre-empted `publisher_meta` from getting a shot at those
+same 27 DOIs. `r_openaire` now only returns a literal `.pdf`-suffixed URL.
+
+Also flagged, not yet resolved: `core` fired only once across 50 DOIs. Could be
+genuinely thin CORE coverage for mycology/plant-pathology literature, or the key
+silently failing auth — `Session.json()` swallows every non-200 response as a plain
+`None`, indistinguishable from "no results." Bea is running a direct diagnostic call
+against CORE's API to check the actual status code before we treat "CORE barely
+contributes" as a real finding rather than a masked auth bug.
+
 CORE's PDF download policy (Bea, pasted from their docs): the plain `downloadUrl` is
 their "preferred method" and what `r_core`/`try_download` already do; their metered
 `GET /v3/outputs/{id}/download` fallback (counts against token allowance, for cases

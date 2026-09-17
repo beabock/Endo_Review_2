@@ -294,34 +294,27 @@ def _walk_for_urls(node) -> list[str]:
 def r_openaire(sess: Session, doi: str) -> tuple[str | None, dict]:
     # OpenAIRE Graph API - keyless (low rate limit) or register for a personal access
     # token for production use: https://graph.openaire.eu/docs/apis/authentication.
-    # EU-funded OA aggregator, strong European institutional-repository coverage -
-    # useful here because it tends to point at the repository copy (a university
-    # domain), not the publisher's, which is exactly what sidesteps a Wiley/MDPI/
-    # Elsevier bot-block. Added 2026-09-17 (see METHODS_CHANGELOG.md) after the first
-    # full-corpus pull came in well under the ~55-75% coverage this was expected to hit,
-    # concentrated in the same publishers already known to bot-block direct scraping.
+    # Added 2026-09-17 (see METHODS_CHANGELOG.md).
     #
-    # NOTE (Claude, 2026-09-17): the exact JSON nesting below was only checked against
-    # one example DOI via a web-fetch tool, not tested end-to-end against this script -
-    # I did not want to hardcode a field path I wasn't confident in, so this walks the
-    # whole response for anything URL-shaped rather than trusting one path. Bea: worth a
-    # --limit 20 --dry-run spot-check before trusting this in a real pull, to confirm
-    # it's actually returning usable OA links and not junk (DOI-resolver URLs etc. can
-    # slip into a generic URL walk like this one).
+    # RESULT (Claude, 2026-09-17, 50-DOI test job 31701092): the original version of
+    # this function had a fallback that accepted ANY non-doi.org/non-openaire URL from
+    # the response when no literal .pdf link was found, on the theory that a repository
+    # URL is still worth trying even without a .pdf suffix. On real data it had a 0%
+    # hit rate (27/27 "wins" over other resolvers, 0 successful downloads - either "not
+    # pdf" landing pages or dead links to bare domain roots like
+    # http://www.kau.in/, i.e. an institution homepage field in the metadata, not an
+    # article link) - AND it was winning the resolver race ahead of publisher_meta, so
+    # those 27 DOIs never even got publisher_meta's shot. Cut entirely rather than
+    # tuned, since the evidence is it's worse than not having it: only return a literal
+    # .pdf-suffixed URL now, and let the DOI fall through to publisher_meta otherwise,
+    # same as before this resolver existed.
     d = sess.json("https://api.openaire.eu/search/publications",
                   params={"doi": doi, "format": "json"})
     if not d:
         return None, {}
     urls = _walk_for_urls(d)
     pdfs = [u for u in urls if u.lower().endswith(".pdf")]
-    if pdfs:
-        return pdfs[0], {}
-    # fall back to a repository-looking URL (not a doi.org/api.openaire.eu self-link)
-    for u in urls:
-        low = u.lower()
-        if "doi.org" not in low and "openaire.eu" not in low:
-            return u, {}
-    return None, {}
+    return (pdfs[0], {}) if pdfs else (None, {})
 
 
 META_PDF_RE = re.compile(
