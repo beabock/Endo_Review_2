@@ -5,8 +5,10 @@
 # download_pdfs.py (archived).
 #
 # Resolvers, tried in order until a VALID PDF lands:
-#   Unpaywall -> OpenAlex -> Europe PMC -> Semantic Scholar -> CORE -> publisher
-#   <meta citation_pdf_url> on the DOI landing page
+#   Unpaywall -> OpenAlex -> Europe PMC -> Semantic Scholar -> CORE -> OpenAIRE ->
+#   publisher <meta citation_pdf_url> on the DOI landing page
+# (OpenAIRE added 2026-09-17 - see METHODS_CHANGELOG.md and the r_openaire comment for
+# why, and the caveat that its parsing was only checked against one example response.)
 #
 # Features: resumable (skips DOIs that already have a valid PDF), shardable
 # (--shard i --nshards n), download validation (magic bytes + PyMuPDF open + page
@@ -247,6 +249,13 @@ def r_semanticscholar(sess: Session, doi: str) -> tuple[str | None, dict]:
 
 
 def r_core(sess: Session, doi: str) -> tuple[str | None, dict]:
+    # CORE_API_KEY: free, no institutional affiliation required - register at
+    # https://core.ac.uk/services/api (just an email). Without a key this resolver is a
+    # silent no-op (returns None immediately, every time) - if it's not set, we're not
+    # actually querying CORE at all, and CORE is the one resolver in this chain most
+    # likely to hand back a copy hosted on CORE's own infrastructure or on an
+    # institutional repository, rather than a redirect straight back to the publisher
+    # domain that's doing the blocking. Worth checking `echo $CORE_API_KEY` on Monsoon.
     key = os.getenv("CORE_API_KEY")
     if not key:
         return None, {}
@@ -258,6 +267,61 @@ def r_core(sess: Session, doi: str) -> tuple[str | None, dict]:
     except Exception:
         return None, {}
     return w.get("downloadUrl"), {}
+
+
+def _walk_for_urls(node) -> list[str]:
+    """Recursively pull every string that looks like a URL out of an arbitrarily-nested
+    dict/list, keyed on any of OpenAIRE's several URL conventions (`fulltext`, `url`,
+    `webresource`, or the legacy XML-to-JSON `{"$": "..."}` wrapper). Used instead of a
+    hardcoded field path because the exact response nesting for this endpoint was only
+    checked against a single example DOI (see r_openaire comment) - a wrong hardcoded
+    path would silently return nothing forever, a wrong recursive walk just returns a
+    same-or-worse candidate list. PDFs are surfaced first, non-PDF URLs kept as a
+    fallback (some repositories serve a landing page here, still worth trying)."""
+    found: list[str] = []
+    if isinstance(node, str):
+        if node.startswith("http"):
+            found.append(node)
+    elif isinstance(node, dict):
+        for v in node.values():
+            found.extend(_walk_for_urls(v))
+    elif isinstance(node, list):
+        for v in node:
+            found.extend(_walk_for_urls(v))
+    return found
+
+
+def r_openaire(sess: Session, doi: str) -> tuple[str | None, dict]:
+    # OpenAIRE Graph API - keyless (low rate limit) or register for a personal access
+    # token for production use: https://graph.openaire.eu/docs/apis/authentication.
+    # EU-funded OA aggregator, strong European institutional-repository coverage -
+    # useful here because it tends to point at the repository copy (a university
+    # domain), not the publisher's, which is exactly what sidesteps a Wiley/MDPI/
+    # Elsevier bot-block. Added 2026-09-17 (see METHODS_CHANGELOG.md) after the first
+    # full-corpus pull came in well under the ~55-75% coverage this was expected to hit,
+    # concentrated in the same publishers already known to bot-block direct scraping.
+    #
+    # NOTE (Claude, 2026-09-17): the exact JSON nesting below was only checked against
+    # one example DOI via a web-fetch tool, not tested end-to-end against this script -
+    # I did not want to hardcode a field path I wasn't confident in, so this walks the
+    # whole response for anything URL-shaped rather than trusting one path. Bea: worth a
+    # --limit 20 --dry-run spot-check before trusting this in a real pull, to confirm
+    # it's actually returning usable OA links and not junk (DOI-resolver URLs etc. can
+    # slip into a generic URL walk like this one).
+    d = sess.json("https://api.openaire.eu/search/publications",
+                  params={"doi": doi, "format": "json"})
+    if not d:
+        return None, {}
+    urls = _walk_for_urls(d)
+    pdfs = [u for u in urls if u.lower().endswith(".pdf")]
+    if pdfs:
+        return pdfs[0], {}
+    # fall back to a repository-looking URL (not a doi.org/api.openaire.eu self-link)
+    for u in urls:
+        low = u.lower()
+        if "doi.org" not in low and "openaire.eu" not in low:
+            return u, {}
+    return None, {}
 
 
 META_PDF_RE = re.compile(
@@ -278,7 +342,11 @@ def r_publisher_meta(sess: Session, doi: str) -> tuple[str | None, dict]:
 
 RESOLVERS = [
     ("unpaywall", r_unpaywall), ("openalex", r_openalex), ("europepmc", r_europepmc),
-    ("semanticscholar", r_semanticscholar), ("core", r_core),
+    ("semanticscholar", r_semanticscholar), ("core", r_core), ("openaire", r_openaire),
+    # publisher_meta last on purpose: it's the one resolver that always points straight
+    # at the publisher's own domain (a doi.org redirect target), i.e. the one most
+    # likely to be bot-blocked. Every resolver before it is more likely to land on a
+    # repository/aggregator host instead.
     ("publisher_meta", r_publisher_meta),
 ]
 

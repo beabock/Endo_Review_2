@@ -10,6 +10,96 @@ Scope decisions live in `NPH_resubmission_checklist.md`; per-task plans in `NPH_
 
 ---
 
+## 2026-09-17 — Full-corpus pull finished (30.4% resolvable); root cause of the shortfall + OpenAIRE resolver + recovery-pass tooling
+`scripts/01_data_preproccessing/fetch_fulltext_pdfs.py`,
+`scripts/01_data_preproccessing/make_recovery_subset.py` (new),
+`scripts/01_data_preproccessing/reconcile_recovery.py` (new).
+
+**What happened.** Job 31693127 (real pull, `--array=0-7`) finished: 19,586 DOIs ->
+downloaded 5,957 (30.4%), no_oa_pdf 9,436 (48.2%), download_failed 4,193 (21.4%). The
+Phase 0 notes projected ~55-75% resolvable; 30.4% is well under that.
+
+**Diagnosis.** `no_oa_pdf` (9,436) tracks Unpaywall's own `closed`+missing count
+(9,142+629=9,771) closely — that bucket is mostly real, not a bug. `download_failed`
+(4,193) is the recoverable one: Unpaywall flags 9,815 records as some kind of OA, but
+only 5,957 downloaded — a ~3,858-record gap that lines up almost exactly with
+`download_failed`. Breaking down the `note` column on the 4,193 failures:
+
+| note | n | % of download_failed |
+|---|---|---|
+| `host circuit open (repeated 403s) - retried on a future run` | 2,770 | 66.1% |
+| `not pdf (ct=text/html...)` (3 variants) | 792 | 18.9% |
+| `http 403` (real, after retries) | 310 | 7.4% |
+| `http 202` | 93 | 2.2% |
+| `http 404` | 79 | 1.9% |
+| everything else (timeouts, DNS, SSL, 5xx, redirects) | ~149 | 3.6% |
+
+Two-thirds of the failures never got a real network attempt at all — they were skipped
+because a host's circuit breaker had already tripped. **Root cause:** the breaker's
+state (`_host_next_ok`, `_host_403_streak`, `_host_circuit_until`) is per-process, i.e.
+per shard. Running 8 array tasks in parallel means a host like `onlinelibrary.wiley.com`
+can see traffic from all 8 shards at once — up to 8x the rate any single shard's
+`HOST_MIN_GAP` was designed to enforce — which is enough to trip (and re-trip) bot
+detection fast and keep it tripped. The top-20 missing-by-journal list in
+`coverage_report.csv` confirms this: dominated by Wiley (incl. New Phytologist itself),
+Elsevier, MDPI, Informa/Mycologia, ACS, Springer, OUP — the exact publishers already
+flagged in the 09-16 entry.
+
+**Fix 1 — new resolver.** Added `r_openaire` (OpenAIRE Graph API,
+`api.openaire.eu/search/publications?doi=...`), placed after CORE and before
+`publisher_meta` in `RESOLVERS`. Keyless (low rate limit) or register a token for
+production use. Rationale: OpenAIRE tends to point at a repository copy (a university
+domain) rather than the publisher's, which is exactly what sidesteps a Wiley/MDPI/
+Elsevier block. **Caveat:** the response parsing (`_walk_for_urls`) was only checked
+against one example DOI via a fetch tool, not tested end-to-end — it walks the whole
+response for anything URL-shaped rather than trusting one hardcoded field path, on
+purpose, but **run a `--limit 20 --dry-run` spot-check before trusting it at scale.**
+Also flagged in `r_core`'s comment: that resolver is a silent no-op without
+`CORE_API_KEY` set (free registration, no institutional affiliation needed,
+core.ac.uk/services/api) — worth confirming it's actually set on Monsoon, since if not,
+CORE (the resolver most likely to hand back its own cached copy rather than a publisher
+redirect) hasn't been contributing anything yet.
+
+**Fix 2 — targeted, low-parallelism recovery pass (tooling only, not run yet).**
+`make_recovery_subset.py` pulls the DOIs with `download_failed` + `host circuit open`
+or `not pdf` notes (4,193 minus the ~440 in the http-403/404/202/exception buckets, i.e.
+~3,562 candidate DOIs) into a small input CSV. Intended to be run as `--array=0
+--export=NSHARDS=1` (single shard, not 8) so the existing per-host throttle behaves as
+designed instead of being multiplied by parallel siblings. `reconcile_recovery.py` then
+folds any newly-`downloaded` rows from that pass back into the main merged manifest
+without disturbing anything else, writing a new file rather than overwriting in place.
+
+**Not evaluated:** BASE (no DOI-lookup REST API exists, confirmed via search — keeps to
+OAI-PMH bulk harvest only, not useful here). ResearchGate / Sci-Hub scraping —
+deliberately excluded (ToS / legal), not proposed.
+
+**Update, same day:** Bea confirmed `CORE_API_KEY` was blank for the entire first pull —
+CORE never ran on any of the 19,586 DOIs, not just the failures. Two keys obtained
+(personal, ~1,000 tokens/day; institutional, higher limit) — set as an env var on
+Monsoon only, never committed to the repo. Institutional key is the one to use for the
+bulk recovery pass given the tighter daily cap on the personal one.
+
+**Sequencing correction:** Bea flagged that drawing the Task 2 sample from the current
+partial full-text pool (5,957 papers) would bake in a publisher-composition bias — that
+pool is specifically the papers that weren't bot-blocked, so it under-represents Wiley/
+MDPI/Elsevier/etc. (including New Phytologist itself) relative to the true corpus. **The
+recovery pass now runs before the Task 2 sample redraw, not in parallel with it**,
+superseding the "they don't block each other" framing from earlier today.
+`make_recovery_subset.py` gained `--include-no-oa-pdf` (CORE + OpenAIRE never ran on
+the 9,436 no_oa_pdf records either — the fuller but much larger, ~13.6k-DOI fix) and
+`--limit` (to test actual CORE token cost on a small slice before committing to scale).
+
+CORE's PDF download policy (Bea, pasted from their docs): the plain `downloadUrl` is
+their "preferred method" and what `r_core`/`try_download` already do; their metered
+`GET /v3/outputs/{id}/download` fallback (counts against token allowance, for cases
+where `downloadUrl` itself is blocked) is not wired in yet — flagged as a possible
+follow-up if the plain-downloadUrl approach doesn't recover enough, not built yet
+pending Bea's steer given the token-cost tradeoff. Systematic scraping of CORE's raw
+fileserver (`fileserver-az.core.ac.uk/...`) is explicitly against their terms and is
+not used anywhere in this pipeline.
+
+---
+
 ## 2026-09-16 — Task 1 fetcher: per-host throttling + 403 backoff (v1 backfired, v2 = circuit breaker)
 `scripts/01_data_preproccessing/fetch_fulltext_pdfs.py`. Diagnosed and fixed twice in one
 day while real pulls (jobs 31692613, then 31692704) were mid-run.
