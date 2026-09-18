@@ -34,3 +34,10 @@ results/manual_validation/groundtruth/completed/
 results/manual_validation/groundtruth/metrics/
 ~$*
 results/manual_validation/groundtruth/~$*
+/data/col26_8_XR_fungi
+/data/cols26_8_XR_plantae
+/data/dataset
+data/kappa_pdfs_for_drive/
+data/*_pdfs_for_drive/
+data/pdf_manifest.csv
+data/processed/
