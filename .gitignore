@@ -41,3 +41,13 @@ NPH_task4_biogeographic_plan.md
 
 # Task 1 fetch job venvs
 .venv_fetch*/
+
+# Task 2 ground-truth working files
+results/manual_validation/groundtruth/sample_frame.csv
+results/manual_validation/groundtruth/completed/
+results/manual_validation/groundtruth/metrics/
+~$*
+results/manual_validation/groundtruth/~$*
+data/kappa_pdfs_for_drive/
+data/*_pdfs_for_drive/
+data/pdf_manifest.csv
