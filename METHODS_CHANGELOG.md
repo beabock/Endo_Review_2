@@ -10,6 +10,50 @@ Scope decisions live in `NPH_resubmission_checklist.md`; per-task plans in `NPH_
 
 ---
 
+## 2026-11-05 — Extraction v6: staged design, DEV/TEST protocol, DEV-set drawing script, Monsoon PoC tooling (design only; nothing run on Monsoon)
+`scripts/04_analyses/draw_dev_set.py` (new), `scripts/01_data_preproccessing/extract_v6_poc.py` (new,
+mock-tested only), `scripts/01_data_preproccessing/v6_bench.py` (new),
+`scripts/01_data_preproccessing/run_v6_poc.sbatch` (new, not submitted),
+`scripts/utils/monsoon_inventory_v6.sh` (new, read-only). Design: `NPH_extraction_v6_design.md`.
+
+**Why.** Referee 3 (method validity / why this model), Referee 2 (validation on held-out data).
+v5 makes one call per chunk for ~17 fields and merges heuristically; judgment fields compete with
+entity recall, nothing checks that a label is grounded in the text, biome/country are model guesses.
+
+**Design.** Four stages: (1) paper card (quote-before-label for each judgment; regex proposes
+coordinates/keyword windows, the model decides, a quote verifies); (2) entity pass per chunk with the
+Stage-1 study hosts, union + dedup, recall audit by capitalised-binomial regex; (3) classification per
+group of <=5 pairs with the paper card; (4) mandatory verbatim supporting quotes with an automatic
+normalised-substring check, consistency flags, optional quote-only re-derivation. Country/biome are
+kept as two columns each: `*_named` (what the text says; scored against the human Q6a/Q8) and
+`*_resolved` / `wwf_biome_coords` (from coordinates; used for the analyses). Serving: vLLM
+preferred (needs HF-format weights; Ollama GGUF blobs are not usable), Ollama with
+`OLLAMA_NUM_PARALLEL` as fallback; every run writes a manifest (model digest/revision, prompt
+hashes, schema version, seed, git commit, engine version).
+
+**DEV/TEST protocol (pre-specified).** The 230-paper sample is the locked TEST set: no prompt tuning
+or model choice on it, run once after freezing. A separate ~40-paper DEV set is drawn
+(`draw_dev_set.py`) from the corpus excluding the 230 + 2 MOCK papers, stratified by era, doc type,
+design (metabarcoding / isolate / other) and, for full text, table-heavy vs prose. Gates (unrecoverable
+calls <=2 %, quote-support >=90 %, GPU-hour budget), ranking (pair F1 -> interaction AC1 -> paper-level
+AC1) and tie margins (0.03 F1 / 0.05 AC1), <=3 prompt revisions, are fixed before any DEV result.
+The Phase 0 abstract-adequacy rule (F1 >= 0.75, taxa/paper not lower, country/biome kappa >= 0.6) is
+unchanged.
+
+**Found, NOT changed (need Bea).** (S1) the reviewer workbooks have two evidence columns per block
+(effect / lifestyle) while `extract_schema.py`, the reviewer guide and `score_groundtruth.py` assume one;
+the scorer's slot regex keeps the last matching column, i.e. it currently reads the LIFESTYLE column as
+`evidence_basis`. (S2) workbook Q11 (ubiquity), the 4-level inoculation answer and yes/no/not-stated
+methods are absent from `extract_schema.py`. (S4) v5 `monsoon_extract.py` never writes
+`sampling_country`, `coordinates_given`, `fungus_source` (blank in all v5 output though scored).
+
+**Still to do.** Bea runs the Monsoon inventory and pastes it back; DEV draw on Monsoon (`--pdf-dir`) +
+annotation of the DEV sheet; GPU go/no-go for the throughput bench and the <=25-paper PoC
+(`NPH_v6_poc_plan.md`); decisions S1/S2; scorer fix for S1; WWF-biome polygon lookup; full DEV grid;
+freeze + TEST once; full-corpus plan.
+
+---
+
 ## 2026-09-17 — Full-corpus pull finished (30.4% resolvable); root cause of the shortfall + OpenAIRE resolver + recovery-pass tooling
 `scripts/01_data_preproccessing/fetch_fulltext_pdfs.py`,
 `scripts/01_data_preproccessing/make_recovery_subset.py` (new),
