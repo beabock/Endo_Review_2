@@ -21,30 +21,38 @@ from __future__ import annotations
 
 TISSUE = [
     "leaf", "root", "stem_wood_bark", "seed", "fruit", "flower",
+    "aerial_parts",              # paper says shoots / aerial parts and does not separate them
     "whole_plant", "other", "not_stated",
 ]
 
 # how the fungus makes its living in this interaction (FungalTraits primary_lifestyle,
 # Polme et al. 2020, condensed; the three endophyte types are merged - tissue records
-# leaf vs root; the four mycorrhizal types are kept separate).
+# leaf vs root). v5.3 (2026-10-08): the four saprotroph types and the four mycorrhizal
+# types are each merged into one value - no analysis splits them, and rare fine-grained
+# categories lower inter-rater agreement. LIFESTYLE_COLLAPSE maps v5.2 output onto v5.3.
 FUNGAL_LIFESTYLE = [
     "endophyte",                 # symptomless in living internal tissue
     "latent_pathogen",           # symptomless now, shown/known to turn pathogenic
     "plant_pathogen",            # causing disease in the studied interaction
-    "wood_saprotroph",
-    "litter_saprotroph",
-    "soil_saprotroph",
-    "other_saprotroph",          # dead/senescent tissue, type unspecified
-    "arbuscular_mycorrhizal",
-    "ectomycorrhizal",
-    "ericoid_mycorrhizal",
-    "orchid_mycorrhizal",
+    "saprotroph",                # dead / senescent plant material (wood, litter, soil, other)
+    "mycorrhizal",               # arbuscular / ecto / ericoid / orchid
     "mycoparasite",              # antagonist of other fungi / microbes
     "epiphyte",                  # on the surface only
     "lichenised",
     "context_dependent",         # the paper says the lifestyle itself shifts
     "unclear",
 ]
+
+LIFESTYLE_COLLAPSE = {           # v5.2 tokens -> v5.3
+    "wood_saprotroph": "saprotroph", "litter_saprotroph": "saprotroph",
+    "soil_saprotroph": "saprotroph", "other_saprotroph": "saprotroph",
+    "arbuscular_mycorrhizal": "mycorrhizal", "ectomycorrhizal": "mycorrhizal",
+    "ericoid_mycorrhizal": "mycorrhizal", "orchid_mycorrhizal": "mycorrhizal",
+}
+
+
+def collapse_lifestyle(token):
+    return LIFESTYLE_COLLAPSE.get(token, token)
 
 # net outcome for THIS host plant, as the paper reports it. Deliberately a separate
 # axis from fungal_lifestyle (a plant_pathogen can occur with no_symptoms_not_tested).
@@ -100,11 +108,17 @@ LANGUAGE = [              # Q4 - answer for the text actually analysed on this r
     "unclear",
 ]
 
-SAMPLING_LOCATION_STATUS = [   # Q8
-    "explicit",             # sampling location explicitly stated
-    "inferable",            # inferable from a named field site / region
+# Q8 (2026-09-22: merged with the short-lived separate Q7a/location_source field - Bea Bock,
+# "I think simplifying could be a good idea". One question now answers both "how specific is
+# the location" AND "where does the text keep it", instead of two overlapping dropdowns that
+# nothing enforced agreement between.)
+SAMPLING_LOCATION_STATUS = [
+    "explicit",             # sampling location explicitly stated in the main text
+    "inferable",            # inferable from a named field site / region in the main text
+    "supplement",           # the main text says location details are in a supplement
+    "cited_work",           # the main text says location details are in another cited study
     "affiliation_only",     # only the authors' institutional country is given
-    "none",                # no geographic information at all
+    "none",                 # no geographic information at all
 ]
 
 STRAIN_VARIATION = [      # Q6
@@ -114,7 +128,7 @@ STRAIN_VARIATION = [      # Q6
 # WWF terrestrial biomes (Olson et al. 2001), matching the Task 4 realm choice. Q9.
 BIOME = [
     "tropical_moist_forest", "tropical_dry_forest",
-    "temperate_boreal_forest", "mediterranean_scrub",
+    "temperate_boreal_forest", "forest_unspecified", "mediterranean_scrub",
     "tropical_grassland_savanna", "temperate_grassland_steppe",
     "montane_grassland_alpine", "desert_xeric",
     "wetland_flooded_grassland", "mangrove", "tundra_polar", "marine_coastal",
@@ -122,11 +136,24 @@ BIOME = [
     "other", "not_stated",
 ]
 
-STERILISATION_CHECKED = [   # Q11
+STERILISATION_CHECKED = [   # workbook Q10 (was Q11)
     "yes_control",          # final rinse plated / tissue imprint / similar control
     "no_check",             # standard sterilisation, no check described
     "not_culture_based",
+    "not_applicable_external",  # no plant tissue processed here (e.g. culture-collection strains)
+    "not_sterilised",           # v5.4: tissue processed without surface sterilisation
     "cannot_tell",
+]
+
+# Workbook Q2 (2026-10-08): where the fungi came from. Separates natural host records from
+# inoculations of strains obtained elsewhere (artificial associations) and from strains merely
+# re-used from a collection. v5.4: also extracted by the model (fungus_source).
+FUNGUS_SOURCE = [
+    "from_study_plants",        # isolated / detected from plants sampled in this study
+    "external",                 # culture collection or another study, then put onto plants here
+    "external_not_inoculated",  # culture collection or another study, not put onto plants here
+    "both",                     # a mix of these
+    "not_stated",
 ]
 
 # endophytism-demonstration methods - MULTI-select (Referee 3 QC). Task 2 method ticks.
@@ -175,18 +202,23 @@ EXTRACTION_SCHEMA = {
         "language": _enum(LANGUAGE),                             # Q4
         "uncultured_taxa": _enum(YES_NO_UNCLEAR),                # Q5
         "strain_variation": _enum(STRAIN_VARIATION),             # Q6
-        "sampling_location": {"type": "string"},                 # Q7 free text / "not stated"
-        "sampling_location_status": _enum(SAMPLING_LOCATION_STATUS),  # Q8
+        "sampling_country": {"type": "string"},                  # Q7a country/countries, "not stated"
+        "sampling_location": {"type": "string"},                 # Q7b site / locality, free text
+        "coordinates_given": _enum(["yes", "no"]),               # Q7c coordinates in the paper?
+        "sampling_location_status": _enum(SAMPLING_LOCATION_STATUS),  # Q8 (specificity + where it's kept)
         "biome": {"type": "array", "items": _enum(BIOME)},       # Q9
         "n_distinct_pairs": {"type": "integer"},                 # Q10
         "sterilisation_checked": _enum(STERILISATION_CHECKED),   # Q11
+        "fungus_source": _enum(FUNGUS_SOURCE),                   # workbook Q2 (v5.4)
         "detection_methods": {"type": "array", "items": _enum(DETECTION_METHODS)},
         "community_summary": {"type": "string"},   # for metabarcoding: richness, dominant taxa
         "interactions": {"type": "array", "items": INTERACTION_ITEM_SCHEMA},
     },
     "required": ["is_fungus_in_plant_study", "primary_aim", "sampling_approach",
-                 "language", "sampling_location", "sampling_location_status",
-                 "biome", "sterilisation_checked", "detection_methods", "interactions"],
+                 "language", "sampling_country", "sampling_location",
+                 "coordinates_given", "sampling_location_status",
+                 "biome", "sterilisation_checked", "fungus_source", "detection_methods",
+                 "interactions"],
 }
 
 # Flat CSV columns written by monsoon_extract.py (v5). Paper-level fields are repeated
@@ -200,8 +232,9 @@ CSV_COLUMNS = [
     "model", "schema_version", "n_chunks", "malformed_chunks",
     # paper-level
     "is_fungus_in_plant_study", "primary_aim", "sampling_approach", "language",
-    "uncultured_taxa", "strain_variation", "sampling_location",
-    "sampling_location_status", "biome", "n_distinct_pairs", "sterilisation_checked",
+    "uncultured_taxa", "strain_variation", "sampling_country", "sampling_location",
+    "coordinates_given", "sampling_location_status", "biome", "n_distinct_pairs", "sterilisation_checked",
+    "fungus_source",
     "detection_methods", "community_summary",
     # interaction-level (new names)
     "fungus", "host_plant", "tissue", "fungal_lifestyle", "effect_on_host",
@@ -210,7 +243,10 @@ CSV_COLUMNS = [
     "fungal_taxon", "plant_host", "primary_guild", "country", "presence_absence",
 ]
 
-SCHEMA_VERSION = "v5.0"
+SCHEMA_VERSION = "v5.4"   # v5.4 (2026-10-08): fungus_source field; not_sterilised;
+# forest_unspecified biome; relabelled workbook options mapped.
+# v5.3: saprotroph / mycorrhizal merged; not_applicable_external
+# sterilisation value. v5.2: dropped location_source, merged into sampling_location_status
 
 # --------------------------------------------------------------------------------
 # legacy primary_guild <- fungal_lifestyle (keeps the old standardisation working)
@@ -223,6 +259,7 @@ LIFESTYLE_TO_LEGACY_GUILD = {
     "other_saprotroph": "saprotroph", "arbuscular_mycorrhizal": "mycorrhiza",
     "ectomycorrhizal": "mycorrhiza", "ericoid_mycorrhizal": "mycorrhiza",
     "orchid_mycorrhizal": "mycorrhiza", "mycoparasite": "biocontrol",
+    "saprotroph": "saprotroph", "mycorrhizal": "mycorrhiza",          # v5.3 merged values
     "epiphyte": "epiphyte", "lichenised": "lichen",
     "context_dependent": "Unknown", "unclear": "Unknown", None: "Unknown",
 }
@@ -236,11 +273,12 @@ HUMAN_TO_TOKEN = {
     "tissue": {
         "leaf": "leaf", "root": "root", "stem / wood / bark": "stem_wood_bark",
         "seed": "seed", "fruit": "fruit", "flower / reproductive": "flower",
+        "aerial parts / shoots (not separated)": "aerial_parts",
         "whole plant": "whole_plant", "other (type it)": "other",
         "not stated": "not_stated",
     },
     "fungal_lifestyle": {
-        "endophyte (foliar, root, or dark-septate; symptomless in living tissue)": "endophyte",
+        "endophyte (any plant tissue; symptomless in living tissue)": "endophyte",
         "latent pathogen / hemibiotroph": "latent_pathogen",
         "plant pathogen": "plant_pathogen",
         "wood saprotroph": "wood_saprotroph",
@@ -255,7 +293,7 @@ HUMAN_TO_TOKEN = {
         "epiphyte (surface only)": "epiphyte",
         "lichenised": "lichenised",
         "context-dependent (varies by host / environment / strain)": "context_dependent",
-        "not clear from the paper": "unclear",
+        "not clear from the text": "unclear",
     },
     "effect_on_host": {
         "not reported (fungus just isolated / detected)": "not_reported",
@@ -300,6 +338,8 @@ HUMAN_TO_TOKEN = {
     "sampling_location_status": {
         "sampling location is explicitly stated": "explicit",
         "sampling location is inferable from a named field site / region": "inferable",
+        "the main text says location details are in a supplement": "supplement",
+        "the main text says location details are in another cited study": "cited_work",
         "no sampling location - only the authors' institutional country is given": "affiliation_only",
         "no geographic information at all": "none",
     },
@@ -332,8 +372,62 @@ HUMAN_TO_TOKEN = {
     },
 }
 
+# 2026-10-08 workbook relabel: the new dropdown text -> the same tokens. The older labels
+# above are kept so a workbook filled before the relabel still scores.
+HUMAN_TO_TOKEN["fungal_lifestyle"] = {k: collapse_lifestyle(v)
+                                      for k, v in HUMAN_TO_TOKEN["fungal_lifestyle"].items()}
+HUMAN_TO_TOKEN["fungal_lifestyle"].update({
+    "endophyte (inside healthy tissue, no disease)": "endophyte",
+    "endophyte (lives inside plant tissue)": "endophyte",          # 2026-10-08 v2 label
+    "latent pathogen (no symptoms now, causes disease later)": "latent_pathogen",
+    "plant pathogen (causing disease)": "plant_pathogen",
+    "saprotroph (on dead or dying plant material)": "saprotroph",
+    "mycorrhizal (any type)": "mycorrhizal",
+})
+HUMAN_TO_TOKEN["tissue"]["other (type over this cell, e.g. other: rhizosphere soil)"] = "other"
+HUMAN_TO_TOKEN["primary_aim"]["other (type over this cell with your own answer)"] = "other"
+HUMAN_TO_TOKEN["language"].update({
+    "non-English (type over this cell, e.g. non-English: French)": "non_english",
+    "English + non-English (type over this cell, e.g. English + French)": "bilingual",
+})
+HUMAN_TO_TOKEN["sampling_location_status"].update({
+    "explicitly stated (country, place, or coordinates)": "explicit",
+    "inferable from a named site / region": "inferable",
+    "the text says it is in a supplement": "supplement",
+    "the text says it is in another cited study": "cited_work",
+    "only the authors' institution country is given": "affiliation_only",
+})
+HUMAN_TO_TOKEN["biome"].update({
+    "greenhouse / growth chamber / lab": "greenhouse_growthchamber",
+    "other (type over this cell with your own answer)": "other",
+})
+HUMAN_TO_TOKEN["sterilisation_checked"].update({
+    "yes - a check was done (e.g. final rinse water plated)": "yes_control",
+    "no - sterilised, but no check described": "no_check",
+    "not applicable - fungi came from a culture collection": "not_applicable_external",
+    "yes - a check was done (e.g. final rinse water plated or sequenced)": "yes_control",
+    "no - tissue was not surface-sterilised": "not_sterilised",
+    "not applicable - no plant tissue processed in this study": "not_applicable_external",
+    "unclear": "cannot_tell",
+})
+HUMAN_TO_TOKEN["fungus_source"] = {
+    "isolated or detected from plants sampled in this study": "from_study_plants",
+    "from a culture collection or another study, then put onto plants here": "external",
+    "from a culture collection or another study (not put onto plants here)": "external_not_inoculated",
+    "both": "both", "a mix of these": "both", "not stated": "not_stated",
+}
+
+HUMAN_TO_TOKEN["evidence_basis"]["from other studies or the fungus's reputation (not shown in this paper)"] = "inferred_from_taxon"
+HUMAN_TO_TOKEN["sampling_location_status"]["explicitly stated (country or coordinates)"] = "explicit"
+HUMAN_TO_TOKEN["biome"]["forest - type not stated"] = "forest_unspecified"
+
 # Task 2 method-tick column header -> DETECTION_METHODS token
 METHOD_COL_TO_TOKEN = {
+    "Methods: cultured fungi from surface-sterilised tissue": "culture_sterilised",   # 2026-10-08
+    "Methods: performed microscopy on tissue": "microscopy_in_tissue",
+    "Methods: molecular (DNA) sequencing from tissue": "direct_sequencing",
+    "Methods: isolate ID by sequencing": "isolate_id_sequencing",
+    "Methods: fungus inoculated onto a plant": "resynthesis_inoculation",
     "culture from sterilised tissue": "culture_sterilised",
     "microscopy in tissue": "microscopy_in_tissue",
     "direct sequencing from tissue": "direct_sequencing",
@@ -374,24 +468,43 @@ PAPER-LEVEL
 - language: language of the text you are reading.
 - uncultured_taxa: does it report sequence-only (OTU/ASV, uncultured) taxa?
 - strain_variation: does it note functional differences among strains/isolates of one species?
-- sampling_location: where the PLANT was sampled (free text; "not stated" if only the
-  authors' institution is given - never put an institution here).
-- sampling_location_status: how that location is known.
+- sampling_country: the country (or countries, separated by "; ") where the PLANT was
+  sampled, as a standard English country name, ONLY if the paper names it. If the paper
+  gives only coordinates, use "not stated" (put the coordinates in sampling_location; do
+  not work out the country). "not stated" if the paper doesn't say - never use the
+  authors' institution's country.
+- sampling_location: the site / locality where the PLANT was sampled, followed by the
+  coordinates as written if the paper gives them (free text; "not
+  stated" if not given - never put an institution here).
+- coordinates_given: does the paper itself report latitude/longitude for the sampling site?
+- sampling_location_status: explicit (stated directly) / inferable (from a named field site
+  or region) / supplement (paper says location details are in supplementary material) /
+  cited_work (paper says location details are in another cited study) / affiliation_only
+  (only the authors' institution is given) / none (no geographic information at all).
 - biome: WWF terrestrial biome(s) of the sampling site.
 - n_distinct_pairs: number of distinct fungus x host-plant pairs the paper names.
-- sterilisation_checked: was surface-sterilisation verified with a control?
+- sterilisation_checked: if plant tissue was surface-sterilised (culture OR DNA work), was the
+  sterilisation verified with a control (e.g. final rinse water plated or sequenced)?
+  not_sterilised if tissue was processed without sterilisation; not_applicable_external if no
+  plant tissue was processed in this study.
+- fungus_source: where the fungi came from - from_study_plants (isolated / detected from plants
+  sampled in this study), external (culture collection or another study, then put onto plants
+  here), external_not_inoculated (culture collection or another study, not put onto plants),
+  both, or not_stated.
 - detection_methods: every method used to show the fungus was inside the plant.
 - community_summary: for metabarcoding, one line - host, tissue, richness (e.g. "142
   OTUs / 38 genera"), dominant taxa. Empty otherwise.
 
 INTERACTIONS - one object per DISTINCT fungus x host-plant pair the paper NAMES:
 - fungus, host_plant: VERBATIM as the authors write them (do not update old names).
-- tissue: list every plant part this pair was found in.
+- tissue: list every plant part this pair was found in. If the paper only says "shoots" or
+  "aerial parts" without separating them, use aerial_parts (do not guess leaf / stem).
 - fungal_lifestyle: how the fungus lives in this interaction (trophic mode). This is a
   SEPARATE question from effect_on_host - a plant_pathogen can be present with
   no_symptoms_not_tested.
 - effect_on_host: net outcome for THIS plant, as the paper reports it.
-- evidence_basis: was the lifestyle+effect experimentally tested here, observed here,
+- evidence_basis: how effect_on_host was established (if effect_on_host is not_reported,
+  how the fungal_lifestyle was established): experimentally tested here, observed here,
   inferred from the taxon's reputation, or just asserted?
 For a metabarcoding community, name only the dominant few taxa and put the rest in
 community_summary.
@@ -417,7 +530,8 @@ if __name__ == "__main__":
                  "primary_aim": PRIMARY_AIM, "sampling_approach": SAMPLING_APPROACH,
                  "language": LANGUAGE, "sampling_location_status": SAMPLING_LOCATION_STATUS,
                  "strain_variation": STRAIN_VARIATION, "biome": BIOME,
-                 "sterilisation_checked": STERILISATION_CHECKED}[fld]
+                 "sterilisation_checked": STERILISATION_CHECKED,
+                 "fungus_source": FUNGUS_SOURCE}[fld]
         bad = set(m.values()) - set(canon)
         assert not bad, f"{fld}: {bad}"
     print("schema self-check OK")

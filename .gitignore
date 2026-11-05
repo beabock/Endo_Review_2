@@ -51,3 +51,4 @@ results/manual_validation/groundtruth/~$*
 data/kappa_pdfs_for_drive/
 data/*_pdfs_for_drive/
 data/pdf_manifest.csv
+NPH_thread_prompts.md
