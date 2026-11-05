@@ -135,6 +135,34 @@ bucket (failed vs. no_oa_pdf) to see whether the failed-bucket-specific rate —
 that actually matters for the publisher-skew concern — is meaningfully higher than the
 blended 4%.
 
+**Root cause of the MDPI/Wiley/Elsevier gap, and Bea's decision (2026-09-17):** the
+9-DOI cross-tab above showed 6/9 were MDPI, and 4 of those tripped the circuit breaker
+again from a single, unsharded process making only a handful of requests — ruling out
+"8 shards were too aggressive" as the full explanation. Most likely cause: Monsoon's
+compute nodes share a small pool of outbound IPs, and that shared IP is already flagged
+by MDPI/Wiley/Elsevier's bot detection from the earlier heavy pull, independent of
+request rate from here on. Researched whether this is a known, precedented problem
+(web search, 2026-09-17): yes — Zotero users have hit the identical failure mode with
+Elsevier/ScienceDirect for years (their own support says "Zotero has an autoupload...
+automation feature which is the reason why ScienceDirect is flagging its users," and
+Zotero's own developers note **shared organizational IPs can get the whole network
+flagged from one person's activity** — directly analogous to a shared HPC egress IP).
+No permanent technical fix exists in that community; outcomes were inconsistent
+(sometimes self-resolved, sometimes needed a different network). Crossref's own TDM
+docs explicitly disclaim solving this. The actual sanctioned path — publisher TDM API
+agreements (Wiley: ORCID + click-through license + API token via `TDM@wiley.com`;
+Elsevier: Developer Portal + `integrationsupport@elsevier.com`), which ride on NAU's
+subscriptions as authenticated, non-scraping traffic — would likely fix Wiley/Elsevier
+specifically, but requires going through NAU's library.
+
+**Bea's call:** not pursuing the library/TDM route right now. Priority is getting the
+Task 2 calibration set out to coauthors (Nancy/Kitty/Ian/Jack), not further closing the
+full-text coverage gap. The MDPI/Wiley/Elsevier shortfall is accepted as a known,
+precedented, documented limitation (confirmed-OA-but-currently-access-blocked, distinct
+from genuinely closed access) rather than something to keep engineering around. Revisit
+the TDM option later if there's time before the resubmission deadline — it's still on
+the table, just not blocking anything.
+
 CORE's PDF download policy (Bea, pasted from their docs): the plain `downloadUrl` is
 their "preferred method" and what `r_core`/`try_download` already do; their metered
 `GET /v3/outputs/{id}/download` fallback (counts against token allowance, for cases
