@@ -1,12 +1,13 @@
 # Global Audit of Fungal Endophyte Literature
 
-This repository contains the data and code for our upcoming paper auditing the global fungal endophyte literature. We're looking at geographic, taxonomic, and economic biases across ~18,750 publications to test the claim that fungal endophytes are ubiquitous.
+This repository contains the data and code for our upcoming paper auditing the global fungal endophyte literature. We audit the literature for geographic (by WWF/Olson biogeographic realm and biome), taxonomic biases, and for how often the claim that fungal endophytes are ubiquitous is stated explicitly versus assumed. (Country-level GDP / economic analyses were removed from the study in the 2026 resubmission; the retired scripts are kept in `scripts/archive/`.) Corpus sizes and every methods change are logged in `METHODS_CHANGELOG.md`; the manuscript's numbers are produced by the scripts, not copied from earlier drafts.
 
 ## Folder Structure
 
-- `data/`: Raw and processed datasets, including publication metadata, GBIF taxonomic data, and country-level GDP information.
+- `data/`: Raw and processed datasets, including publication metadata, taxonomic reference data (GBIF backbone; Catalogue of Life being migrated to, see `docs/col_taxonomy_migration.md`) and the country-to-biogeographic-realm lookup.
 - `scripts/`: Python and R scripts that make up the analysis pipeline.
-- `results/`: Output tables, statistical summaries, and figures.
+- `results/`: Output tables, statistical summaries, and figures. `results/manual_validation/groundtruth/` holds the human ground-truth validation workbooks, reviewer guide and sample.
+- `docs/`: Search strategy, taxonomy review and migration notes, and merge reviews.
 
 ## Dependencies
 
@@ -37,4 +38,4 @@ This script will sequentially run:
 4. Statistical analyses (`scripts/04_analyses`)
 5. Plot generation (`scripts/05_plotting`)
 
-*Note: The initial literature API pulls and data consolidation steps in `01_data_preproccessing` are intentionally kept manual and aren't executed by the automated runner.*
+*Note: The initial literature API pulls and data consolidation steps in `01_data_preproccessing` are intentionally kept manual and aren't executed by the automated runner. The same applies to full-text retrieval (`fetch_fulltext_pdfs.py`, open-access sources only) and local-LLM extraction (`monsoon_extract.py`, run on NAU's Monsoon cluster with Ollama; no hosted APIs). Scoring the ground-truth validation: `python scripts/04_analyses/score_groundtruth.py` (`--self-test` for a synthetic check).*
