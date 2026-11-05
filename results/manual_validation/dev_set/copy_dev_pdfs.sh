@@ -1,0 +1,23 @@
+#!/bin/bash
+# stage the DEV PDFs under their row names (run on Monsoon)
+set -euo pipefail
+PDF_DIR="${PDF_DIR:-/scratch/bmb646/full_corpus}"
+OUT="${OUT:-$HOME/dev_pdfs}"
+mkdir -p "$OUT"
+cp -n "$PDF_DIR/10.3389_fpls.2020.567918.pdf" "$OUT/D002b.pdf"
+cp -n "$PDF_DIR/10.3389_fmicb.2017.01897.pdf" "$OUT/D004b.pdf"
+cp -n "$PDF_DIR/10.3389_fmicb.2018.01526.pdf" "$OUT/D007b.pdf"
+cp -n "$PDF_DIR/10.1264_jsme2.me10163.pdf" "$OUT/D012b.pdf"
+cp -n "$PDF_DIR/10.1007_s00572-011-0417-8.pdf" "$OUT/D013b.pdf"
+cp -n "$PDF_DIR/10.1055_s-0029-1185951.pdf" "$OUT/D014b.pdf"
+cp -n "$PDF_DIR/10.57182_jbiopestic.16.2.115-123.pdf" "$OUT/D016b.pdf"
+cp -n "$PDF_DIR/10.15294_biosaintifika.v14i3.39334.pdf" "$OUT/D018b.pdf"
+cp -n "$PDF_DIR/10.3390_jof8101112.pdf" "$OUT/D021b.pdf"
+cp -n "$PDF_DIR/10.1007_s00248-017-1103-y.pdf" "$OUT/D025b.pdf"
+cp -n "$PDF_DIR/10.3390_md17120649.pdf" "$OUT/D027b.pdf"
+cp -n "$PDF_DIR/10.1007_s00248-018-1153-9.pdf" "$OUT/D030b.pdf"
+cp -n "$PDF_DIR/10.1590_1519-6984.166681.pdf" "$OUT/D032b.pdf"
+cp -n "$PDF_DIR/10.1016_j.heliyon.2024.e39636.pdf" "$OUT/D034b.pdf"
+cp -n "$PDF_DIR/10.1007_s13199-015-0370-y.pdf" "$OUT/D036b.pdf"
+cp -n "$PDF_DIR/10.55003_cast.2023.258187.pdf" "$OUT/D038b.pdf"
+echo "staged $(ls "$OUT" | wc -l) PDFs in $OUT"
