@@ -4,47 +4,59 @@
 # pipeline (NPH-MS-2026-57711 resubmission, Referee 2). See NPH_task2_ground_truth_plan.md
 # and NPH_extraction_schema_design.md.
 #
-#   1. Builds a paper-level frame from the extraction output + abstract metadata,
-#      assigning stratification variables (doc type, function, continent, era).
-#   2. Draws a stratified random sample (fixed seed): a core sample + a targeted
-#      oversample of rare functional categories, in a stratified ORDER so that any
+#   1. Builds a paper-level frame directly from the deduplicated search export (2026-09-17:
+#      switched from the old LLM-extraction output - see the note below), assigning what
+#      stratification variables are actually available pre-extraction (doc type, era).
+#   2. Draws a stratified random sample (fixed seed), in a stratified ORDER so that any
 #      prefix is itself balanced (the kappa block can be extended later).
-#   3. Splits into: a kappa block (all annotators) + solo blocks (Bea + a 4th reviewer).
+#   3. Splits into: a kappa block (all annotators) + solo blocks (Bea + 2 extra reviewers).
 #      Nancy & Kitty rate only the kappa block.
 #   4. Writes one .xlsx workbook per person. One row per (paper, reading stage): a
 #      full-text paper gets an abstract-only row THEN a full-text row (adjacent, same
 #      reader) so we also get a human measure of what abstracts omit vs their own full
 #      text. Dropdown-validated, 5 interaction slots, method tick-columns.
 #
+# 2026-09-17 note - why this no longer reads the old extraction file: Bea flagged that
+# `Ollama_cleaned_synresolved_standardized_year.csv` (the old default) is downstream of
+# the OLD LLM extraction run, on the OLD (narrower) search - 18,751 papers vs. the
+# ~19,586 the current deduplicated search export actually contains, confirmed against
+# `Combo_abstracts_pull2.R` (the dedup script) and its real output,
+# `data/Abstracts/All_abstracts_deduped.csv`. We don't need the LLM extraction to build a
+# sample for people to read - that's a separate pipeline - so this now reads the deduped
+# search export directly. Tradeoff: that export is pre-LLM, so it has no guild/country/
+# interaction data. Function and continent stratification are dropped until the Task 1
+# re-extraction runs on this corpus (Bea, 2026-09-17: "it's fine for us not to be
+# stratifying" on those). Era (from Year) is still available and used. doc_type
+# (full-text vs abstract-only) now comes from an optional PDF-availability manifest
+# (--pdf-manifest); without one, everything defaults to abstract-only - see main().
+#
 # BLIND annotation: no model output is shown (avoids anchoring). score_groundtruth.py
 # merges the completed sheets with an extraction run for precision / recall / F1 / kappa.
 #
 # Usage:
 #   python scripts/04_analyses/build_groundtruth_sample.py
-#   python scripts/04_analyses/build_groundtruth_sample.py --n-kappa 40 --r4-solo 70
+#   python scripts/04_analyses/build_groundtruth_sample.py --pdf-manifest path/to/merged_manifest.csv
 
 from __future__ import annotations
 
 import argparse
 import sys
-from collections import Counter, defaultdict
-from importlib import util
+from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from rubric_sheet import (COUNTRIES, NEW_Q7_LINES, Q7A, Q7B, Q7C,  # noqa: E402
+                          add_rubric_sheet, force_recalc, remove_completeness, set_rollup_formula,
+                          write_instructions)
+
 ROOT = Path(__file__).resolve().parents[2]
-UTILS = ROOT / "scripts" / "utils"
 
-_spec = util.spec_from_file_location("country_mapping", UTILS / "country_mapping.py")
-country_mapping = util.module_from_spec(_spec)
-_spec.loader.exec_module(country_mapping)
-get_continent = country_mapping.get_continent
-
-DEFAULT_EXTRACTION = ROOT / "data" / "Ollama_cleaned_synresolved_standardized_year.csv"
-ABSTRACT_META = ROOT / "data" / "Abstracts" / "Abstracts_for_Monsoon.csv"
-ABSTRACT_DEDUPED = ROOT / "data" / "Abstracts" / "All_abstracts_deduped.csv"
+# 2026-09-17: the deduplicated search export (see the header note above), not the old
+# LLM-extraction output. ~19,586 papers with a usable DOI as of the 2026-09-17 check.
+DEFAULT_CORPUS = ROOT / "data" / "Abstracts" / "All_abstracts_deduped.csv"
 OUT_DIR = ROOT / "results" / "manual_validation" / "groundtruth"
 
 # annotator key -> display label.
@@ -67,7 +79,10 @@ EXTRA_REVIEWERS = ["ian", "jack"]
 VOCAB = {
     "yn": ["yes", "no"],
     "yn_unclear": ["yes", "no", "unclear"],
-    "paper_reviewed": [
+    "country": COUNTRIES,   # Q7a - warning-style, so any other name can still be typed
+    # the five method columns: every cell filled on a complete row (blank = not done yet)
+    "method_status": ["yes", "no", "not stated"],
+    "text_reviewed": [
         "complete",
         "could not access the paper (full text needed)",
         "review or secondary compilation - no primary data of its own",
@@ -100,6 +115,8 @@ VOCAB = {
     "sampling_location_status": [
         "sampling location is explicitly stated",
         "sampling location is inferable from a named field site / region",
+        "the main text says location details are in a supplement",
+        "the main text says location details are in another cited study",
         "no sampling location - only the authors' institutional country is given",
         "no geographic information at all",
     ],
@@ -119,13 +136,14 @@ VOCAB = {
     ],
     "tissue": [
         "leaf", "root", "stem / wood / bark", "seed", "fruit",
-        "flower / reproductive", "whole plant", "other (type it)", "not stated",
+        "flower / reproductive", "aerial parts / shoots (not separated)", "whole plant",
+        "other (type it)", "not stated",
     ],
     # fungal lifestyle / trophic mode - how the fungus makes its living in this
     # interaction. Values follow FungalTraits primary_lifestyle (Polme et al. 2020);
     # the three endophyte types are grouped (the tissue column records leaf vs root).
     "fungal_lifestyle": [
-        "endophyte (foliar, root, or dark-septate; symptomless in living tissue)",
+        "endophyte (any plant tissue; symptomless in living tissue)",
         "latent pathogen / hemibiotroph",
         "plant pathogen",
         "wood saprotroph",
@@ -140,7 +158,7 @@ VOCAB = {
         "epiphyte (surface only)",
         "lichenised",
         "context-dependent (varies by host / environment / strain)",
-        "not clear from the paper",
+        "not clear from the text",
     ],
     # net outcome for THIS host plant, as the paper reports it
     "effect_on_host": [
@@ -179,22 +197,6 @@ METHOD_COLS = [
     "method not stated",
 ]
 
-GUILD_TO_FUNCTION = {
-    "endophyte": "endophyte_asymptomatic", "endophytic": "endophyte_asymptomatic",
-    "pathogen": "pathogen", "pathogenic": "pathogen", "phytopathogen": "pathogen",
-    "mycorrhiza": "mycorrhizal", "mycorrhizal": "mycorrhizal", "ectomycorrhiza": "mycorrhizal",
-    "mutualist": "mutualist_pgpr", "symbiotic": "mutualist_pgpr", "symbiont": "mutualist_pgpr",
-    "pgpr": "mutualist_pgpr",
-    "saprotroph": "saprotroph", "saprobic": "saprotroph", "decomposer": "saprotroph",
-    "biocontrol": "biocontrol_antagonist", "antagonist": "biocontrol_antagonist",
-    "antifungal": "biocontrol_antagonist",
-}
-RARE_FUNCTIONS = {"saprotroph", "mutualist_pgpr", "biocontrol_antagonist"}
-RARE_KEYWORDS = [
-    "commensal", "latent pathogen", "symptomless", "asymptomatic then",
-    "quiescent", "endophyte to pathogen", "life-cycle transition",
-]
-
 
 def norm_doi(x):
     if pd.isna(x):
@@ -209,59 +211,47 @@ def era_of(year):
     return "pre-2000" if y < 2000 else "2000-2012" if y <= 2012 else "2013-2024"
 
 
-def build_paper_frame(extraction_path: Path) -> pd.DataFrame:
-    df = pd.read_csv(extraction_path, low_memory=False)
-    df["doi_n"] = df["doi"].map(norm_doi)
-    df["function"] = (df["primary_guild"].astype(str).str.strip().str.lower()
-                      .map(GUILD_TO_FUNCTION).fillna("unknown"))
-    df["continent"] = df["country"].map(
-        lambda c: get_continent(c) if isinstance(c, str) and len(c) == 3 else None)
+def build_paper_frame(corpus_path: Path, pdf_manifest_path: Path | None) -> pd.DataFrame:
+    """Paper-level frame straight from the deduplicated search export - no LLM
+    extraction involved. See the header note for why."""
+    df = pd.read_csv(corpus_path, low_memory=False)
+    df["doi_n"] = df["DOI"].map(norm_doi)
+    n_before = len(df)
+    df = df.dropna(subset=["doi_n"]).drop_duplicates("doi_n")
+    print(f"  {n_before:,} rows in corpus -> {len(df):,} with a usable DOI "
+          f"(dropped {n_before - len(df):,} with no/blank DOI)")
 
-    def agg_paper(g):
-        funcs = [f for f in g["function"] if f != "unknown"]
-        conts = [c for c in g["continent"].dropna() if c and c != "Other"]
-        ds = g["data_source"].astype(str).str.lower()
-        year = g["publication_year"].dropna()
-        return pd.Series({
-            "doi_n": g["doi_n"].dropna().iloc[0] if g["doi_n"].notna().any() else None,
-            "doc_type": "full-text" if (ds == "full-text").any() else "abstract-only",
-            "function": Counter(funcs).most_common(1)[0][0] if funcs else "unknown",
-            "continent": Counter(conts).most_common(1)[0][0] if conts else "unassigned",
-            "year": int(year.iloc[0]) if len(year) else np.nan,
-            "n_model_rows": len(g),
-            "notes_blob": " ".join(
-                str(x) for x in g.get("interaction_notes", pd.Series(dtype=str)).dropna()
-            ).lower(),
-        })
-
-    papers = df.groupby("paper_id", dropna=True).apply(agg_paper).reset_index()
+    papers = pd.DataFrame({
+        "paper_id": df["doi_n"],
+        "doi_n": df["doi_n"],
+        "title": df["Title"],
+        "authors": df["Authors"],
+        "journal": df["Source.title"],
+        "abstract": df["Abstract"],
+        "language_hint": df["Language.of.Original.Document"]
+                          if "Language.of.Original.Document" in df.columns else "",
+        "year": pd.to_numeric(df["Year"], errors="coerce"),
+    }).reset_index(drop=True)
     papers["era"] = papers["year"].map(era_of)
+    papers["doi_link"] = papers["doi_n"].map(lambda d: f"https://doi.org/{d}")
+
+    if pdf_manifest_path and Path(pdf_manifest_path).exists():
+        man = pd.read_csv(pdf_manifest_path, low_memory=False)
+        doi_col = "doi" if "doi" in man.columns else "DOI"
+        man["doi_n"] = man[doi_col].map(norm_doi)
+        man = man.dropna(subset=["doi_n"]).drop_duplicates("doi_n")
+        downloaded = set(man.loc[man["status"] == "downloaded", "doi_n"])
+        papers["doc_type"] = np.where(papers["doi_n"].isin(downloaded),
+                                      "full-text", "abstract-only")
+        n_ft = int((papers.doc_type == "full-text").sum())
+        print(f"  PDF manifest matched: {n_ft:,} full-text / {len(papers) - n_ft:,} "
+              f"abstract-only")
+    else:
+        papers["doc_type"] = "abstract-only"
+        print("  WARNING: no --pdf-manifest given - doc_type defaults to 'abstract-only' "
+              "for every paper. The kappa block needs full-text papers; re-run with "
+              "--pdf-manifest pointing at the merged PDF manifest once you have it.")
     return papers
-
-
-def attach_metadata(papers: pd.DataFrame) -> pd.DataFrame:
-    meta = pd.read_csv(ABSTRACT_META, low_memory=False)
-    meta["doi_n"] = meta["DOI"].map(norm_doi)
-    meta = (meta.dropna(subset=["doi_n"]).drop_duplicates("doi_n")
-            .rename(columns={"Title": "title", "Authors": "authors",
-                             "Source.title": "journal", "Abstract": "abstract"})
-            [["doi_n", "title", "authors", "journal", "abstract"]])
-
-    lang = pd.DataFrame(columns=["doi_n", "language_hint"])
-    try:
-        dd = pd.read_csv(ABSTRACT_DEDUPED, low_memory=False,
-                         usecols=["DOI", "Language.of.Original.Document"])
-        dd["doi_n"] = dd["DOI"].map(norm_doi)
-        lang = (dd.dropna(subset=["doi_n"]).drop_duplicates("doi_n")
-                .rename(columns={"Language.of.Original.Document": "language_hint"})
-                [["doi_n", "language_hint"]])
-    except Exception as exc:  # noqa: BLE001
-        print(f"  (language hint unavailable: {exc})")
-
-    out = papers.merge(meta, on="doi_n", how="left").merge(lang, on="doi_n", how="left")
-    out["doi_link"] = out["doi_n"].map(
-        lambda d: f"https://doi.org/{d}" if isinstance(d, str) else "")
-    return out
 
 
 def proportional_allocation(counts: dict, total: int, floor: int = 2) -> dict:
@@ -286,6 +276,8 @@ def proportional_allocation(counts: dict, total: int, floor: int = 2) -> dict:
 
 
 def stratified_sample(pool: pd.DataFrame, n: int, rng, strata_cols) -> pd.DataFrame:
+    if n <= 0 or pool.empty:
+        return pool.iloc[0:0]
     counts = {k: v for k, v in pool.groupby(strata_cols).size().to_dict().items() if v > 0}
     alloc = proportional_allocation(counts, n)
     picks = []
@@ -316,73 +308,74 @@ def stratified_order(df: pd.DataFrame, rng, strata_cols) -> pd.DataFrame:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--extraction", type=Path, default=DEFAULT_EXTRACTION)
+    ap.add_argument("--corpus", type=Path, default=DEFAULT_CORPUS,
+                    help="deduplicated search export (2026-09-17: replaces the old "
+                         "--extraction LLM-output flag - see the header note)")
+    ap.add_argument("--pdf-manifest", type=Path, default=None,
+                    help="merged PDF-fetch manifest (doi + status columns) used to set "
+                         "doc_type. Without it, every paper defaults to abstract-only.")
     ap.add_argument("--seed", type=int, default=20260828)
-    ap.add_argument("--n-core", type=int, default=200)
-    ap.add_argument("--n-rare", type=int, default=30)
+    ap.add_argument("--n-core", type=int, default=230,
+                    help="total sample size (2026-09-17: absorbs the old separate "
+                         "rare-function-oversample tier, which required guild data we "
+                         "don't have pre-extraction - see header note)")
     ap.add_argument("--full-text-frac", type=float, default=0.35)
-    ap.add_argument("--n-kappa", type=int, default=50)
-    ap.add_argument("--n-calibration", type=int, default=15,
-                    help="first N kappa-block papers = a calibration round: everyone does "
-                         "these first, then a reconciliation call refines the rubric before "
-                         "the rest. Reported kappa uses the remaining measurement papers.")
-    ap.add_argument("--solo-per-extra", type=int, default=50,
+    ap.add_argument("--n-kappa", type=int, default=20,
+                    help="kappa-block size (rater-time tradeoff decided 2026-09-17: 20 "
+                         "papers, all full-text, one blind measurement pass, no "
+                         "calibration sub-round - see MOCK below for rubric training)")
+    ap.add_argument("--n-calibration", type=int, default=0,
+                    help="first N kappa-block papers scored as a calibration round before "
+                         "a reconciliation call. Default 0 = single blind pass (2026-09-17 "
+                         "decision); kept as an option if a future block wants the split.")
+    ap.add_argument("--solo-per-extra", type=int, default=20,
                     help="solo-block size for each of EXTRA_REVIEWERS (Ian, Jack); "
                          "they also rate the whole kappa block. Bea takes the remainder.")
     args = ap.parse_args()
 
-    if not args.extraction.exists():
-        print(f"ERROR: extraction file not found: {args.extraction}")
+    if not args.corpus.exists():
+        print(f"ERROR: corpus file not found: {args.corpus}")
         return 1
     rng = np.random.default_rng(args.seed)
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
-    print(f"Building paper frame from {args.extraction.name} ...")
-    papers = build_paper_frame(args.extraction)
-    papers = attach_metadata(papers)
-    papers["search_text"] = (papers["notes_blob"].fillna("") + " "
-                             + papers["abstract"].fillna("").str.lower())
-    frame_cols = ["paper_id", "doi_n", "doc_type", "function", "continent", "era",
-                  "year", "n_model_rows", "journal", "language_hint"]
+    print(f"Building paper frame from {args.corpus.name} ...")
+    papers = build_paper_frame(args.corpus, args.pdf_manifest)
+    frame_cols = ["paper_id", "doi_n", "doc_type", "era", "year", "journal", "language_hint"]
     papers[frame_cols].to_csv(OUT_DIR / "sample_frame.csv", index=False)
     print(f"  {len(papers):,} papers ({(papers.doc_type == 'full-text').sum():,} full-text)")
 
+    # core sample: stratified by era + full-text oversample fraction only (no function/
+    # continent - see header note). This is the whole sample now, not "core + rare".
     n_ft = int(round(args.n_core * args.full_text_frac))
     ft = papers[papers.doc_type == "full-text"]
     ab = papers[papers.doc_type == "abstract-only"]
     core = pd.concat([
-        stratified_sample(ft, min(n_ft, len(ft)), rng, ["function", "era"]),
-        stratified_sample(ab, args.n_core - n_ft, rng, ["function", "era"]),
+        stratified_sample(ft, min(n_ft, len(ft)), rng, ["era"]),
+        stratified_sample(ab, args.n_core - min(n_ft, len(ft)), rng, ["era"]),
     ]).drop_duplicates("paper_id")
-    core["bucket"] = "core"
 
-    used = set(core.paper_id)
-    rare_pool = papers[
-        (papers.function.isin(RARE_FUNCTIONS)
-         | papers.search_text.str.contains("|".join(RARE_KEYWORDS), regex=True))
-        & ~papers.paper_id.isin(used)]
-    rare = rare_pool.sample(n=min(args.n_rare, len(rare_pool)),
-                            random_state=rng.integers(1 << 31))
-    rare["bucket"] = "rare_function_oversample"
-
-    # kappa block: a stratified pool of the core that keeps the core's doc-type mix
-    # (so Nancy/Kitty's full-text load matches the sample, not an over-weighted share),
-    # ordered so any prefix stays balanced -> raising --n-kappa later is valid.
-    pool_n = min(max(2 * args.n_kappa, args.n_kappa + 20), len(core))
-    core_ft_frac = (core.doc_type == "full-text").mean()
-    pool_ft_n = round(pool_n * core_ft_frac)
-    kappa_pool = pd.concat([
-        stratified_sample(core[core.doc_type == "full-text"], pool_ft_n, rng, ["function"]),
-        stratified_sample(core[core.doc_type == "abstract-only"], pool_n - pool_ft_n,
-                          rng, ["function"]),
-    ]).drop_duplicates("paper_id")
-    kappa_pool = stratified_order(kappa_pool, rng, ["function"])
+    # kappa block: full-text only (2026-09-17 decision, rater-time tradeoff) - every
+    # kappa paper gets both an abstract row and a full-text row from the same 5 raters,
+    # so a 20-paper block still yields the abstract-vs-full-text comparison. Stratified
+    # by era, ordered so any prefix stays balanced -> raising --n-kappa later is
+    # valid even though there's no calibration sub-round by default.
+    ft_core = core[core.doc_type == "full-text"]
+    if len(ft_core) < args.n_kappa:
+        print(f"\nERROR: only {len(ft_core)} full-text papers in the sample, need "
+              f"{args.n_kappa} for the kappa block. Re-run with --pdf-manifest pointing "
+              f"at the merged PDF manifest (or --n-kappa {len(ft_core)} to proceed "
+              f"anyway, not recommended).")
+        return 1
+    pool_n = min(max(2 * args.n_kappa, args.n_kappa + 20), len(ft_core))
+    kappa_pool = stratified_sample(ft_core, pool_n, rng, ["era"])
+    kappa_pool = stratified_order(kappa_pool, rng, ["era"])
     kappa_pool["order"] = range(len(kappa_pool))
     kappa_ids = set(kappa_pool.head(args.n_kappa).paper_id)
     calibration_ids = set(kappa_pool.head(args.n_calibration).paper_id)
 
-    sample = pd.concat([core.merge(kappa_pool[["paper_id", "order"]], on="paper_id", how="left"),
-                        rare]).drop_duplicates("paper_id").reset_index(drop=True)
+    sample = core.merge(kappa_pool[["paper_id", "order"]], on="paper_id",
+                        how="left").reset_index(drop=True)
     sample["order"] = sample["order"].fillna(9999).astype(int)
     sample["assignment"] = np.where(sample.paper_id.isin(kappa_ids), "kappa_block", "solo")
     sample["phase"] = np.select(
@@ -390,7 +383,7 @@ def main() -> int:
         ["calibration", "measurement"], default="")
 
     # solo split: each EXTRA_REVIEWER takes a stratified slice of the solo block
-    # (keeping the solo block's ~31% full-text mix); Bea takes the remainder.
+    # (keeping the solo block's full-text mix); Bea takes the remainder.
     sample["annotator"] = np.where(sample.assignment == "kappa_block", "ALL", "bea")
     remaining = set(sample[sample.annotator == "bea"].paper_id)
     for who in EXTRA_REVIEWERS:
@@ -398,17 +391,16 @@ def main() -> int:
         n = min(args.solo_per_extra, len(pool))
         ft_n = round(n * (pool.doc_type == "full-text").mean())
         pick = pd.concat([
-            stratified_sample(pool[pool.doc_type == "full-text"], ft_n, rng, ["function"]),
-            stratified_sample(pool[pool.doc_type == "abstract-only"], n - ft_n, rng, ["function"]),
+            stratified_sample(pool[pool.doc_type == "full-text"], ft_n, rng, ["era"]),
+            stratified_sample(pool[pool.doc_type == "abstract-only"], n - ft_n, rng, ["era"]),
         ]).drop_duplicates("paper_id")
         sample.loc[sample.paper_id.isin(pick.paper_id), "annotator"] = who
         remaining -= set(pick.paper_id)
 
-    sample = sample.sort_values(["assignment", "order", "doc_type", "function"])
-    sample.drop(columns=[c for c in ("notes_blob", "search_text") if c in sample.columns],
-                errors="ignore").to_csv(OUT_DIR / "sample_selected.csv", index=False)
+    sample = sample.sort_values(["assignment", "order", "doc_type"])
+    sample.to_csv(OUT_DIR / "sample_selected.csv", index=False)
 
-    write_workbooks(sample)
+    write_workbooks(papers, sample, rng)
     write_stratification_report(papers, sample, args)
 
     kb = (sample.assignment == "kappa_block").sum()
@@ -436,7 +428,7 @@ def expand_rows(block: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(out).reset_index(drop=True)
 
 
-def write_workbooks(sample: pd.DataFrame) -> None:
+def write_workbooks(papers: pd.DataFrame, sample: pd.DataFrame, rng) -> None:
     from openpyxl import Workbook
     from openpyxl.styles import Alignment, Font, PatternFill
     from openpyxl.utils import get_column_letter
@@ -455,18 +447,20 @@ def write_workbooks(sample: pd.DataFrame) -> None:
     Q4 = "Q4  language of the text you are reading"
     Q5 = "Q5  any sequence-only (uncultured) taxa?"
     Q6 = "Q6  strain-level variation noted?"
-    Q7 = "Q7  where was the plant SAMPLED? (not the authors' institution)"
-    Q8 = "Q8  what geographic information does the paper contain?"
+    Q7a, Q7b, Q7c = Q7A, Q7B, Q7C
+    # 2026-09-22 (Bea Bock, "simplifying could be a good idea"): Q8 absorbs the old separate
+    # location-source question (supplement / cited-study deferral is now just more Q8 values).
+    Q8 = "Q8  what geographic information does the text contain?"
     Q9 = "Q9  biome (WWF category)"
     Q10 = "Q10  how many distinct fungus-host pairs?"
     Q11 = "Q11  was the surface-sterilisation checked?"
 
     left_cols = [
-        ("row_id", 8), ("paper_reviewed", 22), ("date_reviewed", 12),
+        ("row_id", 8), ("text_reviewed", 22), ("date_reviewed", 12),
         ("reading_stage", 12), ("paper_id", 22), ("doi_link", 20),
         ("year", 6), ("journal", 18), ("title", 40), ("abstract", 66),
         (Q1, 15), (Q2, 20), (Q3, 22), (Q4, 13), (Q5, 15), (Q6, 15),
-        (Q7, 20), (Q8, 22), (Q9, 20), (Q10, 12), (Q11, 22),
+        (Q7a, 24), (Q7b, 30), (Q7c, 20), (Q8, 30), (Q9, 20), (Q10, 12), (Q11, 22),
     ]
     slot_cols = ["fungus", "host_plant", "tissue",
                  "fungal_lifestyle", "effect_on_host", "evidence_basis"]
@@ -475,17 +469,20 @@ def write_workbooks(sample: pd.DataFrame) -> None:
         ("anything_you_were_unsure_about", 30),
     ]
     dv = {
-        "paper_reviewed": "paper_reviewed",
+        "text_reviewed": "text_reviewed",
         Q1: "yn_unclear", Q2: "primary_aim", Q3: "sampling_approach",
         Q4: "language", Q5: "yn_unclear", Q6: "strain_variation",
+        Q7a: "country",
         Q8: "sampling_location_status", Q9: "biome",
         Q11: "sterilisation_checked",
         "tissue": "tissue", "fungal_lifestyle": "fungal_lifestyle",
         "effect_on_host": "effect_on_host", "evidence_basis": "evidence_basis",
     }
     for m in METHOD_COLS:
-        dv[m] = "yn"
-    q_headers = [Q1, Q2, Q3, Q4, Q5, Q6, Q7, Q8, Q9, Q10, Q11]
+        # the last column ("method not stated") is the roll-up flag: plain yes/no
+        if m != "method not stated":          # that one is a formula (set_rollup_formula)
+            dv[m] = "method_status"
+    q_headers = [Q1, Q2, Q3, Q4, Q5, Q6, Q7a, Q7b, Q7c, Q8, Q9, Q10, Q11]
 
     def add_lists_sheet(wb):
         ws = wb.create_sheet("Lists")
@@ -565,94 +562,17 @@ def write_workbooks(sample: pd.DataFrame) -> None:
                 cell.alignment = WRAP
             ws[f"{abs_col}{rr}"].font = Font(size=10)
             ws.row_dimensions[rr].height = 150
-        ws.freeze_panes = "E2"  # row_id | paper_reviewed | date_reviewed | reading_stage
+        ws.freeze_panes = "E2"  # row_id | text_reviewed | date_reviewed | reading_stage
         ws.title = "Review"
 
     def instructions_sheet(ws, who: str, is_kappa: bool, calib_cut: str = ""):
-        L = [
-            ("Fungal endophyte literature - extraction check", True),
-            ("", False), (f"File for: {who}", True), ("", False),
-        ]
-        if is_kappa and calib_cut:
-            L += [
-                ("*** DO THE CALIBRATION ROUND FIRST ***", True),
-                (f"Complete rows down to and including {calib_cut}, then STOP and tell", False),
-                ("Bea. We will compare everyone's answers, sort out any disagreements,", False),
-                ("update the rubric if needed, and only then continue with the rest.", False),
-                ("", False),
-            ]
-        L += [
-            ("WHAT TO DO", True),
-            ("1. Work top to bottom, one row at a time, filling left to right.", False),
-            ("2. Set 'paper_reviewed' when you finish a row. It decides how much else you fill:", False),
-            ("   complete                     -> fill the whole row from the paper's own data.", False),
-            ("   could not access the paper    -> a full-text row you couldn't get. Stop there.", False),
-            ("   review or secondary compilation -> Q1 = no, Q3 = review, answer Q4 (language),", False),
-            ("        leave Q2, Q5-Q11, the method ticks and the interaction blocks BLANK.", False),
-            ("   not a fungus-in-plant study  -> Q1 = no, leave EVERYTHING else blank.", False),
-            ("   (A blank 'paper_reviewed' = you haven't done that row yet.)", False),
-            ("3. 'reading_stage' tells you how much to read for that row:", False),
-            ("     abstract   = read ONLY the abstract text in the 'abstract' column of", False),
-            ("                  that row. Do NOT open the link. Answer from the abstract", False),
-            ("                  alone, even if that means 'not stated' a lot.", False),
-            ("     full text  = open doi_link and read the whole paper", False),
-            ("   Full-text papers get TWO adjacent rows: an 'abstract' row (do it FIRST,", False),
-            ("   from the abstract alone) then a 'full text' row for the same paper. On the", False),
-            ("   'full text' row you may copy your abstract answers across and then correct.", False),
-            ("4. Answer Q1-Q11. If the right answer isn't in a dropdown, type it into the", False),
-            ("   cell (Excel warns but keeps it). Two that trip people up:", False),
-            ("     Q4  language - answer for the TEXT YOU ARE READING on this row. An", False),
-            ("         English abstract of a French paper = English on the 'abstract' row,", False),
-            ("         French on the 'full text' row.", False),
-            ("     Q7/Q8 - Q7 is the SAMPLING location only. If the paper doesn't say where", False),
-            ("         sampling was done, write 'not stated' - NEVER put the authors'", False),
-            ("         institution in Q7. Q8 then records that only affiliation is available.", False),
-            ("5. Review / commentary paper (no new fungi obtained)? Set Q3 = 'review /", False),
-            ("   synthesis / commentary' and leave the interaction blocks blank.", False),
-            ("6. Method columns (the purple block): put 'yes' in every method the paper", False),
-            ("   used to show the fungus was inside the plant - as many as apply. The", False),
-            ("   rubric defines each one.", False),
-            ("7. List each DISTINCT fungus x host-plant pair the paper NAMES, one per shaded", False),
-            ("   block. Each block has SIX cells about that pair:", False),
-            ("     fungus / host    - copy the name EXACTLY as the authors write it. If you", False),
-            ("                        know it's an old name, still use the authors' name -", False),
-            ("                        the update to current taxonomy is done in code later.", False),
-            ("     tissue           - if several, put them in one cell: 'leaf, root'.", False),
-            ("                        'shoots' / 'aerial parts' with no split -> 'leaf, stem'", False),
-            ("     fungal_lifestyle - how the fungus lives (endophyte, saprotroph,", False),
-            ("                        mycorrhizal, plant pathogen ...) - see rubric", False),
-            ("     effect_on_host   - what happened to THIS plant (harmful / beneficial /", False),
-            ("                        neutral / no symptoms not tested / not reported)", False),
-            ("     evidence_basis   - was that tested here, observed here, or just inferred", False),
-            ("   Leave unused blocks blank.", False),
-            ("8. NGS / metabarcoding paper (Q3)? Don't enumerate every OTU - fill blocks", False),
-            ("   only for named taxa; summarise the rest in the summary column.", False),
-            ("9. Put today's date in 'date_reviewed' (3rd column - no scrolling; type once", False),
-            ("   and drag down for a batch). Your name is the file name, so no initials.", False),
-            ("   A 'review' or 'not a fungus-in-plant study' row is done entirely in the", False),
-            ("   first few columns - you never scroll right for those.", False),
-            ("", False),
-            ("RULES", True),
-            ("- Record what the PAPER (at that reading stage) says, not what you", False),
-            ("  believe is biologically true.", False),
-            ("- fungal_lifestyle vs effect_on_host are DIFFERENT things (a plant pathogen", False),
-            ("  can be present with 'no symptoms'). Both, plus biome and Q11, are defined", False),
-            ("  in guild_rubric.md - keep it open beside this file.", False),
-            ("- You are NOT checking software output - this is a fresh independent read.", False),
-        ]
-        if is_kappa:
-            L += [("", False),
-                  ("This is the shared agreement block. Work independently - do not", False),
-                  ("discuss the papers with the other reviewers until all files are in.", False)]
-        for i, (t, b) in enumerate(L, 1):
-            ws.cell(row=i, column=1, value=t).font = Font(bold=b, size=13 if b and i == 1 else 10)
-        ws.column_dimensions["A"].width = 100
+        write_instructions(ws, who, is_kappa)   # single shared source (rubric_sheet.py)
         ws.title = "Instructions"
 
     def assign_ids(block: pd.DataFrame, prefix: str, is_kappa: bool) -> pd.DataFrame:
         # kappa block: order by the stratified sequence so the calibration papers are the
-        # first rows. Solo blocks: order by doc type / function for a tidy read.
-        sort_by = ["order"] if is_kappa else ["doc_type", "function"]
+        # first rows. Solo blocks: order by doc type / era for a tidy read.
+        sort_by = ["order"] if is_kappa else ["doc_type", "era"]
         block = block.sort_values(sort_by).reset_index(drop=True)
         block["row_id"] = [f"{prefix}%03d" % (i + 1) for i in range(len(block))]
         rows = expand_rows(block)
@@ -668,8 +588,12 @@ def write_workbooks(sample: pd.DataFrame) -> None:
             if len(cal):
                 calib_cut = str(cal["row_id"].iloc[-1])
         instructions_sheet(wb.active, who, is_kappa, calib_cut)
+        add_rubric_sheet(wb)   # Rubric tab, index 1 (rendered from guild_rubric.md)
         list_ranges = add_lists_sheet(wb)
         build_sheet(wb.create_sheet("Review"), rows, list_ranges)
+        set_rollup_formula(wb)  # 'method not stated' fills itself in
+        remove_completeness(wb)  # no-op on a fresh build; keeps the two pipelines identical
+        force_recalc(wb)       # Excel recalculates the above formulas on open, not on a stale cache
         try:
             wb.save(OUT_DIR / path)
         except PermissionError:
@@ -691,9 +615,21 @@ def write_workbooks(sample: pd.DataFrame) -> None:
                 f"{ANNOTATORS[key]} - main block ({len(block)} papers)",
                 f"groundtruth_{key}_main.xlsx", is_kappa=False)
 
-    mock = pd.concat([kappa[kappa.doc_type == "abstract-only"].head(2),
-                      kappa[kappa.doc_type == "full-text"].head(2)])
-    make_wb(mock, "M", "MOCK - 4 example papers (2 abstract-only, 2 full-text)",
+    # MOCK: 2 worked examples (1 abstract-only, 1 full-text) for rubric training BEFORE
+    # the real kappa block starts. Drawn from OUTSIDE `sample` entirely (2026-09-17 fix -
+    # these used to be the kappa block's own first papers, which meant discussing them
+    # as a training exercise would have re-scored already-seen papers inside the real
+    # blind kappa measurement). Not scored for agreement; not part of any total.
+    mock_pool = papers[~papers.paper_id.isin(sample.paper_id)]
+    mock = pd.concat([
+        mock_pool[mock_pool.doc_type == "abstract-only"].sample(
+            n=1, random_state=rng.integers(1 << 31)),
+        mock_pool[mock_pool.doc_type == "full-text"].sample(
+            n=1, random_state=rng.integers(1 << 31)),
+    ])
+    make_wb(mock, "M",
+            "MOCK - 2 worked examples (1 abstract-only, 1 full-text) - training only, "
+            "not scored, not part of the sample",
             "groundtruth_MOCK.xlsx", is_kappa=False)
 
 
@@ -701,21 +637,26 @@ def write_stratification_report(papers, sample, args) -> None:
     ft = int((sample.doc_type == "full-text").sum())
     L = [
         "# Ground-truth sample - stratification report", "",
-        f"- extraction frame: `{args.extraction.name}`  |  seed: `{args.seed}`",
-        f"- core n = {args.n_core} (full-text fraction {args.full_text_frac}) "
-        f"+ rare-function oversample n = {args.n_rare}",
-        f"- kappa block n = {args.n_kappa} papers, rated by ALL annotators; it is the "
-        f"balanced prefix of a stratified pool, so raising --n-kappa later stays valid",
-        f"- within the kappa block, the first **{args.n_calibration}** papers are a "
-        f"calibration round: everyone does them, then a reconciliation call refines the "
-        f"rubric before continuing. Reported Fleiss' kappa uses the remaining "
-        f"{args.n_kappa - args.n_calibration} measurement papers (calibration agreement "
-        f"reported separately as a pilot)",
+        f"- corpus: `{args.corpus.name}`  |  seed: `{args.seed}`",
+        f"- n = {args.n_core} (full-text fraction {args.full_text_frac}). Stratified by "
+        f"era + doc_type only (2026-09-17: no function/continent stratification until "
+        f"the Task 1 re-extraction runs on this corpus - see the script header note)",
+        f"- kappa block n = {args.n_kappa} papers, all full-text, rated by ALL annotators; "
+        f"it is the balanced prefix of a stratified pool, so raising --n-kappa later stays "
+        f"valid",
+        (f"- within the kappa block, the first **{args.n_calibration}** papers are a "
+         f"calibration round: everyone does them, then a reconciliation call refines the "
+         f"rubric before continuing. Reported Fleiss' kappa uses the remaining "
+         f"{args.n_kappa - args.n_calibration} measurement papers (calibration agreement "
+         f"reported separately as a pilot)" if args.n_calibration else
+         f"- single blind measurement pass, no calibration sub-round (2026-09-17 decision - "
+         f"rubric training instead happens on the 2 MOCK papers, drawn from outside the "
+         f"sample, before the real block starts)"),
         f"- **{len(sample)} unique papers total**; the {ft} full-text papers each get a "
         f"paired abstract-only row + full-text row (~{len(sample) + ft} annotation rows)",
         "", "## Selected sample by stratum", "",
     ]
-    for col in ["doc_type", "function", "continent", "era", "assignment", "annotator", "bucket"]:
+    for col in ["doc_type", "era", "assignment", "annotator"]:
         if col not in sample.columns:
             continue
         L.append(f"### {col}")
