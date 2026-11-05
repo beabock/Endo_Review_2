@@ -1,0 +1,571 @@
+#!/usr/bin/env python3
+# BMB 2026-09-02
+# Multi-resolver full-text PDF retriever for the Task 1 re-download
+# (NPH_task1_paired_validation_plan.md, Phase 0a). Replaces the single-source
+# download_pdfs.py (archived).
+#
+# Resolvers, tried in order until a VALID PDF lands:
+#   Unpaywall -> OpenAlex -> Europe PMC -> Semantic Scholar -> CORE -> OpenAIRE ->
+#   publisher <meta citation_pdf_url> on the DOI landing page
+# (OpenAIRE added 2026-09-17 - see METHODS_CHANGELOG.md and the r_openaire comment for
+# why, and the caveat that its parsing was only checked against one example response.)
+#
+# Features: resumable (skips DOIs that already have a valid PDF), shardable
+# (--shard i --nshards n), download validation (magic bytes + PyMuPDF open + page
+# count), a per-DOI manifest, a structured miss log, a --dry-run mode that only
+# does resolver lookups and writes a coverage report broken down by publisher /
+# journal (answers Referee 2: "are abstract-only papers concentrated in particular
+# publishers/journals?"), and per-host request throttling with a growing cooldown on
+# 403s (added 2026-09-16 after the first real pull showed 86% of download failures
+# were 403s concentrated in MDPI/Wiley - eight parallel shards independently hitting
+# the same publisher looked like a burst to their bot detection).
+#
+# NOTHING here is run at scale without sign-off. Start with:
+#   python fetch_fulltext_pdfs.py --input Abstracts_for_Monsoon.csv --dry-run
+#
+# Env (optional, improve coverage / rate limits):
+#   UNPAYWALL_EMAIL (required; falls back to --email)
+#   S2_API_KEY, CORE_API_KEY
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import random
+import re
+import time
+from collections import defaultdict
+from pathlib import Path
+from urllib.parse import urlparse
+
+import pandas as pd
+import requests
+
+try:
+    import fitz  # PyMuPDF - for validation
+    _HAVE_FITZ = True
+except Exception:
+    _HAVE_FITZ = False
+
+# A generic script UA gets a blanket HTTP 403 from a lot of publisher domains even for
+# content a resolver has already confirmed is open access - this is a bot-detection
+# artifact, not a paywall. A standard-looking browser UA is normal practice for OA
+# aggregation tools (Zotero, Unpaywall's own harvester, etc.) and is what's identifying
+# here: every URL we fetch was returned by a resolver specifically because it is OA, so
+# nothing is being evaded, just not needlessly flagged as a script. Contact info still
+# goes in the API calls that ask for it (Unpaywall/OpenAlex `mailto`).
+UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+      "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36")
+TIMEOUT = 40
+MIN_PDF_BYTES = 10_000
+RETRY_STATUSES = {429, 500, 502, 503, 202}
+# 403 is handled separately, below. The first real pull's failures were 86% plain
+# "http 403", concentrated almost entirely in MDPI and Wiley.
+#
+# REVISED 2026-09-16 (same day, after the first version of this fix backfired): a
+# growing per-host cooldown alone assumed the block was a short burst-detection flag
+# that would clear within the ~90s cap - it isn't. The second real pull, running with
+# that version, dropped to ~0.0-0.4 doi/s on several shards (most of the queue was
+# MDPI/Wiley DOIs each paying close to the full cooldown, back to back, with no
+# recovery), on pace to blow through the 8h job limit having processed a small fraction
+# of the corpus. Now: a host still gets a couple of short, cheap retries (8s, then 16s,
+# capped at 20s) in case it genuinely is a brief blip, but after HOST_CIRCUIT_THRESHOLD
+# consecutive 403s the circuit "opens" - further requests to that host fail instantly,
+# no network call, no wait, for HOST_CIRCUIT_COOLDOWN seconds, so the shard keeps moving
+# through the rest of its queue instead of stalling on a host that isn't recovering on
+# this timescale. Every DOI that fails this way is still marked `download_failed` and
+# gets retried automatically on a future run - nothing here is a permanent loss.
+SOFT_BLOCK_STATUSES = {403}
+MAX_RETRIES = 2
+HOST_MIN_GAP = 1.0             # minimum seconds between any two requests to the same host
+HOST_403_COOLDOWN = 8.0        # base cooldown for the first couple of 403s from a host
+HOST_403_COOLDOWN_CAP = 20.0   # cap on that short backoff, before the circuit breaker trips
+HOST_CIRCUIT_THRESHOLD = 3     # consecutive 403s from a host before we stop trying it for a while
+HOST_CIRCUIT_COOLDOWN = 300.0  # once tripped, skip this host entirely for 5 minutes
+
+_host_next_ok: dict[str, float] = {}
+_host_403_streak: dict[str, int] = defaultdict(int)
+_host_circuit_until: dict[str, float] = {}
+
+
+def _host_of(url: str) -> str:
+    try:
+        return urlparse(url).netloc.lower()
+    except Exception:                             # noqa: BLE001
+        return ""
+
+
+def _host_blocked(host: str) -> bool:
+    """True if this host's circuit is currently open (sustained 403s) - callers should
+    skip it entirely rather than wait."""
+    return bool(host) and time.time() < _host_circuit_until.get(host, 0.0)
+
+
+def _wait_for_host(host: str) -> None:
+    """Block until it's this host's turn - a plain minimum gap, plus a short growing
+    cooldown for the first couple of 403s. Per-process (per shard) state: it doesn't
+    coordinate across the other array tasks, and once the circuit breaker trips (see
+    _note_host_result) callers check _host_blocked() instead of landing here."""
+    if not host:
+        return
+    now = time.time()
+    ready_at = _host_next_ok.get(host, 0.0)
+    if ready_at > now:
+        time.sleep(ready_at - now + random.uniform(0, 0.5))
+
+
+def _note_host_result(host: str, status: int | None) -> None:
+    if not host:
+        return
+    gap = HOST_MIN_GAP
+    if status == 403:
+        _host_403_streak[host] += 1
+        if _host_403_streak[host] >= HOST_CIRCUIT_THRESHOLD:
+            # not a burst - a sustained block. Stop paying per-request cooldowns on this
+            # host; fail fast instead so the shard keeps moving through its queue.
+            _host_circuit_until[host] = time.time() + HOST_CIRCUIT_COOLDOWN
+            gap = 0.0
+        else:
+            cooldown = min(HOST_403_COOLDOWN * (2 ** (_host_403_streak[host] - 1)),
+                            HOST_403_COOLDOWN_CAP)
+            gap = max(gap, cooldown)
+    else:
+        _host_403_streak[host] = 0
+    _host_next_ok[host] = time.time() + gap
+
+
+# ---------------------------------------------------------------- helpers
+
+def norm_doi(x) -> str:
+    if not isinstance(x, str):
+        return ""
+    x = x.strip().lower()
+    x = re.sub(r"^https?://(dx\.)?doi\.org/", "", x)
+    x = re.sub(r"^doi:\s*", "", x)
+    return x.strip()
+
+
+def doi_to_filename(doi: str) -> str:
+    return re.sub(r"[^a-z0-9._-]", "_", doi) + ".pdf"
+
+
+def looks_like_pdf(content: bytes) -> bool:
+    return content[:5] == b"%PDF-" or b"%PDF-" in content[:1024]
+
+
+def validate_pdf(path: Path) -> tuple[bool, int, str]:
+    """(ok, n_pages, note). Rejects HTML-error-pages saved as .pdf and 0-page files."""
+    try:
+        if path.stat().st_size < MIN_PDF_BYTES:
+            return False, 0, "too small"
+        head = path.read_bytes()[:1024]
+        if not looks_like_pdf(head):
+            return False, 0, "not a PDF (magic bytes)"
+        if not _HAVE_FITZ:
+            return True, -1, "fitz unavailable - size/magic only"
+        with fitz.open(path) as d:
+            n = d.page_count
+        return (n >= 1), n, ("ok" if n >= 1 else "0 pages")
+    except Exception as e:                        # noqa: BLE001
+        return False, 0, f"open failed: {e}"
+
+
+class Session:
+    def __init__(self, email: str):
+        self.s = requests.Session()
+        self.s.headers["User-Agent"] = UA
+        self.email = email
+
+    def get(self, url, **kw):
+        kw.setdefault("timeout", TIMEOUT)
+        return self.s.get(url, **kw)
+
+    def json(self, url, **kw):
+        try:
+            r = self.get(url, **kw)
+            if r.status_code == 200:
+                return r.json()
+        except Exception:                        # noqa: BLE001
+            pass
+        return None
+
+
+# ---------------------------------------------------------------- resolvers
+# each returns (pdf_url | None, meta_dict)
+
+def r_unpaywall(sess: Session, doi: str) -> tuple[str | None, dict]:
+    d = sess.json(f"https://api.unpaywall.org/v2/{doi}", params={"email": sess.email})
+    if not d:
+        return None, {}
+    meta = {"journal": d.get("journal_name"), "publisher": d.get("publisher"),
+            "is_oa": d.get("is_oa"), "oa_status": d.get("oa_status"),
+            "genre": d.get("genre")}
+    loc = d.get("best_oa_location") or {}
+    url = loc.get("url_for_pdf")
+    if not url:
+        for loc in d.get("oa_locations", []):
+            if loc.get("url_for_pdf"):
+                url = loc["url_for_pdf"]
+                break
+    return url, meta
+
+
+def r_openalex(sess: Session, doi: str) -> tuple[str | None, dict]:
+    d = sess.json(f"https://api.openalex.org/works/https://doi.org/{doi}",
+                  params={"mailto": sess.email})
+    if not d:
+        return None, {}
+    meta = {"openalex_oa": (d.get("open_access") or {}).get("is_oa")}
+    loc = d.get("best_oa_location") or d.get("primary_location") or {}
+    return loc.get("pdf_url"), meta
+
+
+def r_europepmc(sess: Session, doi: str) -> tuple[str | None, dict]:
+    d = sess.json("https://www.ebi.ac.uk/europepmc/webservices/rest/search",
+                  params={"query": f"DOI:{doi}", "format": "json", "resultType": "core"})
+    try:
+        res = d["resultList"]["result"][0]
+    except Exception:
+        return None, {}
+    for ft in (res.get("fullTextUrlList") or {}).get("fullTextUrl", []):
+        if ft.get("documentStyle") == "pdf" and ft.get("availability") in ("Open access", "Free"):
+            return ft.get("url"), {}
+    pmcid = res.get("pmcid")
+    if pmcid:
+        return (f"https://www.ebi.ac.uk/europepmc/webservices/rest/{pmcid}/fullTextPDF"), {}
+    return None, {}
+
+
+def r_semanticscholar(sess: Session, doi: str) -> tuple[str | None, dict]:
+    headers = {}
+    if os.getenv("S2_API_KEY"):
+        headers["x-api-key"] = os.environ["S2_API_KEY"]
+    d = sess.json(f"https://api.semanticscholar.org/graph/v1/paper/DOI:{doi}",
+                  params={"fields": "openAccessPdf,isOpenAccess"}, headers=headers)
+    if not d:
+        return None, {}
+    return (d.get("openAccessPdf") or {}).get("url"), {}
+
+
+def r_core(sess: Session, doi: str) -> tuple[str | None, dict]:
+    # CORE_API_KEY: free, no institutional affiliation required - register at
+    # https://core.ac.uk/services/api (just an email). Without a key this resolver is a
+    # silent no-op (returns None immediately, every time) - if it's not set, we're not
+    # actually querying CORE at all, and CORE is the one resolver in this chain most
+    # likely to hand back a copy hosted on CORE's own infrastructure or on an
+    # institutional repository, rather than a redirect straight back to the publisher
+    # domain that's doing the blocking. Worth checking `echo $CORE_API_KEY` on Monsoon.
+    key = os.getenv("CORE_API_KEY")
+    if not key:
+        return None, {}
+    d = sess.json("https://api.core.ac.uk/v3/search/works",
+                  params={"q": f'doi:"{doi}"', "limit": 1},
+                  headers={"Authorization": f"Bearer {key}"})
+    try:
+        w = d["results"][0]
+    except Exception:
+        return None, {}
+    return w.get("downloadUrl"), {}
+
+
+def _walk_for_urls(node) -> list[str]:
+    """Recursively pull every string that looks like a URL out of an arbitrarily-nested
+    dict/list, keyed on any of OpenAIRE's several URL conventions (`fulltext`, `url`,
+    `webresource`, or the legacy XML-to-JSON `{"$": "..."}` wrapper). Used instead of a
+    hardcoded field path because the exact response nesting for this endpoint was only
+    checked against a single example DOI (see r_openaire comment) - a wrong hardcoded
+    path would silently return nothing forever, a wrong recursive walk just returns a
+    same-or-worse candidate list. PDFs are surfaced first, non-PDF URLs kept as a
+    fallback (some repositories serve a landing page here, still worth trying)."""
+    found: list[str] = []
+    if isinstance(node, str):
+        if node.startswith("http"):
+            found.append(node)
+    elif isinstance(node, dict):
+        for v in node.values():
+            found.extend(_walk_for_urls(v))
+    elif isinstance(node, list):
+        for v in node:
+            found.extend(_walk_for_urls(v))
+    return found
+
+
+def r_openaire(sess: Session, doi: str) -> tuple[str | None, dict]:
+    # OpenAIRE Graph API - keyless (low rate limit) or register for a personal access
+    # token for production use: https://graph.openaire.eu/docs/apis/authentication.
+    # Added 2026-09-17 (see METHODS_CHANGELOG.md).
+    #
+    # RESULT (Claude, 2026-09-17, 50-DOI test job 31701092): the original version of
+    # this function had a fallback that accepted ANY non-doi.org/non-openaire URL from
+    # the response when no literal .pdf link was found, on the theory that a repository
+    # URL is still worth trying even without a .pdf suffix. On real data it had a 0%
+    # hit rate (27/27 "wins" over other resolvers, 0 successful downloads - either "not
+    # pdf" landing pages or dead links to bare domain roots like
+    # http://www.kau.in/, i.e. an institution homepage field in the metadata, not an
+    # article link) - AND it was winning the resolver race ahead of publisher_meta, so
+    # those 27 DOIs never even got publisher_meta's shot. Cut entirely rather than
+    # tuned, since the evidence is it's worse than not having it: only return a literal
+    # .pdf-suffixed URL now, and let the DOI fall through to publisher_meta otherwise,
+    # same as before this resolver existed.
+    d = sess.json("https://api.openaire.eu/search/publications",
+                  params={"doi": doi, "format": "json"})
+    if not d:
+        return None, {}
+    urls = _walk_for_urls(d)
+    pdfs = [u for u in urls if u.lower().endswith(".pdf")]
+    return (pdfs[0], {}) if pdfs else (None, {})
+
+
+META_PDF_RE = re.compile(
+    r'<meta[^>]+name=["\']citation_pdf_url["\'][^>]+content=["\']([^"\']+)["\']', re.I)
+
+
+def r_publisher_meta(sess: Session, doi: str) -> tuple[str | None, dict]:
+    try:
+        r = sess.get(f"https://doi.org/{doi}", headers={"Accept": "text/html"})
+        if r.status_code == 200 and "html" in r.headers.get("content-type", ""):
+            m = META_PDF_RE.search(r.text[:200_000])
+            if m:
+                return m.group(1), {}
+    except Exception:                            # noqa: BLE001
+        pass
+    return None, {}
+
+
+RESOLVERS = [
+    ("unpaywall", r_unpaywall), ("openalex", r_openalex), ("europepmc", r_europepmc),
+    ("semanticscholar", r_semanticscholar), ("core", r_core), ("openaire", r_openaire),
+    # publisher_meta last on purpose: it's the one resolver that always points straight
+    # at the publisher's own domain (a doi.org redirect target), i.e. the one most
+    # likely to be bot-blocked. Every resolver before it is more likely to land on a
+    # repository/aggregator host instead.
+    ("publisher_meta", r_publisher_meta),
+]
+
+
+# ---------------------------------------------------------------- download
+
+def _fetch_once(sess: Session, url: str, doi: str) -> tuple[int | None, dict, bytes, str]:
+    """One GET with a Referer set (some publisher PDF endpoints check it). Returns a
+    synthetic status of -1, with no network call and no wait, if this host's circuit
+    is currently open (sustained 403s)."""
+    host = _host_of(url)
+    if _host_blocked(host):
+        return -1, {}, b"", url
+    _wait_for_host(host)
+    headers = {"Referer": f"https://doi.org/{doi}", "Accept": "application/pdf,*/*;q=0.8"}
+    r = sess.get(url, stream=True, allow_redirects=True, headers=headers)
+    _note_host_result(host, r.status_code)
+    return r.status_code, r.headers, r.content, url
+
+
+def try_download(sess: Session, url: str, dest: Path, doi: str = "", _fallback: bool = False) -> tuple[bool, str]:
+    attempt, status, headers, content, note = 0, None, {}, b"", ""
+    while attempt <= MAX_RETRIES:
+        try:
+            status, headers, content, url = _fetch_once(sess, url, doi)
+        except Exception as e:                    # noqa: BLE001
+            note = f"exc {e}"
+            status = None
+        if status == 200:
+            break
+        if status == -1:
+            return False, "host circuit open (repeated 403s) - retried on a future run"
+        if status in RETRY_STATUSES or status in SOFT_BLOCK_STATUSES or status is None:
+            attempt += 1
+            if attempt <= MAX_RETRIES:
+                # 403 already gets its backoff from the per-host cooldown applied inside
+                # _wait_for_host on the next _fetch_once call - don't double up on delay.
+                if status not in SOFT_BLOCK_STATUSES:
+                    time.sleep(1.5 * attempt)
+            continue
+        return False, note or f"http {status}"
+    if status != 200:
+        return False, note or f"http {status}"
+
+    ct = headers.get("content-type", "").lower()
+    if "pdf" not in ct and not looks_like_pdf(content):
+        # landing page, not the PDF - scan it for a citation_pdf_url meta tag once
+        if not _fallback and "html" in ct:
+            m = META_PDF_RE.search(content[:200_000].decode("utf-8", errors="ignore"))
+            if m and m.group(1) != url:
+                return try_download(sess, m.group(1), dest, doi, _fallback=True)
+        return False, f"not pdf (ct={ct[:40]})"
+
+    dest.write_bytes(content)
+    ok, n, note = validate_pdf(dest)
+    if not ok:
+        dest.unlink(missing_ok=True)
+        return False, note
+    return True, ("ok (size/magic only)" if n == -1 else f"ok ({n}p)")
+
+
+# ---------------------------------------------------------------- main
+
+# search-export column -> manifest column. Carried through so the coverage report can
+# group by the database's own publisher/journal/OA fields (a cross-check on Unpaywall,
+# and the only signal for DOIs Unpaywall 404s on).
+_META_COLS = {
+    "Publisher": "db_publisher", "Source.title": "db_journal", "ISSN": "db_issn",
+    "Open.Access": "db_open_access", "Document.Type": "db_doctype", "Year": "year",
+    "Web.of.Science.Categories": "wos_categories",
+}
+
+
+def load_dois(path: Path) -> pd.DataFrame:
+    df = pd.read_csv(path, low_memory=False)
+    col = next((c for c in ("DOI", "doi", "paper_id") if c in df.columns), None)
+    if col is None:
+        raise SystemExit(f"no DOI column in {path} (looked for DOI/doi/paper_id)")
+    df["doi_norm"] = df[col].map(norm_doi)
+    keep = ["doi_norm"] + [c for c in _META_COLS if c in df.columns]
+    df = (df[keep].rename(columns=_META_COLS)
+          [df["doi_norm"].str.len() > 0].drop_duplicates("doi_norm").reset_index(drop=True))
+    n_nodoi = pd.read_csv(path, low_memory=False, usecols=[col])[col].map(norm_doi).eq("").sum()
+    if n_nodoi:
+        print(f"note: {n_nodoi} records have no DOI and are skipped "
+              f"(counted in the search total, not fetchable by DOI)")
+    return df
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--input", type=Path, required=True,
+                    help="CSV with a DOI / doi / paper_id column")
+    ap.add_argument("--out-dir", type=Path, default=Path("full_corpus"))
+    ap.add_argument("--manifest", type=Path, default=None,
+                    help="default: <out-dir>/pdf_manifest.csv")
+    ap.add_argument("--email", default=os.getenv("UNPAYWALL_EMAIL", ""),
+                    help="Unpaywall contact email (or set UNPAYWALL_EMAIL)")
+    ap.add_argument("--dry-run", action="store_true",
+                    help="resolver lookups only; write a coverage report, download nothing")
+    ap.add_argument("--shard", type=int, default=0)
+    ap.add_argument("--nshards", type=int, default=1)
+    ap.add_argument("--limit", type=int, default=0, help="stop after N DOIs (testing)")
+    ap.add_argument("--sleep", type=float, default=0.3)
+    args = ap.parse_args()
+
+    if not args.email:
+        raise SystemExit("need --email or UNPAYWALL_EMAIL")
+    args.out_dir.mkdir(parents=True, exist_ok=True)
+    manifest_path = args.manifest or (args.out_dir / "pdf_manifest.csv")
+
+    df = load_dois(args.input)
+    if args.nshards > 1:
+        df = df[df.index % args.nshards == args.shard].reset_index(drop=True)
+    if args.limit:
+        df = df.head(args.limit)
+
+    done = {}
+    if manifest_path.exists():
+        prev = pd.read_csv(manifest_path)
+        done = {r["doi"]: r for _, r in prev.iterrows()}
+
+    sess = Session(args.email)
+    meta_cols = [c for c in df.columns if c != "doi_norm"]
+    rows, t0 = [], time.time()
+    for i, rec in enumerate(df.itertuples(index=False)):
+        doi = rec.doi_norm
+        db_meta = {c: getattr(rec, c, None) for c in meta_cols}
+        fn = doi_to_filename(doi)
+        dest = args.out_dir / fn
+
+        if not args.dry_run and doi in done and str(done[doi].get("status")) == "downloaded" \
+                and dest.exists() and validate_pdf(dest)[0]:
+            rows.append(done[doi].to_dict())
+            continue
+
+        # First non-blocked hit wins. If a resolver's URL is on a host whose circuit is
+        # currently open (sustained 403s this run), don't commit to it - keep checking
+        # the remaining resolvers for a candidate on a different host first (this is
+        # where an OpenAlex/EuropePMC/CORE copy on a repository, rather than the
+        # publisher's own domain, actually helps). If every candidate we find is on a
+        # blocked host, fall back to the first one anyway - try_download's circuit
+        # breaker will fail it fast and correctly, rather than us reporting "no_oa_pdf"
+        # for a DOI that does have OA, just not reachable from here right now.
+        tried, pdf_url, hit_resolver, meta = [], None, None, {}
+        blocked_pdf_url, blocked_hit_resolver = None, None
+        for name, fn_res in RESOLVERS:
+            try:
+                url, m = fn_res(sess, doi)
+            except Exception as e:                # noqa: BLE001
+                url, m = None, {"err": str(e)}
+            meta.update({k: v for k, v in m.items() if v is not None})
+            if url and _host_blocked(_host_of(url)):
+                tried.append(f"{name}:blocked")
+                if blocked_pdf_url is None:
+                    blocked_pdf_url, blocked_hit_resolver = url, name
+            elif url:
+                tried.append(name)
+                pdf_url, hit_resolver = url, name
+                break            # first non-blocked hit wins; download-failure path re-queries
+            else:
+                tried.append(f"{name}:none")
+            time.sleep(args.sleep)
+        if pdf_url is None and blocked_pdf_url is not None:
+            pdf_url, hit_resolver = blocked_pdf_url, blocked_hit_resolver
+
+        row = {"doi": doi, "filename": fn, "resolver": hit_resolver,
+               "resolver_url": pdf_url, "tried": ";".join(tried),
+               "journal": meta.get("journal"), "publisher": meta.get("publisher"),
+               "is_oa": meta.get("is_oa"), "oa_status": meta.get("oa_status"),
+               "genre": meta.get("genre"), "status": None, "note": None, "n_pages": None,
+               **db_meta}
+
+        if args.dry_run:
+            row["status"] = "resolvable" if pdf_url else "no_oa_pdf"
+        elif pdf_url:
+            ok, note = try_download(sess, pdf_url, dest, doi)
+            row["status"] = "downloaded" if ok else "download_failed"
+            row["note"] = note
+            if ok:
+                row["n_pages"] = validate_pdf(dest)[1]
+            else:                                 # try the other resolvers' urls
+                for name, fn_res in RESOLVERS:
+                    if name == hit_resolver:
+                        continue
+                    try:
+                        url, _ = fn_res(sess, doi)
+                    except Exception:             # noqa: BLE001
+                        url = None
+                    if not url:
+                        continue
+                    ok, note = try_download(sess, url, dest, doi)
+                    if ok:
+                        row.update(status="downloaded", resolver=name,
+                                   resolver_url=url, note=note,
+                                   n_pages=validate_pdf(dest)[1])
+                        break
+        else:
+            row["status"] = "no_oa_pdf"
+
+        rows.append(row)
+        if (i + 1) % 25 == 0:
+            pd.DataFrame(rows).to_csv(manifest_path, index=False)
+            rate = (i + 1) / (time.time() - t0)
+            print(f"[{i+1}/{len(df)}] {rate:.1f} doi/s  last={doi} -> {row['status']}")
+
+    man = pd.DataFrame(rows)
+    man.to_csv(manifest_path, index=False)
+
+    # ---- summary
+    print(f"\n{len(man)} DOIs")
+    print(man["status"].value_counts().to_string())
+    if args.dry_run:
+        rep = args.out_dir / "coverage_report.csv"
+        miss = man[man["status"] != "resolvable"]
+        by_pub = (miss.groupby(["publisher", "journal"], dropna=False)
+                  .size().reset_index(name="n_missing").sort_values("n_missing",
+                                                                    ascending=False))
+        by_pub.to_csv(rep, index=False)
+        print(f"\nabstract-only concentration (top 15) -> {rep}")
+        print(by_pub.head(15).to_string(index=False))
+        cov = (man["status"] == "resolvable").mean()
+        print(f"\nresolvable OA coverage: {cov:.1%}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -135,6 +135,18 @@ def parse_args() -> argparse.Namespace:
         default=0.0,
         help="Optional delay between model calls",
     )
+    parser.add_argument(
+        "--num-ctx",
+        type=int,
+        default=8192,
+        help="Ollama context window (tokens). Set explicitly - the default 2048 truncates.",
+    )
+    parser.add_argument(
+        "--temperature",
+        type=float,
+        default=0.0,
+        help="Sampling temperature (0 = deterministic, recommended for extraction)",
+    )
     return parser.parse_args()
 
 
@@ -251,19 +263,48 @@ def collect_snippets(
     snippet_window: int,
     max_context_chars: int,
 ) -> Tuple[str, int, int]:
-    """Collect text snippets. For speed, just grab first max_context_chars."""
+    """
+    Keyword-centred snippets, not a blind prefix.
+
+    A ubiquity claim usually sits in the Introduction or Discussion, not in the first
+    ~2 pages, so the old `text[:8000]` truncation (NPH_task1 plan section 1b) silently
+    missed claims in longer papers. Here we take a +/- `snippet_window`-char window
+    around each keyword match (merging overlaps), up to `max_snippets`, capped at
+    `max_context_chars` total. Falls back to the prefix only when there is no hit at
+    all (so a paper with zero keyword hits is still shown to the model).
+    """
     text = compact_whitespace(text)
     if not text:
         return "", 0, 0
 
-    # Count keyword hits for reporting
     matches = list(KEYWORD_RE.finditer(text))
     keyword_hits = len(matches)
 
-    # Simple: just take the first max_context_chars to avoid complex snippet logic
-    context = text[:max_context_chars]
-    
-    return context, 1, keyword_hits
+    if not matches:
+        return text[:max_context_chars], (1 if text else 0), 0
+
+    # build merged windows around the matches
+    spans: List[List[int]] = []
+    for m in matches[: max(max_snippets * 3, max_snippets)]:
+        lo, hi = max(0, m.start() - snippet_window), min(len(text), m.end() + snippet_window)
+        if spans and lo <= spans[-1][1]:
+            spans[-1][1] = max(spans[-1][1], hi)
+        else:
+            spans.append([lo, hi])
+
+    snippets: List[str] = []
+    used = 0
+    for lo, hi in spans[:max_snippets]:
+        piece = text[lo:hi]
+        if used + len(piece) > max_context_chars:
+            piece = piece[: max_context_chars - used]
+        if piece:
+            snippets.append(("... " + piece + " ...").strip())
+            used += len(piece)
+        if used >= max_context_chars:
+            break
+
+    return "\n\n".join(snippets), len(snippets), keyword_hits
 
 
 def build_prompt(context: str, source_name: str) -> str:
@@ -339,20 +380,28 @@ def ollama_generate_json(
     model: str,
     prompt: str,
     timeout_seconds: int = 120,
+    num_ctx: int = 8192,
+    temperature: float = 0.0,
 ) -> Dict:
-    """Generate JSON from Ollama with simple timeout."""
+    """Generate JSON from Ollama with simple timeout.
+
+    num_ctx is set EXPLICITLY: Ollama's historical default (2048 tokens) silently
+    truncates anything longer, so the old call saw far less than the 8000 chars it was
+    handed (NPH_task1 plan section 1b). Size num_ctx to the snippet budget + prompt.
+    """
     client = get_ollama_client(ollama_host)
-    
+
     # Set timeout alarm
     signal.signal(signal.SIGALRM, timeout_handler)
     signal.alarm(timeout_seconds)
-    
+
     try:
         response_data = client.generate(
             model=model,
             prompt=prompt,
             format="json",
             stream=False,
+            options={"num_ctx": num_ctx, "temperature": temperature},
         )
         signal.alarm(0)  # Cancel alarm
         
@@ -690,6 +739,8 @@ def main() -> None:
                 ollama_host=args.ollama_host,
                 model=args.model,
                 prompt=prompt,
+                num_ctx=args.num_ctx,
+                temperature=args.temperature,
             )
             result = to_result(
                 response_json=response_json,
@@ -819,6 +870,8 @@ def main() -> None:
                 ollama_host=args.ollama_host,
                 model=args.model,
                 prompt=prompt,
+                num_ctx=args.num_ctx,
+                temperature=args.temperature,
             )
             result = to_result(
                 response_json=response_json,

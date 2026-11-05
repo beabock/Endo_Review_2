@@ -1,6 +1,12 @@
-# BMB 2024-09-22
+# BMB 2024-09-22, revised 2026-09-02
 # Manual step - pulls abstracts from PubMed, Scopus, and Web of Science APIs.
 # Needs credentials; run interactively, not part of the automated pipeline.
+#
+# The AUTHORITATIVE search string is the Phase 2 string in docs/SEARCH_STRATEGY.md
+# (also data/Abstracts/All_abstracts_8-14-25/search_string.txt). It is used identically
+# across all three databases (reformatted only for each platform's phrase/wildcard rules).
+# `base_search_DRAFT` below is a superseded earlier version kept only for provenance -
+# do NOT use it.
 
 library(rentrez)       # PubMed
 library(rscopus)       # Scopus
@@ -10,24 +16,32 @@ library(tibble)
 library(purrr)
 library(xml2)
 
-# 1. Define search string
+# 1. Search string --------------------------------------------------------------
+# Phase 2 (docs/SEARCH_STRATEGY.md) - exact-phrase endophyte terms x host terms.
+endophyte_terms <- paste(
+  '"fungal endophyte" OR "fungal endophytes" OR "endophytic fungus" OR "endophytic fungi"',
+  'OR "latent fungus" OR "latent fungi" OR "systemic fungus" OR "systemic fungi"',
+  'OR "internal fungi" OR "resident fungi" OR "seed-borne fungi" OR "seed-transmitted fungi"',
+  'OR "dark septate endophyte" OR "dark septate fungi" OR "DSE fungi"')
+host_terms <- paste(
+  "plant* OR moss* OR bryophyte* OR liverwort* OR hornwort* OR fern* OR lycophyte*",
+  "OR pteridophyte* OR tree* OR shrub* OR grass* OR graminoid* OR herb* OR crop*",
+  "OR seedling* OR sapling* OR seed* OR root* OR leaf* OR foliage OR shoot* OR stem*",
+  "OR twig* OR rhizome* OR thallus OR frond* OR algae OR \"green alga*\" OR macroalga*",
+  "OR cyanobacteria OR cyanobiont* OR photobiont* OR lichen*")
+base_search <- sprintf("(%s) AND (%s)", endophyte_terms, host_terms)
+# For PubMed via rentrez, append the article-type limit (WoS/Scopus set this in the UI):
+pubmed_search <- paste0(base_search, ' AND "Journal Article"[Publication Type]')
 
-base_search <- paste(
+# --- superseded draft, provenance only - DO NOT USE -----------------------------
+base_search_DRAFT <- paste(
   "( (endophyte* AND (fungus OR fungi OR fungal OR mycota))",
   'OR "latent fung*" OR "systemic fung*" OR "internal fung*" OR "resident fung*"',
   'OR "fungal endophyte*" OR "endophytic fung*" OR "dark septate endophyte*"',
   'OR "dark septate fung*" OR "seed-borne fung*" OR "seed-transmitted fung*"',
   'OR "symptomless fung*" OR "asymptomatic fung*" OR "quiescent fung*" )',
   "AND",
-  "( plant* OR moss* OR bryophyt* OR liverwort* OR hornwort* OR fern*",
-  "OR lycophyte* OR pteridophyte* OR tree* OR forest* OR shrub* OR grass*",
-  "OR graminoid* OR herb* OR crop* OR seedling* OR sapling* OR seed*",
-  "OR root* OR leaf* OR foliage OR shoot* OR stem* OR twig* OR rhizome*",
-  "OR thallus OR frond* OR hydrophyte* OR seagrass* OR alga* OR gymnosperm*",
-  "OR angiosperm* OR macroalga* OR spermatophyte* OR phanerogam* OR monocot*",
-  "OR dicot* OR charophyt* OR chlorophyt* OR anthocerotophyt* OR glaucophyt*",
-  "OR langiophytophyt* OR langiophytopsid* OR marchantiophyt* OR rhodophyt*",
-  "OR tracheophyt* OR vine* OR epiphyt* OR cultivar* OR xylem OR phloem )",
+  "( plant* OR moss* OR ... OR xylem OR phloem )",
   "AND \"Journal Article\"[Publication Type]",
   collapse = " "
 )
@@ -45,7 +59,7 @@ year_ranges <- list(
 # 3. Function to fetch and parse a year chunk
 fetch_parse_pubmed <- function(year_start, year_end, batch_size = 200) {
   search_string <- paste0(
-    base_search,
+    pubmed_search,
     " AND (", year_start, "/01/01[PDAT] : ", year_end, "/12/31[PDAT])"
   )
   

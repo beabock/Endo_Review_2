@@ -1,0 +1,64 @@
+Number of WoS files read: 15 
+Total rows after binding: 14855 
+Number of Scopus files read: 4 
+Total rows after binding: 15426 
+PubMed source: data/Abstracts/All_abstracts_8-14-25/pubmed_pull_phase2.csv 
+Number of PubMed files read: 6 
+Total rows after binding: 9141 
+WoS columns: 71 
+Scopus columns: 46 
+PubMed columns: 6 
+WoS standardized columns: 69 
+Wos earliest year: 4 
+Scopus earliest year: 1930 
+PubMed earliest year: 1946 
+Common columns: 7 
+Combined rows with a usable abstract: 39114 (WoS/Scopus/PubMed: 14634 / 15339 / 9141 )
+
+Deduplication (normalise: lowercase, collapse whitespace, strip punctuation):
+  DOI dedup                          39114 ->   22212  (-16902)  36772 had a DOI, 2342 did not
+  Abstract-text dedup                22212 ->   21982  (-230)  62 of the removed had a DOI, 168 did not
+
+  Document.Type BEFORE the filter:
+
+                       Article                           <NA> 
+                         18864                           2698 
+         Article; Book Chapter     Article; Proceedings Paper 
+                           156                            132 
+         Article; Early Access            Article; Data Paper 
+                           120                              7 
+Article; Retracted Publication 
+                             5 
+  Document-type filter               21982 ->   21982  (-0)  kept *article* + NA; dropped review/editorial/etc.
+  Document.Type AFTER the filter:
+
+                       Article                           <NA> 
+                         18864                           2698 
+         Article; Book Chapter     Article; Proceedings Paper 
+                           156                            132 
+         Article; Early Access            Article; Data Paper 
+                           120                              7 
+Article; Retracted Publication 
+                             5 
+  Title dedup                        21982 ->   21414  (-568)  normalized-title match on titles >= 15 chars; 7 short titles kept as-is
+
+Implausible publication years set to NA: 3 
+# A tibble: 3 × 3
+  Title                                                               Year DOI  
+  <chr>                                                              <dbl> <chr>
+1 "Endophytic Diversity in Sicilian Olive Trees: Identifying Optima…    13 http…
+2 "Prevalence of the genus Cladosporium on the integument of leaf-c…   109 http…
+3 "Dark septate endophytes colonizing the roots of \"non-mycorrhiza…     4 <NA> 
+
+==== FINAL ====
+Final dataset rows: 21414 
+  with DOI: 19586 
+  no DOI  : 1828 
+  missing Title: 0 | missing Abstract: 0 
+  year range: 1926 - 2025 
+
+Written:
+  data/Abstracts/All_abstracts_deduped.csv  ( 21414 rows )
+  data/Abstracts/Abstracts_for_Monsoon.csv  (slim projection)
+  results/outputs/dedup_stage_counts.csv    (Methods table)
+  data/processed/dedup_removed_by_{abstract,doctype,title}.csv  (audit)

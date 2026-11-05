@@ -1,0 +1,473 @@
+# Methods changelog — NPH-MS-2026-57711 resubmission
+
+A running, plain-language record of every pipeline / methods change made for the
+resubmission, so the Methods section and the point-by-point "Response to referees" can be
+written from a single source. Newest first. Each entry: what changed, which files, which
+referee point it answers, and what still has to happen (re-run, manuscript text, figure).
+
+Scope decisions live in `NPH_resubmission_checklist.md`; per-task plans in `NPH_task*_*.md`
+(local, gitignored). This file is committed and tracks the *code*.
+
+---
+
+## 2026-09-17 — Full-corpus pull finished (30.4% resolvable); root cause of the shortfall + OpenAIRE resolver + recovery-pass tooling
+`scripts/01_data_preproccessing/fetch_fulltext_pdfs.py`,
+`scripts/01_data_preproccessing/make_recovery_subset.py` (new),
+`scripts/01_data_preproccessing/reconcile_recovery.py` (new).
+
+**What happened.** Job 31693127 (real pull, `--array=0-7`) finished: 19,586 DOIs ->
+downloaded 5,957 (30.4%), no_oa_pdf 9,436 (48.2%), download_failed 4,193 (21.4%). The
+Phase 0 notes projected ~55-75% resolvable; 30.4% is well under that.
+
+**Diagnosis.** `no_oa_pdf` (9,436) tracks Unpaywall's own `closed`+missing count
+(9,142+629=9,771) closely — that bucket is mostly real, not a bug. `download_failed`
+(4,193) is the recoverable one: Unpaywall flags 9,815 records as some kind of OA, but
+only 5,957 downloaded — a ~3,858-record gap that lines up almost exactly with
+`download_failed`. Breaking down the `note` column on the 4,193 failures:
+
+| note | n | % of download_failed |
+|---|---|---|
+| `host circuit open (repeated 403s) - retried on a future run` | 2,770 | 66.1% |
+| `not pdf (ct=text/html...)` (3 variants) | 792 | 18.9% |
+| `http 403` (real, after retries) | 310 | 7.4% |
+| `http 202` | 93 | 2.2% |
+| `http 404` | 79 | 1.9% |
+| everything else (timeouts, DNS, SSL, 5xx, redirects) | ~149 | 3.6% |
+
+Two-thirds of the failures never got a real network attempt at all — they were skipped
+because a host's circuit breaker had already tripped. **Root cause:** the breaker's
+state (`_host_next_ok`, `_host_403_streak`, `_host_circuit_until`) is per-process, i.e.
+per shard. Running 8 array tasks in parallel means a host like `onlinelibrary.wiley.com`
+can see traffic from all 8 shards at once — up to 8x the rate any single shard's
+`HOST_MIN_GAP` was designed to enforce — which is enough to trip (and re-trip) bot
+detection fast and keep it tripped. The top-20 missing-by-journal list in
+`coverage_report.csv` confirms this: dominated by Wiley (incl. New Phytologist itself),
+Elsevier, MDPI, Informa/Mycologia, ACS, Springer, OUP — the exact publishers already
+flagged in the 09-16 entry.
+
+**Fix 1 — new resolver.** Added `r_openaire` (OpenAIRE Graph API,
+`api.openaire.eu/search/publications?doi=...`), placed after CORE and before
+`publisher_meta` in `RESOLVERS`. Keyless (low rate limit) or register a token for
+production use. Rationale: OpenAIRE tends to point at a repository copy (a university
+domain) rather than the publisher's, which is exactly what sidesteps a Wiley/MDPI/
+Elsevier block. **Caveat:** the response parsing (`_walk_for_urls`) was only checked
+against one example DOI via a fetch tool, not tested end-to-end — it walks the whole
+response for anything URL-shaped rather than trusting one hardcoded field path, on
+purpose, but **run a `--limit 20 --dry-run` spot-check before trusting it at scale.**
+Also flagged in `r_core`'s comment: that resolver is a silent no-op without
+`CORE_API_KEY` set (free registration, no institutional affiliation needed,
+core.ac.uk/services/api) — worth confirming it's actually set on Monsoon, since if not,
+CORE (the resolver most likely to hand back its own cached copy rather than a publisher
+redirect) hasn't been contributing anything yet.
+
+**Fix 2 — targeted, low-parallelism recovery pass (tooling only, not run yet).**
+`make_recovery_subset.py` pulls the DOIs with `download_failed` + `host circuit open`
+or `not pdf` notes (4,193 minus the ~440 in the http-403/404/202/exception buckets, i.e.
+~3,562 candidate DOIs) into a small input CSV. Intended to be run as `--array=0
+--export=NSHARDS=1` (single shard, not 8) so the existing per-host throttle behaves as
+designed instead of being multiplied by parallel siblings. `reconcile_recovery.py` then
+folds any newly-`downloaded` rows from that pass back into the main merged manifest
+without disturbing anything else, writing a new file rather than overwriting in place.
+
+**Not evaluated:** BASE (no DOI-lookup REST API exists, confirmed via search — keeps to
+OAI-PMH bulk harvest only, not useful here). ResearchGate / Sci-Hub scraping —
+deliberately excluded (ToS / legal), not proposed.
+
+**Update, same day:** Bea confirmed `CORE_API_KEY` was blank for the entire first pull —
+CORE never ran on any of the 19,586 DOIs, not just the failures. Two keys obtained
+(personal, ~1,000 tokens/day; institutional, higher limit) — set as an env var on
+Monsoon only, never committed to the repo. Institutional key is the one to use for the
+bulk recovery pass given the tighter daily cap on the personal one.
+
+**Sequencing correction:** Bea flagged that drawing the Task 2 sample from the current
+partial full-text pool (5,957 papers) would bake in a publisher-composition bias — that
+pool is specifically the papers that weren't bot-blocked, so it under-represents Wiley/
+MDPI/Elsevier/etc. (including New Phytologist itself) relative to the true corpus. **The
+recovery pass now runs before the Task 2 sample redraw, not in parallel with it**,
+superseding the "they don't block each other" framing from earlier today.
+`make_recovery_subset.py` gained `--include-no-oa-pdf` (CORE + OpenAIRE never ran on
+the 9,436 no_oa_pdf records either — the fuller but much larger, ~13.6k-DOI fix) and
+`--limit` (to test actual CORE token cost on a small slice before committing to scale).
+
+**50-DOI test result (job 31701092, single shard, `--include-no-oa-pdf --limit 50`):**
+2 downloaded, 5 no_oa_pdf, 43 download_failed. The useful signal isn't the raw count —
+it's that only 5/50 came back `no_oa_pdf` this time, vs. the ~36/50 that would have been
+`no_oa_pdf` before (this sample skews toward that bucket), meaning some resolver now
+finds *a* candidate URL for most of them. But of the 27 DOIs `openaire` "won" the
+resolver race for, **zero** turned into a successful download (24 landing pages, the
+rest dead links/timeouts to bare domain roots like `http://www.kau.in/` — an institution
+homepage field, not an article link). The 2 real successes came from `semanticscholar`
+and `core` (1 each). Fixed same-day: `r_openaire`'s fallback (accept any non-doi.org/
+non-openaire URL when there's no literal `.pdf` link) is cut — it was actively worse
+than nothing, since it also pre-empted `publisher_meta` from getting a shot at those
+same 27 DOIs. `r_openaire` now only returns a literal `.pdf`-suffixed URL.
+
+Also flagged, then resolved: `core` fired only once across 50 DOIs. Ruled out a masked
+auth failure — Bea ran a direct diagnostic call against CORE's API with the institutional
+key for one of the test DOIs (`10.1016/j.fgb.2004.01.005`) and got `status: 200`,
+`totalHits: 0` (a real search, zero results, not an auth error). So the low CORE hit
+rate in this sample is a genuine coverage finding: CORE indexes repository deposits, and
+mycology/plant-pathology literature is evidently thin there compared to, say,
+biomedicine (where green-OA deposit mandates are far more common). CORE is still worth
+having in the chain (it did contribute one of the 2 real successes in the test), just
+shouldn't be expected to be the main lever for closing the coverage gap.
+
+**Re-test after the OpenAIRE fix (job 31702506, same recipe, `--limit 50`):**
+downloaded 2, no_oa_pdf 29, download_failed 19 — vs. downloaded 2, no_oa_pdf 5,
+download_failed 43 before the fix. Confirms the fix did exactly what it should: the 24
+DOIs that used to be misclassified as `download_failed` (OpenAIRE junk URL, landing
+page/dead link) now correctly report `no_oa_pdf` (nothing found), and the real success
+count is unchanged at 2 — OpenAIRE's old fallback never converted to an actual download,
+so removing it cost nothing.
+
+`run_fetch_pdfs.sbatch` gained a `MANIFEST` override (defaults to the old
+`${OUT_DIR}/pdf_manifest_shard${SHARD}.csv` path if unset) after this test run
+overwrote the first test's manifest — the override I'd told Bea to pass didn't exist
+in the script yet.
+
+**Honest read on yield so far:** 2/50 = 4% recovery rate on this blended
+(no_oa_pdf-heavy) sample. Extrapolated to the full ~13,600-DOI candidate pool
+(3,589 failed-bucket + 9,436 no_oa_pdf, excluding ~604 unrecoverable exceptions/hard
+403s), that's roughly +540 papers corpus-wide — 5,957 -> ~6,500 downloaded, 30.4% ->
+~33.2% resolvable. Real, but far more modest than the ~52% ceiling estimated purely
+from the circuit-breaker fix in isolation on 09-17. Not yet broken out by original
+bucket (failed vs. no_oa_pdf) to see whether the failed-bucket-specific rate — the one
+that actually matters for the publisher-skew concern — is meaningfully higher than the
+blended 4%.
+
+CORE's PDF download policy (Bea, pasted from their docs): the plain `downloadUrl` is
+their "preferred method" and what `r_core`/`try_download` already do; their metered
+`GET /v3/outputs/{id}/download` fallback (counts against token allowance, for cases
+where `downloadUrl` itself is blocked) is not wired in yet — flagged as a possible
+follow-up if the plain-downloadUrl approach doesn't recover enough, not built yet
+pending Bea's steer given the token-cost tradeoff. Systematic scraping of CORE's raw
+fileserver (`fileserver-az.core.ac.uk/...`) is explicitly against their terms and is
+not used anywhere in this pipeline.
+
+---
+
+## 2026-09-16 — Task 1 fetcher: per-host throttling + 403 backoff (v1 backfired, v2 = circuit breaker)
+`scripts/01_data_preproccessing/fetch_fulltext_pdfs.py`. Diagnosed and fixed twice in one
+day while real pulls (jobs 31692613, then 31692704) were mid-run.
+
+**Why (v1).** The first real pull (`sbatch --array=0-7`, job 31692613) showed a 17.7%
+download-failure rate on top of the resolver hit-rate (66.8% of records got a
+resolver-found URL, close to the dry run's 61.2% "resolvable" estimate, so the resolvers
+themselves are working as expected). Of the failures, 86% were plain `http 403`,
+concentrated almost entirely in MDPI (186) and Wiley (134), publishers known for
+WAF/bot-detection rather than genuine access denial — MDPI in particular is
+overwhelmingly gold OA, so a resolver correctly finding a PDF there and then getting
+blocked points at request-volume detection, not paywalling. `RETRY_STATUSES` didn't
+include 403 at all, so every one of these failed on the first attempt with zero backoff.
+
+**v1 change (backfired).** Added `SOFT_BLOCK_STATUSES = {403}`, retried like
+`RETRY_STATUSES` but backed off per-host: a cooldown starting at 12s and doubling on
+each consecutive 403 from that host, capped at 90s.
+
+**Why v1 was wrong.** Resubmitted as job 31692704. Within an hour, shards were logging
+~0.0–0.4 doi/s (50 records in 58 minutes on one shard, 25 on another) — on pace to hit
+the 8h job time limit having processed maybe 15–20% of each shard's queue. The 90s cap
+assumed the block was a short burst-detection flag that clears quickly; it isn't. MDPI
+and Wiley DOIs are common enough in the corpus that most of a shard's queue was paying
+close to the full 90s cooldown back to back, with no recovery — a growing-but-unbounded
+per-host wait is the wrong model for a sustained block. **Job 31692704 was cancelled**
+(`scancel 31692704`) before burning its allocation.
+
+**v2 change (circuit breaker) — this is what's in the file now.** A host still gets a
+couple of short, cheap retries (8s, then 16s, capped at 20s) in case it genuinely is a
+brief blip, but after `HOST_CIRCUIT_THRESHOLD` (3) consecutive 403s from the same host,
+the circuit "opens": further requests to that host return instantly (no network call, no
+wait) for `HOST_CIRCUIT_COOLDOWN` (300s) seconds, so the shard keeps moving through the
+rest of its queue instead of stalling. `_host_blocked()` / `_host_circuit_until` added;
+`_fetch_once` checks the circuit before doing anything else. DOIs that fail this way are
+still marked `download_failed` with a distinct note (`"host circuit open..."`) and are
+retried automatically on a future run — nothing is a permanent loss, just deferred to
+whenever the real block (whatever its actual duration is) has cleared.
+
+Both versions: per-process (per-shard) state, not shared across the 8 array tasks — this
+stops one shard from re-hammering a host that just blocked it, but doesn't coordinate
+across shards. Resolver lookup calls (Unpaywall/OpenAlex/etc. JSON hits, the
+`r_publisher_meta` landing-page fetch) are unchanged in both versions — the diagnosed
+problem was specifically the PDF download step.
+
+**v3 addition — prefer non-blocked hosts proactively.** Bea asked whether alternate OA
+venues (rather than the publisher's own site) should be tried for the blocked
+publishers. Partly already true: the existing download-failure fallback already loops
+through every other resolver looking for an alternate host. Closed the remaining gap —
+the resolver-selection loop now skips committing to a URL whose host is already
+circuit-blocked (checks `_host_blocked` before taking the "first hit wins" URL) and
+keeps checking the rest of the resolvers for a candidate on a different host first,
+falling back to the blocked one only if nothing else turns up (so it still gets a
+correct `download_failed` rather than an incorrect `no_oa_pdf`). Expected payoff differs
+by publisher: MDPI is gold-OA-at-source with essentially no independent repository
+copies, so this likely won't recover much there — the block is on the only real venue.
+Wiley/Elsevier hybrid-OA articles are more likely to have a green-OA deposit in an
+institutional repository or PMC, where this should help more.
+
+**Still to do.** Re-run the real pull with this version (resumes, not restarts — DOIs
+already `downloaded` are skipped, `download_failed` DOIs retried) and check both the
+overall throughput (should look like the *first* run's pace, not the second) and the
+status/failure breakdown, split by publisher. If MDPI/Wiley are still eating a large
+share after several circuit-breaker cycles, that's a sign the block genuinely lasts
+longer than the polling cadence and real cross-shard coordination (a shared
+lock/counter file) or just running fewer concurrent shards would be the next thing to
+try — not a longer solo cooldown.
+
+---
+
+## 2026-09-02 — Corpus dedup: DOI normalisation + auditable stages
+`combine_dedupe_abstracts.R` (renamed from `Combo_abstracts_pull2.R` — it combines and
+deduplicates, it does not pull).
+
+**Why.** Reviewing the dedup for the resubmission (the Methods needs the exact search
+string, databases, dedup sequence, and a stage-count table — flagged in `manuscript.md`).
+
+**Changed.**
+- DOIs are normalised (case, `doi.org/` prefix, trailing punctuation) **before** the
+  DOI-dedup, so `10.x/ABC` / `10.x/abc` / `https://doi.org/10.x/abc` collapse to one
+  record instead of three.
+- Within a DOI (and every later stage) the WoS > Scopus > PubMed record is kept,
+  tie-broken by the longest abstract (most complete copy).
+- Document-type filter matches any *article*-flavoured type (`Article`,
+  `Article; Proceedings Paper`, `Article in Press`) + NA, not the literal string
+  `"Article"`; the full `Document.Type` breakdown is printed before and after.
+- Every stage writes rows-in / rows-out / removed to
+  `results/outputs/dedup_stage_counts.csv` (the Methods table), and the records removed
+  at the abstract / doc-type / title stages are saved to `data/processed/` for review.
+- Both canonical outputs (`All_abstracts_deduped.csv` + the slim `Abstracts_for_Monsoon.csv`)
+  are now written by the script to `data/Abstracts/` — the slim file used to appear with
+  no script that made it.
+
+**Search string — DISCREPANCY FOUND (needs a decision).** `search_string.txt` (the
+WoS/Scopus string) is **not** equivalent to `base_search` in `api_pull_abstracts.R` (the
+PubMed string):
+
+| term | PubMed (`base_search`) | WoS/Scopus (`search_string.txt`) |
+|---|---|---|
+| bare `endophyte*` + fungal word | yes | no (exact phrases only) |
+| `symptomless / asymptomatic / quiescent fung*` | yes | no |
+| `DSE fungi` | no | yes |
+| `lichen* / cyanobacteria / photobiont* / cyanobiont*` | no | yes |
+| `angiosperm* / gymnosperm* / monocot* / dicot*` | yes | (relies on `plant*`) |
+
+Plant-side differences mostly wash out (`plant*` covers the taxon words); the
+endophyte-side and lichen/photobiont differences are substantive.
+
+**Resolved by `docs/SEARCH_STRATEGY.md`** (found in the old project repo, now copied into
+`Endo_Review_2/docs/`): the **authoritative** string is the Phase-2 / `search_string.txt`
+one (exact endophyte phrases × host terms incl. lichen/photobiont), run across all three
+databases on 2025-07-31. `base_search` in `api_pull_abstracts.R` was an earlier **draft**
+— it is now renamed `base_search_DRAFT` (provenance only) and the script uses the Phase-2
+string.
+
+**RESOLVED — the PubMed pull used the draft string; it needs a re-pull.** Forensics:
+- `pubmed_pull_8-14-25.csv` (10,631 PMIDs) = `rentrez` API pull, **draft** string. Used by the dedup.
+- `abstract-endophyteA-set.txt` (9,222 recs, website export, 2025-08-14) = **Phase 2**
+  string (has lichen/photobiont/DSE). Never used.
+- ~1,487 records are only in the draft CSV; **~723 have no "endophyte" term at all** —
+  clinical antifungal + plant-pathology papers matched via `"latent/systemic fungi"` +
+  generic host words. The draft PubMed component is contaminated with clinical mycology.
+
+**Fixed (2026-09-02).** `abstract-endophyteA-set.txt` (9,222 recs) IS the Phase 2 PubMed
+website export from 2025-08-14. `parse_pubmed_textfile.py` (new) parses it →
+`pubmed_pull_phase2.csv` (9,141 recs with an abstract; correction/erratum/retraction
+notices dropped). `combine_dedupe_abstracts.R` picks it up automatically.
+
+**Corpus re-run with Phase 2 PubMed:** 39,114 combined → DOI 22,212 → abstract 21,982 →
+doc-type 21,982 → title **21,414** (19,586 with DOI). Contribution after dedup: WoS 14,624
+/ Scopus 4,229 / PubMed 2,561. vs the pre-resubmission 21,891 — smaller mainly because
+~1,500 clinical-mycology / plant-pathology papers the draft string caught are gone.
+
+`pull_pubmed_phase2.R` (rentrez) kept for the eventual date-extension only (it needs its
+count validated against the 9,141 first).
+
+**Search date = 2025-08-14** (resolved). Every WoS/Scopus/PubMed export file is timestamped
+09:16–10:01 on 2025-08-14; `old_manuscript.md` agrees. The 2025-07-31 in the old
+SEARCH_STRATEGY.md / `docs/METHODS.md` was the planning date. `docs/METHODS.md` (old repo)
+still needs the fix.
+
+**Dedup re-run (2026-09-02), improved script, real data:**
+40,776 combined → DOI 23,100 → abstract 22,830 → doc-type 22,830 → title **22,268**
+(20,411 with a DOI, 1,857 without). Old pipeline was 21,891; the +377 is mostly
+`Article; Proceedings Paper` / `Book Chapter` / `Early Access` the old exact-`"Article"`
+filter dropped. 3 rows had a volume number in the year field → set to NA. Year span
+1926–2025. Table: `results/outputs/dedup_stage_counts.csv`.
+
+**Still to do.**
+- Resolve the search-string discrepancy (above).
+- Copy the fresh `All_abstracts_deduped.csv` (22,268 rows) to Monsoon for the dry-run.
+- Add the search string(s) + `dedup_stage_counts.csv` table to Methods / SI.
+- Add an explicit corpus-scope paragraph (self-identified endophyte research; fungi
+  published under mycorrhizal / pathology / microbiome frames are out of scope by design).
+- Before final submission only: extend the search to the current year (mechanical,
+  reshuffles every number — do it last).
+
+---
+
+## 2026-09-02 — Task 1 Phase 0: full-text retrieval + extraction rewrite (code only)
+Branch `nph-task1-fulltext-revalidation`. Nothing run at scale yet.
+
+**Why.** Referee 3: the abstract-vs-full-text "sensitivity analysis" compared two
+different pools of papers, not the abstract and full text of the *same* records. And the
+old `monsoon_extract.py` only read the first 12 PDF pages then truncated to 8,000
+characters, so the "full-text" dataset was really an extended-abstract dataset.
+
+**Changed.**
+- `scripts/01_data_preproccessing/extract_schema.py` (new) — one definition of the
+  extraction schema: the JSON schema for schema-constrained decoding, the controlled
+  vocabularies, the prompt, and a map from every Task 2 human-annotation label to the
+  same machine token (so model output and the human ground truth score on one axis).
+  Fields locked to the Task 2 workbook: per interaction `fungus`, `host_plant`,
+  `tissue`, `fungal_lifestyle`, `effect_on_host`, `evidence_basis`; per paper the
+  Q1–Q11 equivalents + 6 detection-method flags + a metabarcoding community summary.
+- `scripts/01_data_preproccessing/pdf_segment.py` (new) — structure-aware PDF parse
+  (pymupdf4llm), keep Methods/Results/Discussion/Taxonomy + table captions + paragraphs
+  naming a binomial or country, drop References/Acknowledgements/Funding, chunk into
+  context-sized windows with `[DOI | section]` headers. Scanned / image-only PDFs are
+  OCR'd with `ocrmypdf` (Tesseract) and cached — **not** skipped, because skipping scans
+  would bias against exactly the older and non-English papers the study is about.
+- `scripts/01_data_preproccessing/fetch_fulltext_pdfs.py` (new, replaces
+  `download_pdfs.py`) — six open-access resolvers in order (Unpaywall → OpenAlex →
+  Europe PMC → Semantic Scholar → CORE → publisher `citation_pdf_url`) until a validated
+  PDF is obtained (magic bytes + PyMuPDF open + ≥1 page). Resumable, shardable, per-DOI
+  manifest + miss log. `--dry-run` produces a coverage report grouped by
+  publisher/journal.
+- `scripts/01_data_preproccessing/monsoon_extract.py` (rewritten; v4 → `scripts/archive/`)
+  — per paper: segment → one schema-constrained Ollama call per chunk → union + dedup
+  interactions on `(fungus, host, tissue-set)` → `global_endo_extraction_v5.csv`.
+  `--mode abstract|fulltext` (same schema both ways so the paired comparison joins on
+  `paper_id`), `--model` for the bake-off, explicit `num_ctx` + `temperature=0`.
+- `scripts/04_analyses/06_detect_ubiquity_claims_ollama.py` — `collect_snippets` now
+  takes keyword-centred windows instead of `text[:8000]` (a ubiquity claim in the
+  Discussion of a long paper was previously invisible); `num_ctx` and `temperature` are
+  now set explicitly on the Ollama call (the default 2048-token window silently
+  truncated even the 8k it was handed).
+
+**Answers.** Referee 3 (paired validation, detection-method QC, guild criteria);
+Referee 2 (precision/recall against a curated set, English-only question, strain-level
+variation, author-assigned vs demonstrated function); Referee 1 (commensalism as a
+first-class category).
+
+**Corpus denominator (2026-09-02).** The full-text coverage check and the re-extraction
+are seeded from `data/Abstracts/All_abstracts_deduped.csv` — the **deduplicated original
+search export**, before any LLM touched it (20,228 records with a DOI + 1,630 without).
+Not from the old pipeline's cleaned/filtered output, which would inherit the old model's
+relevance and guild-classification decisions — the exact thing the re-extraction exists
+to redo. Relevance + guild filtering is re-applied afterwards with the new schema and
+validated against the Task 2 ground truth.
+
+**Phase 0a coverage dry-run — DONE 2026-09-03** (Monsoon, `run_fetch_pdfs.sbatch`, 4 shards,
+input = the 21,414-record corpus). Of the **19,586 DOI-bearing** papers, **11,979 (61.2%)
+have an open-access PDF resolvable** through the six-resolver chain — vs ~3,000 full texts
+in the pre-resubmission pipeline. Unpaywall OA status: 9,366 closed / 5,949 gold / 1,294
+bronze / 1,197 hybrid / 1,151 green. The ~7,600 misses cluster in (a) mycology society
+journals (Mycologia 200, Fungal Ecology 206, Mycological Research 141, Fungal Biology 117)
+and (b) natural-products / chemistry journals (J Nat Prod 163, J Agric Food Chem 150,
+Phytochemistry 98, Fitoterapia 106) — this is the answer to Referee 2's "are abstract-only
+papers concentrated in particular publishers/journals?" (`coverage_report.csv`).
+Institutional / ILL access for the mycology journals is a parallel manual track (the
+retriever is OA-only). Realistic downloaded yield ≈ 80–90% of 11,979 → ~9.5–10.8k PDFs.
+
+**Real pull — started 2026-09-16** (job 31692613, 8 shards). Early numbers (~1,900 of
+19,586 processed): 49.1% downloaded, 33.3% no_oa_pdf, 17.7% download_failed — see the
+2026-09-16 fetcher entry above for the 403/MDPI/Wiley diagnosis and fix. Yield off the
+resolvable set is tracking a bit under the 80–90% estimate (≈74% so far); the 403 fix
+should close some of that gap on a re-run.
+
+**Still to do.**
+- Decide the pre-registered agreement threshold (proposed: interaction F1 ≥ 0.75, taxon
+  counts not systematically lower for abstracts, country/biome κ ≥ 0.6).
+- Re-run the real pull with the 403 fix (see above), confirm the failure-rate
+  improvement, then: 25-paper Phase 1 POC (model sanity check) → scaled re-extraction
+  (whole corpus, new schema, bake-off winner).
+- `ocrmypdf` + tesseract needed on Monsoon for the extraction step (`conda install -c
+  conda-forge ocrmypdf tesseract`); OCR is English-only (corpus is English by search).
+- **Re-run the ubiquity detector** — the snippet + `num_ctx` fix changes the Prediction-1
+  "2.7% of the corpus states ubiquity" number. Manuscript figure + text need updating.
+- Working decision (2026-09-02): headline taxonomic/geographic claims will rest on the
+  **full-text corpus only**; abstract extraction is run anyway to quantify what abstracts
+  omit (supplement). Revisit only if paired agreement is exceptional (>90%).
+
+---
+
+## 2026-09-02 — Task 2: ground-truth validation sample + annotation workbooks
+Branch `nph-task2-ground-truth`, commit 54cd8e5. Infrastructure built; workbooks are
+filled after Task 1 provides the re-extraction to score against.
+
+**Why.** Referee 2 asked for precision, recall, false-positive/negative rates, and
+inter-annotator agreement against a manually curated set — not a model confidence score.
+
+**Changed.**
+- `scripts/04_analyses/build_groundtruth_sample.py` (new) — draws a stratified random
+  sample (fixed seed), writes one Excel workbook per annotator with warning-style
+  dropdown validation. A shared 50-paper κ block (15 calibration + 35 measurement) for
+  all five annotators (Bea, Nancy, Kitty, Ian, Jack) plus solo blocks. Full-text papers
+  get a paired `abstract` row and `full text` row so the human abstract-vs-full-text gap
+  is measured the same way as the machine one.
+- `scripts/04_analyses/score_groundtruth.py` (new, skeleton) — interaction-level
+  P/R/F1 per reading stage, Fleiss' κ per field, false-positive/negative rates. Wired to
+  `extract_schema.HUMAN_TO_TOKEN`; field-accuracy + κ finished once the re-extraction
+  schema lands.
+- `results/manual_validation/groundtruth/` — `guild_rubric.md` (Methods-citable rubric,
+  FungalTraits `primary_lifestyle` cited), `data_dictionary.md`, `annotator_instructions.md`,
+  `stratification_report.md`.
+
+**Design notes worth keeping for Methods.**
+- `fungal_lifestyle` (trophic mode) and `effect_on_host` (net host outcome) are separate
+  axes — a plant pathogen can be present with no symptoms. This decoupling is the study's
+  central claim, so the instrument enforces it.
+- `evidence_basis` (experimental / observational / inferred-from-taxon / asserted) is the
+  anti-circularity field — it quantifies how often a functional label was actually tested.
+- Fungal + host names are recorded **verbatim as the authors wrote them**, even
+  known-outdated names; synonym resolution stays programmatic.
+- κ unit: 1 item = 1 paper for paper-level fields (~35 measurement papers × 5 raters),
+  1 item = 1 matched interaction for interaction-level fields.
+
+**Answers.** Referee 2 (extraction validation, strain variation, author-assigned labels);
+Referee 3 (guild circularity, endophytism-method QC, "human in the loop" definition);
+Referee 1 (commensalism).
+
+**Blocked on Task 1's real PDF pull** — the current sample's full-text picks were drawn
+against the old, mostly-gone local corpus (~282 files) and need to be redrawn against the
+real retrieved set before workbooks go out, so Nancy/Kitty/Ian/Jack get one complete,
+non-confusing batch (Bea's call, 2026-09-02).
+
+---
+
+## 2026-08-2x — Task 3: remove GDP / Prediction 4
+Branch `nph-tasks-3-4-gdp-biogeographic`, commit c75a8c2. Implemented; awaiting merge +
+Monsoon regeneration.
+
+**Why.** All three referees + the editor converged on the country-level GDP analysis:
+it conflates population with research capacity and the positive relationship is
+unsurprising as stated.
+
+**Changed.** GDP analysis + Prediction 4 removed from the pipeline (archived, not
+deleted): `scripts/archive/01_country_gdp_latitude_analysis.R`; `01_country_latitude_analysis.R`
+(new, GDP-free); `04_country_enrichment.R` gains a `--with-gdp` opt-in flag; GDP
+references stripped from 8 consumer scripts (`03_geographic_bias_mapping.R`,
+`09_biodiversity_priority_robustness.py`, `08_biodiversity_priority_overlap.R`,
+`make_supplementary_tables.py`, `compare_abs_fulltexts.R`, plotting scripts, sbatch).
+
+**Still to do.** Manuscript: drop "socioeconomic" from the title, rewrite the Summary
+close, cut Prediction 4 + Figure 5, renumber predictions, re-anchor the Discussion
+examples to "under-sampled regions" generally.
+
+---
+
+## 2026-08-2x — Task 4: biogeographic realms replace political categories
+Branch `nph-tasks-3-4-gdp-biogeographic`, commit 8ee155e. Implemented; awaiting merge +
+Monsoon regeneration.
+
+**Why.** Referee 3: "European Union" and "Global South" are political categories with
+geographically inconsistent membership; biogeographic regions would be more meaningful.
+
+**Changed.** EU / Global North–South grouping replaced with Olson et al. (2001) WWF
+biogeographic realms (8) and biomes (14): `scripts/utils/build_biogeographic_realm_table.py`
+(new), `country_biogeographic_realm.csv` (new, 250 rows), `biogeographic_mapping.R` (new),
+`country_mapping.py` gains `get_realm()`; `03c_biogeographic_bias_mapping.R` (new) replaces
+the `*_eu_grouped` scripts (archived); `biome_plots_by_realm.R` (new) adds a realm × biome
+heatmap.
+
+**Still to do.** Manuscript: replace "Global North/South" and "EU" language throughout
+Introduction / Results / Discussion with biogeographic framing.
